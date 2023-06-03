@@ -7,6 +7,38 @@ from bs4 import BeautifulSoup as bs
 from http.cookies import SimpleCookie
 from tqdm import tqdm
 from pyfiglet import figlet_format 
+import os
+
+def delete_folder(folder_name):
+
+    try:
+
+        # Mendapatkan path lengkap folder saat ini
+
+        current_directory = os.getcwd()
+
+        # Menggabungkan path folder saat ini dengan nama folder yang akan dihapus
+
+        folder_path = os.path.join(current_directory, folder_name)
+
+        # Menghapus folder beserta isinya
+
+        shutil.rmtree(folder_path)
+
+        #print("Folder berhasil dihapus.")
+
+    except Exception as e:
+
+        #print("Terjadi kesalahan saat menghapus folder:", str(e))
+
+# Contoh penggunaan fungsi
+
+folder_name = 'nama_folder_yang_akan_dihapus'
+
+delete_folder(folder_name)
+
+
+
 def main():
   system('clear')
   banner.banner()
