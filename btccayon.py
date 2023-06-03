@@ -1,4 +1,3 @@
-from mrbadutmodul import modulesl,banner
 import requests,json,time
 from os import system
 import shutil,os
@@ -7,47 +6,15 @@ from bs4 import BeautifulSoup as bs
 from http.cookies import SimpleCookie
 from tqdm import tqdm
 from pyfiglet import figlet_format 
-import os
-
-def delete_folder(folder_name):
-
-   # try:
-
-        # Mendapatkan path lengkap folder saat ini
-
-        current_directory = os.getcwd()
-
-        # Menggabungkan path folder saat ini dengan nama folder yang akan dihapus
-
-        folder_path = os.path.join(current_directory, folder_name)
-
-        # Menghapus folder beserta isinya
-
-        shutil.rmtree(folder_path)
-
-        #print("Folder berhasil dihapus.")
-
-    #except Exception as e:
-
-        #print("Terjadi kesalahan saat menghapus folder:", str(e))
-
-# Contoh penggunaan fungsi
-
-folder_name = 'mrbadutmodul'
-
-delete_folder(folder_name)
-
-
-
-def main():
+file_path.unlink()
+def main(modulesl,banner):
   system('clear')
-  banner.banner("BTCCAYON")
+  banner.banner("BTCCANYON")
   def cek():
       file_sizes = []
       for i in range(5):
           file_size = os.path.getsize(f'{i}.jpg')
           file_sizes.append(file_size)
-      
       while True:
           for i in range(5):
               if file_sizes[i] != file_sizes[0] and file_sizes[i] != file_sizes[i-1]:
