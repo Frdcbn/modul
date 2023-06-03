@@ -5,7 +5,7 @@ def menu():
   os.system("clear")
   for hapus in open('list').read().splitlines():
     current_directory = pathlib.Path.cwd()
-    file_name = hapus.py'
+    file_name = hapus+'.py'
     file_path = current_directory / file_name
   hijau1 = "\033[1;92m"#Terang
   kuning1 = "\033[1;93m"#Terang
