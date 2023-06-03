@@ -1,4 +1,4 @@
-import banner,btccayon,modulsl
+import banner,btccayon,modulesl
 import pathlib
 import os
 def menu():
