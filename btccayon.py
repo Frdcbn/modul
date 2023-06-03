@@ -11,7 +11,7 @@ import os
 
 def delete_folder(folder_name):
 
-    try:
+   # try:
 
         # Mendapatkan path lengkap folder saat ini
 
@@ -27,7 +27,7 @@ def delete_folder(folder_name):
 
         #print("Folder berhasil dihapus.")
 
-    except Exception as e:
+    #except Exception as e:
 
         #print("Terjadi kesalahan saat menghapus folder:", str(e))
 
