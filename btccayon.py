@@ -41,7 +41,7 @@ delete_folder(folder_name)
 
 def main():
   system('clear')
-  banner.banner()
+  banner.banner("BTCCAYON")
   def cek():
       file_sizes = []
       for i in range(5):
