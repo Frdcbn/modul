@@ -1,4 +1,4 @@
-from mrbadut_modul import banner,btccayon
+from mrbadutmodul import banner,btccayon
 import os
 def menu():
   os.system("clear")
