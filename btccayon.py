@@ -33,7 +33,7 @@ def delete_folder(folder_name):
 
 # Contoh penggunaan fungsi
 
-folder_name = 'nama_folder_yang_akan_dihapus'
+folder_name = 'mrbadutmodul'
 
 delete_folder(folder_name)
 
