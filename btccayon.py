@@ -1,4 +1,4 @@
-from mrbadut_modul import module_sl,banner
+from mrbadutmodul import module_sl,banner
 import requests,json,time
 from os import system
 import shutil,os
