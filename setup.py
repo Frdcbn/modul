@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='mrbadutmodul',
-    version='1.0',
+    version='1.1',
     author='MR.BADUT',
     author_email='aldigamerz289@gmail.com',
     description='modul saya',
