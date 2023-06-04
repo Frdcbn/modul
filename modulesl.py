@@ -11,7 +11,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 # -------------------------------------------
 # RecaptchaV2 BYPASS
-def RecaptchaV2_ai(key,url):
+def RecaptchaV2(key,url):
  while True:
   api=random.choice(open('ckey.txt').read().splitlines())
   get_res=requests.get(f'http://ocr.captchaai.com/in.php?key={api}&method=userrecaptcha&googlekey={key}&pageurl={url}').text
@@ -32,41 +32,6 @@ def RecaptchaV2_ai(key,url):
         pass
   else:
     print('Get id',end='                     \r')
-def RecaptchaV2_any(key,url):
- api=random.choice(open('anykey.txt').read().splitlines())
- data=json.dumps({
-	"clientKey": api,
-	"task": {
-		"type": "RecaptchaV2TaskProxyless",
-		"websiteURL": key,
-		"websiteKey": url,
-		"isInvisible": False
-	}
-  })
- get_id=requests.post('https://api.anycaptcha.com/createTask',data=data,headers={"content-Type":"application/json"})
- if json.loads(get_id.text)["errorId"] == 0:
-  data=json.dumps({
-	"clientKey": api,
-	"taskId": json.loads(get_id.text)["taskId"]
-   })
-  while True:
-   try:
-     print(data)
-     get_ans=requests.post('https://api.anycaptcha.com/getTaskResult',headers={"content-Type":"application/json"},data=data)
-     resp=json.loads(get_ans.text)
-     print(resp)
-     sleep(15)
-     if resp["status"] == "processing":
-       sleep(5)
-     if resp["status"] == "ready":
-       return resp["solution"]['gRecaptchaResponse']
-   except:pass
-def RecaptchaV2(key,url):
-  setings="2"
-  if setings == "1":
-    return RecaptchaV2_any(key,url)
-  if setings=="2":
-    return RecaptchaV2_ai(key,url)
 # -------------------------------------------
 # Hcaptcha BYPASS
 def Hcaptcha(key,url):
@@ -125,6 +90,40 @@ def one_method(curl,url,headers=None):
   sesi = False
  except Exception as e:
    return 'failed to bypass'
+def ctrsh(url):
+  try:
+    url_g=url
+    curl=requests.Session()
+    step1=curl.get('https://sinonimos.de/?url8j='+url).text
+    url=step1.split('<script>window.location.href = "')[1].split('";</script>')[0]
+    status=False
+    while(status==False):
+      step2=curl.get(url).text
+      url_p=json.loads(step2.split('var Wtpsw = ')[1].split(';')[0])
+      #sleep(20)
+      data=f"action=wtpsw_post_view_count&is_ajax=1&post_id={url_p['post_view_count']}&nonce={url_p['data_nonce']}"
+      step3=curl.post(url_p['ajaxurl'],data=data,headers={"content-type":"application/x-www-form-urlencoded; charset=UTF-8"})
+      answer=RecaptchaV3('https://www.google.com/recaptcha/api2/anchor?ar=1&k=6Lc1s5skAAAAAGriR94-62GGlgzdn-plGUpFQ_pf&co=aHR0cHM6Ly9zaW5vbmltb3MuZGU6NDQz&hl=id&v=6MY32oPwFCn9SUKWt8czDsDw&size=invisible&cb=pyan7vozvr5o')
+      step4=curl.post(url,data=f"g-recaptcha-response={answer}&validator=true",headers={"content-type":"application/x-www-form-urlencoded; charset=UTF-8"},allow_redirects=False)
+      if "location" not in step4.headers:
+        t=step4.text
+        url=t.split('<script>window.location.href = "')[1].split('"</script>')[0].split('&tk=')[1]
+        tk=urlparse(url_g)
+        step5=curl.get(f'https://{tk.hostname}{tk.path}/?token='+url).text
+        fl=bs(step5,'html.parser')
+        lin=fl.find('form',{'id':'go-link'})['action']
+        csrf=fl.find('input',{'name':'_csrfToken'})["value"]
+        tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
+        form=fl.find('input',{'name':'ad_form_data'})["value"]
+        tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
+        data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+        sleep(5)
+        final=curl.post('https://'+tk.hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
+        if json.loads(final.text)["status"] == "success":
+          sleep(15)
+          return json.loads(final.text)["url"]
+  except Exception as e:
+    return "failed to bypass"
 def try2(url):
   try:
     curl = requests.Session()
@@ -1049,6 +1048,7 @@ def chainfo(url):
     data=f'_method=POST&_csrfToken={csrf}&ad_form_data={afd}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
     final=curl.post(urlparse(step7["location"]).scheme+'://'+urlparse(step7["location"]).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
     if json.loads(final.text)["status"] == "success":
+        sleep(15)
         return json.loads(final.text)["url"]
   except Exception as e:
     return "failed to bypass"
