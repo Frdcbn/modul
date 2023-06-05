@@ -1135,6 +1135,7 @@ def bitads(url):
   data = urlencode({input.get("name"): input.get("value") for input in inputs}).replace('text=None&None=ENTER+THE+CONFIRMATION+CODE&','')
   get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
   if get_url['status'] == 'success':
+      sleep(15)
       return get_url["url"]
  except Exception as e:
    return "failed to bypass"

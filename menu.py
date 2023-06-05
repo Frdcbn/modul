@@ -12,7 +12,7 @@ def de():
  except:pass
 def menu():
   os.system("clear")
-  de()
+  #de()
   hijau1 = "\033[1;92m"#Terang
   kuning1 = "\033[1;93m"#Terang
   putih1 = "\033[1;97m"#Terang
@@ -28,6 +28,11 @@ def menu():
   print(f"{putih1}[{hijau1}6{putih1}]{biru1}.SIMPLEADS")
   print(f"{putih1}[{hijau1}7{putih1}]{biru1}.ADHIVES")
   print(f"{putih1}[{hijau1}8{putih1}]{biru1}.EARNSOLANA")
+  print(f"{putih1}[{hijau1}9{putih1}]{biru1}.CLAIM.RO")
+  print(f"{putih1}[{hijau1}10{putih1}]{biru1}.BTCADSPACE")
+  print(f"{putih1}[{hijau1}11{putih1}]{biru1}.RUSHBITCOIN")
+  print(f"{putih1}[{hijau1}12{putih1}]{biru1}.CLAIMBITS")
+  print(f"{putih1}[{hijau1}13{putih1}]{biru1}.LTCHUNT")
   select = input(putih1+"select : ")
   if select == "1":
     thread = threading.Thread(target=modul.btccanyon, args=(modulesl,banner))
@@ -55,6 +60,30 @@ def menu():
     thread.join()
   if select == "8":
     thread = threading.Thread(target=modul.earnsolana, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "7":
+    thread = threading.Thread(target=modul.adhives, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "9":
+    thread = threading.Thread(target=modul.claim_ro, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "10":
+    thread = threading.Thread(target=modul.btcadspace, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "11":
+    thread = threading.Thread(target=modul.rushbitcoin, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "12":
+    thread = threading.Thread(target=modul.claimbits, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "13":
+    thread = threading.Thread(target=modul.ltchunt, args=(modulesl,banner))
     thread.start()
     thread.join()
   if select == "0":
