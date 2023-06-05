@@ -12,7 +12,7 @@ def de():
  except:pass
 def menu():
   os.system("clear")
-  #de()
+  de()
   hijau1 = "\033[1;92m"#Terang
   kuning1 = "\033[1;93m"#Terang
   putih1 = "\033[1;97m"#Terang
