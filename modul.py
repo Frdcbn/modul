@@ -891,7 +891,7 @@ def ltchunt(modulesl,banner):
     'fc.lc': modulesl.fl_lc,
     'exe.io': modulesl.exe_io,
     'illink.net': modulesl.illink_net,
-    'birdurls.com': modulesl.birdurls,
+    'birdurls.com': modulesl.birdurl,
     'adshorti.xyz': modulesl.adshorti_xyz,
     'owllink.net': modulesl.owlink,
     'linksly.co': modulesl.linksly,
