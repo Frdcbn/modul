@@ -1,4 +1,4 @@
-import banner,modul,modulesl
+#import banner,modul,modulesl
 import pathlib
 import threading
 import os
@@ -10,7 +10,7 @@ def de():
     file_path = current_directory / file_name
     file_path.unlink()
  except:pass
-def menu():
+def menu(banner,modul,modulesl):
   os.system("clear")
   de()
   hijau1 = "\033[1;92m"#Terang
@@ -113,5 +113,5 @@ def menu():
       api_key=input("Api key captcha ai > ")
       with open("ckey.txt","w") as e:
         e.write(api_key)
-      menu()
+      menu(banner,modul,modulesl)
     exit()
