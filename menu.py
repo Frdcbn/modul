@@ -12,7 +12,7 @@ def de():
  except:pass
 def menu():
   os.system("clear")
-  de()
+  #de()
   hijau1 = "\033[1;92m"#Terang
   kuning1 = "\033[1;93m"#Terang
   putih1 = "\033[1;97m"#Terang
@@ -33,6 +33,10 @@ def menu():
   print(f"{putih1}[{hijau1}11{putih1}]{biru1}.RUSHBITCOIN")
   print(f"{putih1}[{hijau1}12{putih1}]{biru1}.CLAIMBITS")
   print(f"{putih1}[{hijau1}13{putih1}]{biru1}.LTCHUNT")
+  print(f"{putih1}[{hijau1}14{putih1}]{biru1}.FAUCETCRYPTO_NET")
+  print(f"{putih1}[{hijau1}15{putih1}]{biru1}.FAUCET4U")
+  print(f"{putih1}[{hijau1}16{putih1}]{biru1}.NOKOFAUCET")
+  print(f"{putih1}[{hijau1}17{putih1}]{biru1}.FAUCETSPEEDBTC")
   select = input(putih1+"select : ")
   if select == "1":
     thread = threading.Thread(target=modul.btccanyon, args=(modulesl,banner))
@@ -84,6 +88,22 @@ def menu():
     thread.join()
   if select == "13":
     thread = threading.Thread(target=modul.ltchunt, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "14":
+    thread = threading.Thread(target=modul.faucetcrypto_net, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "15":
+    thread = threading.Thread(target=modul.faucet4u, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "16":
+    thread = threading.Thread(target=modul.nokofaucet, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "17":
+    thread = threading.Thread(target=modul.faucetspeedbtc, args=(modulesl,banner))
     thread.start()
     thread.join()
   if select == "0":

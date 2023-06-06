@@ -1280,3 +1280,19 @@ def softindex_website(url):
       return json.loads(final.text)["url"]
  except Exception as e:
     return "failed to bypass"
+def _1short_in(url):
+ try:
+  curl=requests.Session()
+  step1=curl.get(url)
+  gt=bs(step1.text,'html.parser')
+  csrf=gt.find('input',{'name':'_token'})['value']
+  sitkey=gt.find('button',{'class':'btn btn-success get-link g-recaptcha'})['data-sitekey']
+  answer=RecaptchaV2(sitkey,url)
+  data=f"_token={csrf}&g-recaptcha-response={answer}"
+  ur=gt.find('form',{'id':'getLinkForm'})['action']
+  final=curl.post(ur,data=data,headers={'accept':'*/*','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8',"referer":url},allow_redirects=False).text
+  if "url" in final:
+    sleep(15)
+    return json.loads(final)["url"]
+ except Exception as e:
+    return "failed to bypass"
