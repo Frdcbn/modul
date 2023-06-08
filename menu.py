@@ -155,12 +155,11 @@ def save(waktu_terakhir_dipilih, select):
         json.dump(data, file)
 
 def load_data():
-    #file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
-
-    file_path="data.json"
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
+    
     if not os.path.exists(file_path):
         data = {}
-        for i in range(22):
+        for i in range(23):
             data[str(i)] = None
         with open(file_path, "w") as file:
             json.dump(data, file)
