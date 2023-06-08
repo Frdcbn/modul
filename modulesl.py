@@ -84,7 +84,7 @@ def one_method(curl,url,headers=None):
   bs4 = BeautifulSoup(final, "html.parser")
   inputs = bs4.find_all("input")
   data = urlencode({input.get("name"): input.get("value") for input in inputs})
-  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
+  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8',"user-agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"}, data=data).json()
   if get_url['status'] == 'success':
       return get_url["url"]
   sesi = False
@@ -1081,7 +1081,7 @@ def links1s_com(url):
     if json.loads(gas.text)['status'] == "success":
       res= json.loads(gas.text)['url']
   else:
-    res=one_method(curl,url,headers={"referer":"https://anhdep24.com/apple-vs-android.html"})
+    res=one_method(curl,url,headers={"referer":"https://www.byboe.com/how-to-clean-brass-jewelry/","user-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
   sleep(15)
   return res
  except Exception as e:
@@ -1296,3 +1296,54 @@ def _1short_in(url):
     return json.loads(final)["url"]
  except Exception as e:
     return "failed to bypass"
+def urlcash(url):
+ try:
+  curl=requests.Session()
+  if '&url=' in url:
+    url=url.split('&url=')
+  if 'go1.' in url:
+    url=url.replace('go1.','')
+  else:
+    url=url
+  step1=curl.get(url)
+  tf=bs(step1.text,'html.parser')
+  csrf=tf.find('input',{'name':'_csrfToken'})["value"]
+  tkf=tf.find('input',{'name':'_Token[fields]'})["value"]
+  tku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
+  ref=tf.find('input',{'name':'ref'})["value"]
+  get_key=json.loads(step1.text.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
+  answer=RecaptchaV2(key=get_key,url=step1.url)
+  data=f'_method=POST&_csrfToken={csrf}&ref=&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+  step2=curl.post(step1.url,data=data,headers={'content-type':'application/x-www-form-urlencoded;'}).text
+  sleep(15)
+  fl=bs(step2,"html.parser")
+  lin=fl.find('form',{'id':'go-link'})['action']
+  csrf=fl.find('input',{'name':'_csrfToken'})["value"]
+  tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
+  form=fl.find('input',{'name':'ad_form_data'})["value"]
+  tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
+  data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+  final=curl.post('https://'+urlparse(step1.url).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
+  if json.loads(final.text)["status"] == "success":
+      sleep(15)
+      return json.loads(final.text)["url"]
+ except Exception as e:
+    return "failed to bypass"
+def coinparty(url):
+ try:
+  curl=requests.Session()
+  step1=curl.get('https://coinsparty.com'+urlparse(url.replace('/m','')).path)
+  sleep(10)
+  fl=bs(step1.text,'html.parser')
+  csrf=fl.find('input',{'name':'_csrfToken'})["value"]
+  tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
+  form=fl.find('input',{'name':'ad_form_data'})["value"]
+  tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
+  data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+  final=curl.post(f'https://coinsparty.com/links/go',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'})
+  if json.loads(final.text)["status"] == "success":
+      sleep(15)
+      return json.loads(final.text)["url"]
+ except Exception as e:
+    return "failed to bypass"
+#print(links1s_com('https://link1s.com/JzZC9lW5'))

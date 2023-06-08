@@ -1,43 +1,40 @@
-#import banner,modul,modulesl
 import pathlib
 import threading
-import os
-def de():
- try:
-  for hapus in open('list').read().splitlines():
-    current_directory = pathlib.Path.cwd()
-    file_name = hapus+'.py'
-    file_path = current_directory / file_name
-    file_path.unlink()
- except:pass
+import os,time,datetime,json
 def menu(banner,modul,modulesl):
   os.system("clear")
-  #de()
   hijau1 = "\033[1;92m"#Terang
   kuning1 = "\033[1;93m"#Terang
   putih1 = "\033[1;97m"#Terang
   merah1 = "\033[1;91m"#Terang
   biru1 = "\033[1;94m"#Terang
   banner.banner("MAIN MENU")
-  print(f"{putih1}[{hijau1}0{putih1}]{biru1}.METHOD BYPASS")
-  print(f"{putih1}[{hijau1}1{putih1}]{biru1}.BTCCAYON")
-  print(f"{putih1}[{hijau1}2{putih1}]{biru1}.COINGAX")
-  print(f"{putih1}[{hijau1}3{putih1}]{biru1}.CLAIMSATOSHI")
-  print(f"{putih1}[{hijau1}4{putih1}]{biru1}.COINFOLA")
-  print(f"{putih1}[{hijau1}5{putih1}]{biru1}.CLAIMLITE")
-  print(f"{putih1}[{hijau1}6{putih1}]{biru1}.SIMPLEADS")
-  print(f"{putih1}[{hijau1}7{putih1}]{biru1}.ADHIVES")
-  print(f"{putih1}[{hijau1}8{putih1}]{biru1}.EARNSOLANA")
-  print(f"{putih1}[{hijau1}9{putih1}]{biru1}.CLAIM.RO")
-  print(f"{putih1}[{hijau1}10{putih1}]{biru1}.BTCADSPACE")
-  print(f"{putih1}[{hijau1}11{putih1}]{biru1}.RUSHBITCOIN")
-  print(f"{putih1}[{hijau1}12{putih1}]{biru1}.CLAIMBITS")
-  print(f"{putih1}[{hijau1}13{putih1}]{biru1}.LTCHUNT")
-  print(f"{putih1}[{hijau1}14{putih1}]{biru1}.FAUCETCRYPTO_NET")
-  print(f"{putih1}[{hijau1}15{putih1}]{biru1}.FAUCET4U")
-  print(f"{putih1}[{hijau1}16{putih1}]{biru1}.NOKOFAUCET")
-  print(f"{putih1}[{hijau1}17{putih1}]{biru1}.FAUCETSPEEDBTC")
+  data = load_data()
+  print(f"{putih1}[{hijau1}0{putih1}]{biru1}.METHOD BYPASS (waktu: {convrt(data['0'])}")
+  print(f"{putih1}[{hijau1}1{putih1}]{biru1}.BTCCAYON (waktu: {convrt(data['1'])}")
+  print(f"{putih1}[{hijau1}2{putih1}]{biru1}.COINGAX (waktu: {convrt(data['2'])}")
+  print(f"{putih1}[{hijau1}3{putih1}]{biru1}.CLAIMSATOSHI (waktu: {convrt(data['3'])}")
+  print(f"{putih1}[{hijau1}4{putih1}]{biru1}.COINFOLA (waktu: {convrt(data['4'])}")
+  print(f"{putih1}[{hijau1}5{putih1}]{biru1}.CLAIMLITE (waktu: {convrt(data['5'])}")
+  print(f"{putih1}[{hijau1}6{putih1}]{biru1}.SIMPLEADS (waktu: {convrt(data['6'])}")
+  print(f"{putih1}[{hijau1}7{putih1}]{biru1}.ADHIVES (waktu: {convrt(data['7'])}")
+  print(f"{putih1}[{hijau1}8{putih1}]{biru1}.EARNSOLANA (waktu: {convrt(data['8'])}")
+  print(f"{putih1}[{hijau1}9{putih1}]{biru1}.CLAIM.RO (waktu: {convrt(data['9'])}")
+  print(f"{putih1}[{hijau1}10{putih1}]{biru1}.BTCADSPACE (waktu: {convrt(data['10'])}")
+  print(f"{putih1}[{hijau1}11{putih1}]{biru1}.RUSHBITCOIN (waktu: {convrt(data['11'])}")
+  print(f"{putih1}[{hijau1}12{putih1}]{biru1}.CLAIMBITS (waktu: {convrt(data['12'])}")
+  print(f"{putih1}[{hijau1}13{putih1}]{biru1}.LTCHUNT (waktu: {convrt(data['13'])}")
+  print(f"{putih1}[{hijau1}14{putih1}]{biru1}.FAUCETCRYPTO_NET (waktu: {convrt(data['14'])}")
+  print(f"{putih1}[{hijau1}15{putih1}]{biru1}.FAUCET4U (waktu: {convrt(data['15'])}")
+  print(f"{putih1}[{hijau1}16{putih1}]{biru1}.NOKOFAUCET (waktu: {convrt(data['16'])}")
+  print(f"{putih1}[{hijau1}17{putih1}]{biru1}.FAUCETSPEEDBTC (waktu: {convrt(data['17'])}")
+  print(f"{putih1}[{hijau1}18{putih1}]{biru1}.COINZASK (waktu: {convrt(data['18'])}")
+  print(f"{putih1}[{hijau1}19{putih1}]{biru1}.TIKIEARN (waktu: {convrt(data['19'])}")
+  print(f"{putih1}[{hijau1}20{putih1}]{biru1}.ALLFAUCET (waktu: {convrt(data['20'])}")
+  print(f"{putih1}[{hijau1}21{putih1}]{biru1}.BITMONK (waktu: {convrt(data['21'])}")
   select = input(putih1+"select : ")
+  waktu_terakhir_dipilih = time.time()
+  save(waktu_terakhir_dipilih,select)
   if select == "1":
     thread = threading.Thread(target=modul.btccanyon, args=(modulesl,banner))
     thread.start()
@@ -106,6 +103,22 @@ def menu(banner,modul,modulesl):
     thread = threading.Thread(target=modul.faucetspeedbtc, args=(modulesl,banner))
     thread.start()
     thread.join()
+  if select == "18":
+    thread = threading.Thread(target=modul.coinzask, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "19":
+    thread = threading.Thread(target=modul.tikiearn, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "20":
+    thread = threading.Thread(target=modul.allfaucet, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "21":
+    thread = threading.Thread(target=modul.bitmonk, args=(modulesl,banner))
+    thread.start()
+    thread.join()
   if select == "0":
     print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
     sel=input(putih1+"select : ")
@@ -113,5 +126,51 @@ def menu(banner,modul,modulesl):
       api_key=input("Api key captcha ai > ")
       with open("ckey.txt","w") as e:
         e.write(api_key)
-      menu(banner,modul,modulesl)
+      menu()
     exit()
+def save(waktu_terakhir_dipilih, select):
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
+    
+    if not os.path.exists(file_path):
+        data = {}
+        for i in range(23):
+            data[str(i)] = None
+        with open(file_path, "w") as file:
+            json.dump(data, file)
+    else:
+        with open(file_path, "r") as file:
+            data = json.load(file)
+            
+    if select in data:
+        data[select] = waktu_terakhir_dipilih
+    else:
+        data[str(select)] = waktu_terakhir_dipilih
+    
+    with open(file_path, "w") as file:
+        json.dump(data, file)
+
+def load_data():
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
+
+    if not os.path.exists(file_path):
+        data = {}
+        for i in range(22):
+            data[str(i)] = None
+        with open(file_path, "w") as file:
+            json.dump(data, file)
+    else:
+        with open(file_path, "r") as file:
+            data = json.load(file)
+
+    return data
+def convrt(waktu):
+ if waktu == None:
+   return "-"
+ else:
+  return datetime.datetime.fromtimestamp(waktu).strftime('%Y-%m-%d %H:%M:%S')
+def add_data(angka):
+  with open('data.json') as file:
+    data = json.load(file)
+  data[angka] = None
+  with open('data.json', 'w') as file:
+      json.dump(data, file)
