@@ -32,6 +32,7 @@ def menu(banner,modul,modulesl):
   print(f"{putih1}[{hijau1}19{putih1}]{biru1}.TIKIEARN (waktu: {convrt(data['19'])}")
   print(f"{putih1}[{hijau1}20{putih1}]{biru1}.ALLFAUCET (waktu: {convrt(data['20'])}")
   print(f"{putih1}[{hijau1}21{putih1}]{biru1}.BITMONK (waktu: {convrt(data['21'])}")
+  print(f"{putih1}[{hijau1}22{putih1}]{biru1}.OSKUT (waktu: {convrt(data['22'])}")
   select = input(putih1+"select : ")
   waktu_terakhir_dipilih = time.time()
   save(waktu_terakhir_dipilih,select)
@@ -117,6 +118,10 @@ def menu(banner,modul,modulesl):
     thread.join()
   if select == "21":
     thread = threading.Thread(target=modul.bitmonk, args=(modulesl,banner))
+    thread.start()
+    thread.join()
+  if select == "22":
+    thread = threading.Thread(target=modul.oskut, args=(modulesl,banner))
     thread.start()
     thread.join()
   if select == "0":

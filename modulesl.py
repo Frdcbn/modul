@@ -987,9 +987,16 @@ def insfly(url):
 def zuba_link(url):
   try:
     curl=requests.Session()
-    res=one_method(curl,url,headers={"referer":"https://blog.battleroyal.online/?p=9%20.%20%27?session=4%27"})
+    host=urlparse(url).netloc
+    final = curl.get(url,headers={"referer":"https://earn.zubatecno.com/?p=9%20.%20%27?session=4%27"}).text
     sleep(15)
-    return res
+    bs4 = BeautifulSoup(final, "html.parser")
+    inputs = bs4.find_all("input")
+    data = urlencode({input.get("name"): input.get("value") for input in inputs})
+    get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
+    if get_url['status'] == 'success':
+        sleep(15)
+        return get_url["url"]
   except Exception as e:
     return 'failed to bypass'
 def shortzu_icu(url):
@@ -1346,4 +1353,3 @@ def coinparty(url):
       return json.loads(final.text)["url"]
  except Exception as e:
     return "failed to bypass"
-#print(links1s_com('https://link1s.com/JzZC9lW5'))

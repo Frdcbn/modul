@@ -4,6 +4,7 @@ import shutil,os
 from time import sleep
 from bs4 import BeautifulSoup as bs
 from http.cookies import SimpleCookie
+from urllib.parse import urlparse,urlencode
 from tqdm import tqdm
 from pyfiglet import figlet_format 
 import pathlib
@@ -181,6 +182,7 @@ def btccanyon(modulesl,banner):
         'birdurls.com': modulesl.birdurl,
         'owllink.net': modulesl.owlink,
         'clickzu.icu': modulesl.clickzu_icu,
+        'shortzu.icu': modulesl.shortzu_icu,
         'zuba.link': modulesl.zuba_link,
         'mitly.us': modulesl.mitly,
         'illink.net': modulesl.illink_net,
@@ -2495,4 +2497,69 @@ def nokofaucet(modulesl,banner):
       animasi(5)
     else:
       animasi(5)
+  exit()
+def oskut(modulesl,banner):
+  def save_data(name):
+      cookies=input(hijau1+'masukan email fp mu > ')
+      data = {
+          'email': cookies
+      }
+      # Menyimpan data dalam format JSON
+      with open(f'data/{name}/{name}.json', 'w') as file:
+          json.dump(data, file)
+  def load_data(name):
+        try:
+            with open(f'data/{name}/{name}.json', 'r') as file:
+                data = json.load(file)
+            cookies = data['email']
+            return cookies
+        except FileNotFoundError:
+            return None
+  system('clear')
+  data_control('oskut')
+  banner.banner('OSKUT')
+  email = load_data('oskut')
+  if not os.path.exists("data/oskut/oskut.json"):
+    save_data('oskut')
+    oskut(modulesl,banner)
+  curl=requests.Session()
+  login=curl.get('https://oscut.fun/')
+  y=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})["value"]
+  data=f"wallet={email}&csrf_token_name={y}"
+  gas=curl.post('https://oscut.fun/auth/login',headers={"content-type":"application/x-www-form-urlencoded","referer":"https://oscut.fun/"},data=data)
+  print(hijau1+"> "+biru1+"menu")
+  print(hijau1+'> '+biru1+'1.USDT')
+  print(hijau1+'> '+biru1+'2.BTC')
+  pilih=input(hijau1+'pilih : ')
+  if pilih =="1":
+    url_base="https://oscut.fun/links/currency/usdt"
+  if pilih =="2":
+    url_base="https://oscut.fun/links/currency/btc"
+  else:
+    print(hijau1+" ! "+biru1+" pilih yang bener cok")
+    oskut(modulesl,banner)
+  get_link=curl.get(url_base)
+  link=bs(get_link.text,'html.parser').find_all('div',{'class':'col-sm-6'})
+  datalink = {
+    'Clks': modulesl.clks_pro,
+    'Try2link': modulesl.try2,
+    'Linksfly': modulesl.linksfly,
+    'Shortsfly': modulesl.shortfly,
+    'Clk': modulesl.clksh,
+    'Owllink': modulesl.owlink,
+}
+  for link in link:
+    name=link.find('h4',{'class':'card-title mt-0'}).text
+    lin=link.find('a',{'class':'btn btn-primary waves-effect waves-light'})['href']
+    jumlah=link.find('span',{'class':'badge badge-info'}).text.split('/')[0]
+    if name in datalink:
+      for ulang in range(int(jumlah)):
+          url = curl.get(lin,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+          answer = datalink[name](url)
+          if 'failed to bypass' in answer:
+              print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+          else:
+            reward=curl.get(answer)
+            if 'Success!' in reward.text:
+              print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("html: '")[1].split("',")[0])
   exit()
