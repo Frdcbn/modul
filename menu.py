@@ -134,16 +134,14 @@ def menu(banner,modul,modulesl):
       menu()
     exit()
 def save(waktu_terakhir_dipilih, select):
-    #file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
-    file_path="data.json"
-    if not os.path.exists(file_path):
+    if not os.path.exists("data.json"):
         data = {}
         for i in range(23):
             data[str(i)] = None
-        with open(file_path, "w") as file:
+        with open("data.json", "w") as file:
             json.dump(data, file)
     else:
-        with open(file_path, "r") as file:
+        with open("data.json", "r") as file:
             data = json.load(file)
             
     if select in data:
@@ -151,20 +149,18 @@ def save(waktu_terakhir_dipilih, select):
     else:
         data[str(select)] = waktu_terakhir_dipilih
     
-    with open(file_path, "w") as file:
+    with open("data.json", "w") as file:
         json.dump(data, file)
 
 def load_data():
-    #file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
-    data="data.json"
-    if not os.path.exists(file_path):
+    if not os.path.exists("data.json"):
         data = {}
         for i in range(23):
             data[str(i)] = None
-        with open(file_path, "w") as file:
+        with open("data.json", "w") as file:
             json.dump(data, file)
     else:
-        with open(file_path, "r") as file:
+        with open("data.json", "r") as file:
             data = json.load(file)
 
     return data
