@@ -2547,7 +2547,7 @@ def oskut(modulesl,banner):
     'Shortsfly': modulesl.shortfly,
     'Clk': modulesl.clksh,
     'Owllink': modulesl.owlink,
-}
+  }
   for link in link:
     name=link.find('h4',{'class':'card-title mt-0'}).text
     lin=link.find('a',{'class':'btn btn-primary waves-effect waves-light'})['href']
@@ -2562,4 +2562,62 @@ def oskut(modulesl,banner):
             reward=curl.get(answer)
             if 'Success!' in reward.text:
               print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("html: '")[1].split("',")[0])
+  exit()
+def landofbits(modulesl,banner):
+  system('clear')
+  data_control('landofbits')
+  banner.banner('LANDOFBITS')
+  cookies, ugentmu = load_data('landofbits')
+  if not os.path.exists("data/landofbits/landofbits.json"):
+    save_data('landofbits')
+    landofbits(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":"landofbits.com",
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  dash=curl.get('https://landofbits.com/dashboard',headers=ua,cookies=cookies)
+  if 'Balance' not in dash.text:
+    save_data('landofbits')
+    landofbits(modulesl,banner)
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'col-lg-3 col-md-6'})
+  print(hijau1+"> "+biru1+"Account information")
+  for info in info:
+    print(hijau1+'> '+info.text.strip().splitlines()[1]+' : '+info.text.strip().splitlines()[0])
+  print(hijau1+"> "+biru1+"Start bypass shortlinks")
+  link=curl.get('https://landofbits.com/links',headers=ua,cookies=cookies)
+  link=bs(link.text,'html.parser').find_all('div',{'class':'col-md-6 col-lg-4 mb-3 mb-lg-0'})
+  services = {
+    'Oii (Easy)': modulesl.oii,
+    'FCLC (Easy)': modulesl.fl_lc,
+    'LinksFly': modulesl.linksfly,
+    'USALink': modulesl.usalink,
+    'EXE (Easy)': modulesl.exe_io,
+    'Cuty (Easy)': modulesl.cuty_io,
+    'Web1s': modulesl.web1s_info,
+    'Traffic1s': modulesl.trafic1s,
+    '1short': modulesl._1short_in,
+    'Shortsfly': modulesl.shortfly
+  }
+  for link in link:
+   try:
+    name=link.find('h5',{'class':'c_title text-center'}).text
+    jumlah=int(link.find('a',{'class':'btn btn-one w-100 waves-effect waves-light'}).text.split('Claim ')[1].split('/')[0])
+    link=link.find('a',{'class':'btn btn-one w-100 waves-effect waves-light'})['href']
+    if name in services:
+      for ulang in range(jumlah):
+          url = curl.get(link, headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+          answer = services[name](url)
+          if 'failed to bypass' in answer:
+              print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+          else:
+              reward = curl.get(answer, headers=ua, cookies=cookies)
+              if 'Good job!' in reward.text:
+                print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Good job! '+reward.text.split("text: '")[1].split("',")[0])
+   except:
+     pass
   exit()

@@ -1128,7 +1128,7 @@ def megaurl(url):
     return "failed to bypass"
 def link1s_net(url):
   curl=requests.Session()
-  res=one_method(curl,url,headers={"referer":"https://nguyenvanbao.com/them-thong-tin-nhan-thanh-toan-tren-google-adsense-2022/"})
+  res=one_method(curl,url,headers={"referer":"https://xemsport.com/karim-benzema/"})
   sleep(15)
   return res
 def bitads(url):
@@ -1353,3 +1353,23 @@ def coinparty(url):
       return json.loads(final.text)["url"]
  except Exception as e:
     return "failed to bypass"
+def trafic1s(url):
+  curl=requests.Session()
+  step1=curl.get(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
+  tf=bs(step1.text,'html.parser')
+  csrf=tf.find('input',{'name':'_csrfToken'})["value"]
+  tkf=tf.find('input',{'name':'_Token[fields]'})["value"]
+  tku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
+ # ref=tf.find('input',{'name':'ref'})["value"]
+  get_key=json.loads(step1.text.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
+  answer=RecaptchaV2(key=get_key,url=step1.url)
+  data=f'_method=POST&_csrfToken={csrf}&action=captcha&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+  step2=curl.post(step1.url,data=data,headers={'content-type':'application/x-www-form-urlencoded;',"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"}).text
+  sleep(15)
+  bs4 = BeautifulSoup(step2, "html.parser")
+  inputs = bs4.find_all("input")
+  data = urlencode({input.get("name"): input.get("value") for input in inputs}).replace('traffic_campaign_code=None','traffic_campaign_code=')
+  final=curl.post('https://traffic1s.com/links/go',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8','referer':url})
+  if json.loads(final.text)["status"] == "success":
+      sleep(15)
+      return json.loads(final.text)["url"]
