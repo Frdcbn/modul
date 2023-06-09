@@ -166,8 +166,7 @@ def menu(banner,modul,modulesl):
       exit()
 
 def save(waktu_terakhir_dipilih, select, menu_dict, data):
-    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
-
+    file_path = "data.json"
     if not os.path.exists(file_path):
         data = {}
         for key in menu_dict.keys():
