@@ -41,7 +41,9 @@ def menu(banner,modul,modulesl):
     "20": "ALLFAUCET",
     "21": "BITMONK",
     "22": "OSKUT",
-    "23": "LANDOFBITS"
+    "23": "LANDOFBITS",
+    "24": "COINSFARM",
+    "25": "CRYPTO2U",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
@@ -143,6 +145,14 @@ def menu(banner,modul,modulesl):
       thread.join()
     if select == "23":
       thread = threading.Thread(target=modul.landofbits, args=(modulesl,banner))
+      thread.start()
+      thread.join()
+    if select == "24":
+      thread = threading.Thread(target=modul.coinsfarm, args=(modulesl,banner))
+      thread.start()
+      thread.join()
+    if select == "25":
+      thread = threading.Thread(target=modul.crypto2u, args=(modulesl,banner))
       thread.start()
       thread.join()
     if select == "0":

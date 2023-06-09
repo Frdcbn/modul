@@ -41,15 +41,36 @@ def data_control(name):
   if not sub_folder_path.exists():
       sub_folder_path.mkdir()
 def save_data(name):
-      cookies=input(hijau1+'masukan cookies mu > ')
-      user_agent=input(hijau1+'masukan User-Agent mu > ')
-      data = {
-          'cookies': cookies,
-          'user_agent': user_agent
-      }
-      # Menyimpan data dalam format JSON
-      with open(f'data/{name}/{name}.json', 'w') as file:
-          json.dump(data, file)
+    try:
+        with open(f'data/{name}/{name}.json', 'r') as file:
+            data = json.load(file)
+            cookies = data.get('cookies')
+            user_agent = data.get('user_agent')
+            if user_agent:
+                print(f'{putih1}[{kuning1} ~ {putih1}] {hijau1}User-Agent sudah ada tetap update User-Agent? jika User-Agent sudah di update tetap cf gunakan User-Agent : XYZ/3.0')
+                jawab = input('y/n : '.lower())
+                if jawab == 'y':
+                  user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
+                cookies = input(hijau1 + 'Masukkan cookies mu > ')
+            else:
+                user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
+            data = {
+                'cookies': cookies,
+                'user_agent': user_agent
+            }
+            with open(f'data/{name}/{name}.json', 'w') as file:
+                json.dump(data, file)
+          #  return cookies, user_agent
+    except FileNotFoundError:
+        cookies = input(hijau1 + 'Masukkan cookies mu > ')
+        user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
+        data = {
+            'cookies': cookies,
+            'user_agent': user_agent
+        }
+        with open(f'data/{name}/{name}.json', 'w') as file:
+            json.dump(data, file)
+        return cookies, user_agent
 def load_data(name):
       try:
           with open(f'data/{name}/{name}.json', 'r') as file:
@@ -245,15 +266,6 @@ def claimlite(modulesl,banner):
   system('clear')
   banner.banner("CLAIMLITE")
   data_control('claimlite')
-  def cek():
-      file_sizes = []
-      for i in range(5):
-          file_size = os.path.getsize(f'cache/claimlite/{i}.jpg')
-          file_sizes.append(file_size)
-      while True:
-          for i in range(5):
-              if file_sizes[i] != file_sizes[0] and file_sizes[i] != file_sizes[i-1]:
-                  return i
   def get_answer():
       cache_control('claimlite')
       us = {
@@ -588,6 +600,36 @@ def claimbits(modulesl,banner):
   host="claimbits.net"
   banner.banner(nama_host.upper())
   data_control(''+nama_host+'')
+  def save_data(name):
+    try:
+            cookies = input(hijau1 + 'Masukkan cookies mu > ')
+            user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
+            data = {
+                'cookies': cookies,
+                'user_agent': user_agent
+            }
+            with open(f'data/{name}/{name}.json', 'w') as file:
+                json.dump(data, file)
+          #  return cookies, user_agent
+    except FileNotFoundError:
+        cookies = input(hijau1 + 'Masukkan cookies mu > ')
+        user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
+        data = {
+            'cookies': cookies,
+            'user_agent': user_agent
+        }
+        with open(f'data/{name}/{name}.json', 'w') as file:
+            json.dump(data, file)
+        return cookies, user_agent
+  def cek():
+      file_sizes = []
+      for i in range(5):
+          file_size = os.path.getsize(f'cache/claimlite/{i}.jpg')
+          file_sizes.append(file_size)
+      while True:
+          for i in range(5):
+              if file_sizes[i] != file_sizes[0] and file_sizes[i] != file_sizes[i-1]:
+                  return i
   def cek():
       file_sizes = []
       for i in range(5):
@@ -648,6 +690,9 @@ def claimbits(modulesl,banner):
   try:
     print(hijau1+"> "+biru1+"Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
+    if 'Balance' not in get_sl.text:
+      save_data(nama_host)
+      claimbits(modulesl,banner)
     for info in get_inf:
       print(hijau1+'> '+info.text.strip())
   except Exception as e:
@@ -1212,6 +1257,69 @@ def coingax(modulesl,banner):
    except:
      pass
   exit()
+def crypto2u(modulesl,banner):
+  system('clear')
+  data_control('crypto2u')
+  banner.banner('CRYPTO2U')
+  cookies, ugentmu = load_data('crypto2u')
+  if not os.path.exists("data/crypto2u/crypto2u.json"):
+    save_data('crypto2u')
+    crypto2u(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":"crypto2u.xyz",
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  dahs=curl.get('https://crypto2u.xyz/dashboard',headers=ua,cookies=cookies)
+  if 'Balance' not in dahs.text:
+    save_data('crypto2u')
+    crypto2u(modulesl,banner)
+  fd=bs(dahs.text,'html.parser').find_all('div',{'class':'col-xl-4 col-lg-6 col-md-6 col-sm-6 col-xs-12'})
+  print(hijau1+"> "+biru1+"Account information")
+  for i in fd:
+    print(hijau1+'> '+i.text.strip().splitlines()[0]+' : '+i.text.strip().splitlines()[1])
+  link=curl.get('https://crypto2u.xyz/links',headers=ua,cookies=cookies)
+  print(hijau1+"> "+biru1+"Start bypass shortlinks")
+  fd=bs(link.text,'html.parser').find_all('div',{'class':'col-md-6 col-lg-4 mb-3 mb-lg-0'})
+  bypass_functions = {
+    'Clks': modulesl.clks_pro,
+    'LinksFly': modulesl.linksfly,
+    'CLK': modulesl.clksh,
+    'ShrinkEarn': modulesl.shrinkearn,
+    'CTR': modulesl.ctrsh,
+    'Ez4Short': modulesl.ez4short,
+    'Try2Link': modulesl.try2,
+    'Owl Link': modulesl.owlink,
+    'EXE': modulesl.exe_io,
+    'LinkJust': modulesl.linkjust,
+    'USA Link': modulesl.usalink,
+    'FCLC': modulesl.fl_lc,
+    'Cuty': modulesl.cuty_io,
+  }
+  for li in fd:
+      try:
+          name = li.find('h5',{'class':'card-title text-center'}).text
+          jumlah = li.find('span',{'class':'ms-auto badge badge-primary'}).text.split('/')[0]
+          for i in range(int(jumlah)):
+              link = li.find('button')['onclick'].split("window.open('")[1].split("', '")[0]
+              if name in bypass_functions:
+                  get_links = curl.get(link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
+                  print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Try to bypass : ' + get_links, end='\r')
+                  answer = bypass_functions[name](get_links)
+                  if 'failed to bypass' in answer:
+                      print(f'{putih1}[{merah1} ! {putih1}] {hijau1}Failed to bypass', end='\r')
+                  else:
+                      reward = curl.get(answer, headers=ua, cookies=cookies)
+                      dahs=curl.get('https://crypto2u.xyz/dashboard',headers=ua,cookies=cookies)
+                      fd=bs(dahs.text,'html.parser').find_all('div',{'class':'col-xl-4 col-lg-6 col-md-6 col-sm-6 col-xs-12'})
+                      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}' + fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1]+'                                         ')
+      except:
+          pass
+  exit()
 def claimsatoshi(modulesl,banner):
   system('clear')
   data_control('claimsatoshi')
@@ -1558,6 +1666,75 @@ def adhives(modulesl,banner):
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                   elif 'Congratulations.' in reward.text:
                       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("message: '")[1].split("'")[0])
+    except Exception as e:
+      pass
+  exit()
+def coinsfarm(modulesl,banner):
+  system('clear')
+  data_control('coinsfarmers')
+  banner.banner('COINSFARMERS')
+  cookies, ugentmu = load_data('coinsfarmers')
+  if not os.path.exists("data/coinsfarmers/coinsfarmers.json"):
+    save_data('coinsfarmers')
+    adhives(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":"coinsfarmers.com",
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  try:
+    dahs=curl.get('https://coinsfarmers.com/account',headers=ua,cookies=cookies)
+    if 'Balance' not in dahs.text:
+      save_data('coinsfarmers')
+      coinsfarm(modulesl,banner)
+  except Exception as e:
+    save_data('coinsfarmers')
+    coinsfarm(modulesl,banner)
+  fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
+  print(hijau1+"> "+biru1+"Account information")
+  print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
+  print(hijau1+'> '+fd[0].text.strip().splitlines()[4]+' : '+fd[0].text.strip().splitlines()[5])
+  link=curl.get('https://coinsfarmers.com/shortlinks',headers=ua,cookies=cookies)
+  gt=bs(link.text,'html.parser').find_all('div',{'class':'col-lg-4 mt-4'})
+  print(hijau1+"> "+biru1+"Start bypass shortlinks")
+  providers = {
+    'LinksFly': modulesl.linksfly,
+    'Shortsfly': modulesl.shortfly,
+    'Usalink': modulesl.usalink,
+    'Fc.lc': modulesl.fl_lc,
+    'Birdurls': modulesl.birdurl,
+    'Owllink': modulesl.owlink,
+    'Cuty': modulesl.cuty_io,
+    'Exe.io': modulesl.exe_io,
+    'Insfly': modulesl.insfly,
+    'Hrshort': modulesl.hrshort,
+    'Clks.pro': modulesl.clks_pro,
+    'Shorti': modulesl.shorti_io,
+  }
+  for i in gt:
+    try:
+      name = i.text.strip().splitlines()[0]
+      for provider in providers:
+          if provider in name:
+              y=[i for i in i.text.strip().splitlines() if i][2]
+              if 'clicks remaining' in y:
+                y=y.split(' clicks remaining')[0].replace(' ','')
+              if 'click remaining' in y:
+                y=y.split(' click remaining')[0].replace(' ','')
+              link=i.find('a',{'class':'card shadow text-decoration-none text-dark'})['href']
+              for ulang in range(int(y)):
+                  get_links = curl.get('https://coinsfarmers.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
+                  print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
+                  answer = providers[provider](get_links)
+                  reward = curl.get(answer, headers=ua, cookies=cookies)
+                  if 'failed to bypass' in answer:
+                      print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+                  elif 'Congratulations.' in reward.text:
+                      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("message: '")[1].split("'")[0]+'       ')
     except Exception as e:
       pass
   exit()
