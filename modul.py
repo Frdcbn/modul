@@ -266,6 +266,15 @@ def claimlite(modulesl,banner):
   system('clear')
   banner.banner("CLAIMLITE")
   data_control('claimlite')
+  def cek():
+      file_sizes = []
+      for i in range(5):
+          file_size = os.path.getsize(f'cache/claimlite/{i}.jpg')
+          file_sizes.append(file_size)
+      while True:
+          for i in range(5):
+              if file_sizes[i] != file_sizes[0] and file_sizes[i] != file_sizes[i-1]:
+                  return i
   def get_answer():
       cache_control('claimlite')
       us = {
@@ -1829,6 +1838,117 @@ def earnsolana(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      exit()
   exit()
+def james_trussy(modulesl,banner):
+  system('clear')
+  data_control('james-trussy')
+  banner.banner('JAMES-TRUSSY')
+  cookies, ugentmu = load_data('james-trussy')
+  if not os.path.exists("data/james-trussy/james-trussy.json"):
+    save_data('james-trussy')
+    james_trussy(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":"james-trussy.com",
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
+  if 'firewall' in faucet.url:
+      info=bs(faucet.text,'html.parser')
+      csrf=info.find('input',{'name':'csrf_token_name'})['value']
+      answer=modulesl.RecaptchaV2('6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO',faucet.url)
+      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
+      gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
+  dash=curl.get('https://james-trussy.com/dashboard',headers=ua,cookies=cookies)
+  if 'Balance' not in dash.text:
+    save_data('james-trussy')
+    james_trussy(modulesl,banner)
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
+  print(hijau1+"> "+biru1+"Account information")
+  for info in info:
+    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
+  print(hijau1+"> "+biru1+"Start bypass shortlinks")
+  get_links=curl.get('https://james-trussy.com/links',headers=ua,cookies=cookies).text
+  fd=bs(get_links,'html.parser')
+  link=fd.find_all('div',{'class':'col-lg-3'})
+  for i in link:
+    try:
+        name = i.find('h4').text
+        jumlah = int(i.find('span').text.split('/')[0])
+        services = {
+    'CRTSH': modulesl.ctrsh,
+    'FCLC': modulesl.fl_lc,
+    'BirdUrl': modulesl.birdurl,
+    'LinksFly': modulesl.linksfly,
+    'USALink': modulesl.usalink,
+    'IlLink': modulesl.illink_net,
+    'Cuty': modulesl.cuty_io,
+    'Exe': modulesl.exe_io,
+    'OwlLink': modulesl.owlink
+      }
+        if name in services:
+            for ulang in range(jumlah):
+                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+                answer = services[name](url)
+                if 'failed to bypass' in answer:
+                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+                else:
+                    reward = curl.get(answer, headers=ua, cookies=cookies).text
+                  #  print(reward)
+                    if 'Good job!' in reward:
+                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    else:
+                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
+    except:
+        pass
+  print(hijau1+"> "+biru1+"Start auto faucet")
+  while True:
+   try:
+    faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
+    if 'firewall' in faucet.url:
+      info=bs(faucet.text,'html.parser')
+      csrf=info.find('input',{'name':'csrf_token_name'})['value']
+      answer=modulesl.RecaptchaV2('6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO',faucet.url)
+      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
+      gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
+    get_=curl.get('https://james-trussy.com/auto',headers=ua,cookies=cookies)
+    token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
+    sleep(60)
+    reward=curl.post('https://james-trussy.com/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    if 'Good job!' in reward.text:
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except Exception as e:
+     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     break
+   #  exit()
+  print(hijau1+"> "+biru1+"Start faucet")
+  faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
+  jumlah=bs(faucet.text,'html.parser').find_all('p',{'class':'lh-1 mb-1 font-weight-bold'})
+  jum=int(jumlah[len(jumlah)-1].text.split('/')[0])
+  for i in range(jum):
+    faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
+    info=bs(faucet.text,'html.parser')
+    csrf=info.find('input',{'name':'csrf_token_name'})['value']
+    token=info.find('input',{'name':'token'})['value']
+    answer=modulesl.RecaptchaV2('6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO','https://james-trussy.com/faucet')
+    data=f"csrf_token_name={csrf}&token={token}&captcha=recaptchav2&recaptchav3=&g-recaptcha-response={answer}"
+    faucet=curl.post('https://james-trussy.com/faucet/verify',data=data,headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},cookies=cookies)
+    if 'Good job!' in faucet.text:
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+faucet.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+    animasi(1)
+    faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
+    if 'firewall' in faucet.url:
+      info=bs(faucet.text,'html.parser')
+      csrf=info.find('input',{'name':'csrf_token_name'})['value']
+      answer=modulesl.RecaptchaV2('6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO',faucet.url)
+      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
+      gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
 def bitmonk(modulesl,banner):
   system('clear')
   data_control('bitmonk')
@@ -2284,6 +2404,7 @@ def faucet4u(modulesl,banner):
         
         services = {
     'ShrinkEarn': modulesl.shrinkearn,
+    'Link4M': modulesl.link4m_com,
     'Shrinkme': modulesl.shrinkme,
     'LinksFly': modulesl.linksfly,
     'ShortsFly': modulesl.shortfly,

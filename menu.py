@@ -44,6 +44,7 @@ def menu(banner,modul,modulesl):
     "23": "LANDOFBITS",
     "24": "COINSFARM",
     "25": "CRYPTO2U",
+    "26": "JAMES-TRUSSY",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
@@ -155,6 +156,10 @@ def menu(banner,modul,modulesl):
       thread = threading.Thread(target=modul.crypto2u, args=(modulesl,banner))
       thread.start()
       thread.join()
+    if select == "26":
+      thread = threading.Thread(target=modul.james_trussy, args=(modulesl,banner))
+      thread.start()
+      thread.join()
     if select == "0":
       print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
       sel=input(putih1+"select : ")
@@ -166,7 +171,8 @@ def menu(banner,modul,modulesl):
       exit()
 
 def save(waktu_terakhir_dipilih, select, menu_dict, data):
-    file_path = "data.json"
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
+
     if not os.path.exists(file_path):
         data = {}
         for key in menu_dict.keys():

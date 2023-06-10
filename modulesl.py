@@ -9,29 +9,42 @@ from time import sleep
 import urllib.parse
 import requests
 from bs4 import BeautifulSoup as bs
+import concurrent.futures
 # -------------------------------------------
 # RecaptchaV2 BYPASS
-def RecaptchaV2(key,url):
- while True:
-  api=random.choice(open('ckey.txt').read().splitlines())
-  get_res=requests.get(f'http://ocr.captchaai.com/in.php?key={api}&method=userrecaptcha&googlekey={key}&pageurl={url}').text
-  if 'OK' in get_res:
-    status=False
-    id=get_res.split('|')[1]
-    while(status==False):
-      try:
-        get_ans=requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}').text
-        sleep(5)
-        if 'CAPCHA_NOT_READY' in get_ans:
-          print('Belum ada respon dari recaptcha',end='                     \r')
-        if 'OK' in get_ans:
-          return get_ans.split('|')[1]
-          status =True
-      except Exception as e:
-        print(e)
-        pass
-  else:
-    print('Get id',end='                     \r')
+
+def get_res(api, key, url):
+    return requests.get(f'http://ocr.captchaai.com/in.php?key={api}&method=userrecaptcha&googlekey={key}&pageurl={url}').text
+
+def get_ans(api, id):
+    return requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}').text
+
+def RecaptchaV2(key, url):
+    with open('ckey.txt') as f:
+        api_list = f.read().splitlines()
+
+    while True:
+        api = random.choice(api_list)
+        get_res_text = get_res(api, key, url)
+
+        if 'OK' in get_res_text:
+            id = get_res_text.split('|')[1]
+            start_time = time.time()
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                while True:
+                    time.sleep(1)  # Mengurangi waktu tunggu menjadi setengah detik
+
+                    get_ans_text = get_ans(api, id)
+                    elapsed_time = time.time() - start_time
+
+                    if 'CAPCHA_NOT_READY' in get_ans_text:
+                        print('Belum ada respon dari reCAPTCHA', end='\r')
+                    elif 'OK' in get_ans_text:
+                        return get_ans_text.split('|')[1]
+        else:
+            print('Get ID', end='\r')
+
 # -------------------------------------------
 # Hcaptcha BYPASS
 def Hcaptcha(key,url):
