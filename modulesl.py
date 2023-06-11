@@ -1001,7 +1001,8 @@ def zuba_link(url):
   try:
     curl=requests.Session()
     host=urlparse(url).netloc
-    final = curl.get(url,headers={"referer":"https://earn.zubatecno.com/?p=9%20.%20%27?session=4%27"}).text
+    get_ref=urlparse(curl.get(url).url).netloc
+    final = curl.get(url,headers={"referer":f"https://{get_ref}/?p=9%20.%20%27?session=4%27"}).text
     sleep(15)
     bs4 = BeautifulSoup(final, "html.parser")
     inputs = bs4.find_all("input")
@@ -1141,7 +1142,7 @@ def megaurl(url):
     return "failed to bypass"
 def link1s_net(url):
   curl=requests.Session()
-  res=one_method(curl,url,headers={"referer":"https://xemsport.com/karim-benzema/"})
+  res=one_method(curl,url,headers={"referer":"https://nguyenvanbao.com/danh-cho-nguoi-moi-vao-nghe-make-money-online/"})
   sleep(15)
   return res
 def bitads(url):

@@ -196,6 +196,7 @@ def btccanyon(modulesl,banner):
         'fc.lc': modulesl.fl_lc,
         'clk.sh': modulesl.clksh,
         'linksfly.me': modulesl.linksfly,
+        'shortsfly.me': modulesl.shortfly,
         'chainfo.xyz': modulesl.chainfo,
         'flyzu.icu': modulesl.flyzu,
         'adshorti.xyz': modulesl.adshorti_xyz,
@@ -1838,6 +1839,109 @@ def earnsolana(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      exit()
   exit()
+def coinpay_faucet(modulesl,banner):
+  system('clear')
+  data_control('coinpay-faucet')
+  banner.banner('COINPAY-FAUCET')
+  cookies, ugentmu = load_data('coinpay-faucet')
+  if not os.path.exists("data/coinpay-faucet/coinpay-faucet.json"):
+    save_data('coinpay-faucet')
+    coinpay_faucet(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":"coinpay-faucet.com",
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  dash=curl.get('https://coinpay-faucet.com/dashboard',headers=ua,cookies=cookies)
+  if 'firewall' in dash.url:
+      info=bs(faucet.text,'html.parser')
+      csrf=info.find('input',{'name':'csrf_token_name'})['value']
+      answer=modulesl.RecaptchaV2('6LdtJxUiAAAAAC8KYAgOUIqTwCee5g2r-YpeeU6D',faucet.url)
+      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
+      gas=curl.post("https://coinpay-faucet.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
+  if 'Balance' not in dash.text:
+    save_data('coinpay-faucet')
+    coinpay_faucet(modulesl,banner)
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
+  print(hijau1+"> "+biru1+"Account information")
+  for info in info:
+    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
+  print(hijau1+"> "+biru1+"Start bypass shortlinks")
+  get_links=curl.get('https://coinpay-faucet.com/links',headers=ua,cookies=cookies).text
+  fd=bs(get_links,'html.parser')
+  link=fd.find_all('div',{'class':'col-lg-3'})
+  for i in link:
+    try:
+        name = i.find('h4').text
+        jumlah = int(i.find('span').text.split('/')[0])
+        services = {
+        'HOT- shortsfly.me': modulesl.shortfly,
+        'HOT- linksfly.me': modulesl.linksfly,
+        'exe.io': modulesl.exe_io,
+        'shorti.io': modulesl.shorti_io,
+        'cuty.io': modulesl.cuty_io,
+        'usalink.io': modulesl.usalink,
+        'owllink.net': modulesl.owlink,
+        'birdurls.com': modulesl.birdurl,
+        'illink.net': modulesl.illink_net,
+        'clks.pro': modulesl.clks_pro,
+        'ex-foary.com': modulesl.ex_foary_com
+        }
+        if name in services:
+            for ulang in range(jumlah):
+                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+                answer = services[name](url)
+                if 'failed to bypass' in answer:
+                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+                else:
+                    reward = curl.get(answer, headers=ua, cookies=cookies).text
+                    if 'Good job!' in reward:
+                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    else:
+                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
+    except:
+        pass
+  print(hijau1+"> "+biru1+"Start auto faucet")
+  while True:
+   try:
+    get_=curl.get('https://coinpay-faucet.com/auto',headers=ua,cookies=cookies)
+    token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
+    sleep(60)
+    reward=curl.post('https://coinpay-faucet.com/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    if 'Good job!' in reward.text:
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except Exception as e:
+     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     break
+  print(hijau1+"> "+biru1+"Start faucet")
+  mad=curl.get('https://coinpay-faucet.com/madfaucet',headers=ua,cookies=cookies)
+  f=bs(mad.text,'html.parser').find_all('div',{'class':'col-md-6 col-xl-3 mb-3 mb-xl-3'})
+  jumlah=int(f[len(f)-1].text.strip().split('/')[0])
+  for i in range(jumlah):
+    faucet=curl.get("https://coinpay-faucet.com/madfaucet",headers=ua,cookies=cookies)
+    if 'firewall' in faucet.url:
+      info=bs(faucet.text,'html.parser')
+      csrf=info.find('input',{'name':'csrf_token_name'})['value']
+      answer=modulesl.RecaptchaV2('6LdtJxUiAAAAAC8KYAgOUIqTwCee5g2r-YpeeU6D',faucet.url)
+      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
+      gas=curl.post("https://coinpay-faucet.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
+    faucet=curl.get("https://coinpay-faucet.com/madfaucet",headers=ua,cookies=cookies)
+    fd=bs(faucet.text,'html.parser')
+    csrf=fd.find('input',{'name':'csrf_token_name'})['value']
+    answer=modulesl.RecaptchaV2('6LdtJxUiAAAAAC8KYAgOUIqTwCee5g2r-YpeeU6D',faucet.url)
+    data=f"csrf_token_name={csrf}&captcha=recaptchav2&g-recaptcha-response={answer}"
+    reward=curl.post('https://coinpay-faucet.com/madfaucet/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data=data)
+    #print(reward.text)
+    if 'Good job!' in reward.text:
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+    animasi(5)
+  exit()
 def james_trussy(modulesl,banner):
   system('clear')
   data_control('james-trussy')
@@ -1949,6 +2053,95 @@ def james_trussy(modulesl,banner):
       data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
       gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
+def eurofaucet_de(modulesl,banner):
+  system('clear')
+  data_control('eurofaucet.de')
+  banner.banner('EUROFAUCET.DE')
+  cookies, ugentmu = load_data('eurofaucet.de')
+  if not os.path.exists("data/eurofaucet.de/eurofaucet.de.json"):
+    save_data('eurofaucet.de')
+    eurofaucet_de(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":"eurofaucet.de",
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  dash=curl.get('https://eurofaucet.de/dashboard',headers=ua,cookies=cookies)
+  if 'Balance' not in dash.text:
+    save_data('eurofaucet.de')
+    eurofaucet_de(modulesl,banner)
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
+  print(hijau1+"> "+biru1+"Account information")
+  for info in info:
+    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
+  print(hijau1+"> "+biru1+"Start bypass ptc")
+  ptc=curl.get('https://eurofaucet.de/ptc',headers=ua,cookies=cookies)
+  ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
+  for ptc in ptc:
+   try:
+    name=ptc.find('h5',{'class':'card-title'}).text
+    link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
+    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+    visit=curl.get(link,headers=ua,cookies=cookies)
+    sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
+    csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+    answer=modulesl.RecaptchaV2('6Lcza1QmAAAAAInStIpZuJYEOm-89v4zKNzglgU9',link)
+    data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}"
+    verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+    if 'Good job!' in verify.text:
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except:
+        pass
+  print(hijau1+"> "+biru1+"Start bypass shortlinks")
+  get_links=curl.get('https://eurofaucet.de/links',headers=ua,cookies=cookies).text
+  fd=bs(get_links,'html.parser')
+  link=fd.find_all('div',{'class':'col-lg-3'})
+  for i in link:
+    try:
+     #   print(i)
+        name = i.find('h4').text
+        jumlah = int(i.find('span').text.split('/')[0])
+        services = {
+        'shorti': modulesl.adshorti_xyz,
+        'try2': modulesl.try2,
+        'linksfly': modulesl.linksfly,
+        'shortsfly': modulesl.shortfly,
+        'owl': modulesl.owlink,
+        'illink': modulesl.illink_net,
+        }
+
+        if name in services:
+            for ulang in range(jumlah):
+                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+                answer = services[name](url)
+                if 'failed to bypass' in answer:
+                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+                else:
+                    reward = curl.get(answer, headers=ua, cookies=cookies).text
+                  #  print(reward)
+                    if 'Good job!' in reward:
+                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    else:
+                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
+    except:
+        pass
+  print(hijau1+"> "+biru1+"Start auto faucet")
+  while True:
+   try:
+    get_=curl.get('https://eurofaucet.de/auto',headers=ua,cookies=cookies)
+    token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
+    sleep(60)
+    reward=curl.post('https://eurofaucet.de/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    if 'Good job!' in reward.text:
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except Exception as e:
+     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     break
+  exit()
 def bitmonk(modulesl,banner):
   system('clear')
   data_control('bitmonk')

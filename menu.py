@@ -45,6 +45,8 @@ def menu(banner,modul,modulesl):
     "24": "COINSFARM",
     "25": "CRYPTO2U",
     "26": "JAMES-TRUSSY",
+    "27": "COINPAY-FAUCET",
+    "28": "EUROFAUCET_DE",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
@@ -160,6 +162,14 @@ def menu(banner,modul,modulesl):
       thread = threading.Thread(target=modul.james_trussy, args=(modulesl,banner))
       thread.start()
       thread.join()
+    if select == "27":
+      thread = threading.Thread(target=modul.coinpay_faucet, args=(modulesl,banner))
+      thread.start()
+      thread.join()
+    if select == "28":
+      thread = threading.Thread(target=modul.eurofaucet_de, args=(modulesl,banner))
+      thread.start()
+      thread.join()
     if select == "0":
       print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
       sel=input(putih1+"select : ")
@@ -171,8 +181,7 @@ def menu(banner,modul,modulesl):
       exit()
 
 def save(waktu_terakhir_dipilih, select, menu_dict, data):
-    #file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
-    file_path="data.json"
+    file_path = "data.json"
 
     if not os.path.exists(file_path):
         data = {}
@@ -191,6 +200,7 @@ def save(waktu_terakhir_dipilih, select, menu_dict, data):
 
     with open(file_path, "w") as file:
         json.dump(data, file)
+
 
 def load_data(menu_dict):
     file_path = "data.json"
