@@ -2468,31 +2468,9 @@ def faucetspeedbtc(modulesl,banner):
   print(hijau1+"> "+biru1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+biru1+"Start ptc")
-  ptc=curl.get('https://faucetspeedbtc.com/ptc',headers=ua,cookies=cookies)
-  if 'ads available' not in ptc.text:
-    save_data('faucetspeedbtc')
-    faucetspeedbtc(modulesl,banner)
-  ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-md-6 col-xl-4'})
-  del ptc[0]
-  for ptc in ptc:
-   try:
-      name=ptc.find('h5',{'class':'card-title text-center font-size-18'}).text
-      link=ptc.find('button')["onclick"].split("window.location = '")[1].split("'")[0]
-      print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
-      visit=curl.get(link,headers=ua,cookies=cookies)
-      sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
-      csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-      token=bs(visit.text,'html.parser').find('input',{'name':'token'})['value']
-      answer=modulesl.RecaptchaV2('6LeexQ4gAAAAAD1rsg0j8dSybe1eFscYUobiMQBw',link)
-      data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
-      verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
-      if 'Good job!' in verify.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-   except Exception as e:
-        save_data('faucetspeedbtc')
-        faucetspeedbtc(modulesl,banner)
-        pass
+ # print(hijau1+"> "+biru1+"Start ptc")
+  
+  
   print(hijau1+"> "+biru1+"Start bypass shortlinks")
   get_links=curl.get('https://faucetspeedbtc.com/links',headers=ua,cookies=cookies).text
   fd=bs(get_links,'html.parser')
@@ -3054,6 +3032,39 @@ def oskut(modulesl,banner):
             if 'Success!' in reward.text:
               print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("html: '")[1].split("',")[0])
   exit()
+def reliable(modulesl,banner):
+  def save_data(name):
+      cookies=input(hijau1+'masukan wallet btc fp mu > ')
+      data = {
+          'wallet': cookies
+      }
+      # Menyimpan data dalam format JSON
+      with open(f'data/{name}/{name}.json', 'w') as file:
+          json.dump(data, file)
+  def load_data(name):
+        try:
+            with open(f'data/{name}/{name}.json', 'r') as file:
+                data = json.load(file)
+            cookies = data['wallet']
+            return cookies
+        except FileNotFoundError:
+            return None
+  system('clear')
+  data_control('reliable')
+  banner.banner('RELIABLE')
+  email = load_data('reliable')
+  if not os.path.exists("data/reliable/reliable.json"):
+    save_data('reliable')
+    reliable(modulesl,banner)
+  curl=requests.Session()
+  print(hijau1+"> "+biru1+"Account information")
+  print(hijau1+'> wallet : '+email)
+  login=curl.get('https://btc.hect.online/',headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
+  answer=modulesl.RecaptchaV2('6Leu8NAlAAAAACYFYwJSVtMtu3XFeJcuROPndSWy',"https://btc.hect.online/")
+  data=f"bvGt1YTKvz={email}&g-recaptcha-response={answer}"
+  reward=curl.post("https://btc.hect.online/",data=data,headers={"content-type":"application/x-www-form-urlencoded","referer":"https://btc.hect.online/","User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
+  print(reward.text)
+  animasi(5)
 def landofbits(modulesl,banner):
   system('clear')
   data_control('landofbits')
