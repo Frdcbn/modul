@@ -3161,3 +3161,82 @@ def landofbits(modulesl,banner):
    except:
      pass
   exit()
+def oskut(modulesl,banner):
+  system('clear')
+  def save_datan(name):
+    try:
+        with open(f'data/{name}/{name}.json', 'r') as file:
+            data = json.load(file)
+            cookies = data.get('email')
+       #     user_agent = data.get('user_agent')
+            cookies = input(hijau1 + 'Masukkan email mu > ')
+            data = {
+                'email': cookies,
+            }
+            with open(f'data/{name}/{name}.json', 'w') as file:
+                json.dump(data, file)
+          #  return cookies, user_agent
+    except FileNotFoundError:
+        cookies = input(hijau1 + 'Masukkan email mu > ')
+        data = {
+            'email': cookies,
+       #     'user_agent': user_agent
+        }
+        with open(f'data/{name}/{name}.json', 'w') as file:
+            json.dump(data, file)
+        return cookies
+  def load_datan(name):
+      try:
+          with open(f'data/{name}/{name}.json', 'r') as file:
+              data = json.load(file)
+          cookies = data['email']
+      #    user_agent = data['user_agent']
+          return cookies
+      except FileNotFoundError:
+          return None, None
+  banner.banner('OSKUT')
+  cookies= load_datan('oskut')
+  if not os.path.exists("data/oskut/oskut.json"):
+    save_datan('oskut')
+    oskut(modulesl,banner)
+  curl=requests.Session()
+  step1=curl.get('https://oscut.fun/')
+  fd=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  data=f"wallet={cookies}&csrf_token_name={fd}"
+  step2=curl.post('https://oscut.fun/auth/login',data=data,headers={"content-type":"application/x-www-form-urlencoded"})
+  if 'Login Success' in step2.text:
+    print(f'{putih1}[{hijau1} √ {putih1}] Login Success')
+    print('1.BTC')
+    print('2.USDT')
+    curen=input('Select : ')
+    if curen == '1':
+      cur='btc'
+    if curen == '2':
+      cur='usdt'
+    get_links=curl.get('https://oscut.fun/links/currency/'+cur)
+    gt=bs(get_links.text,'html.parser').find_all('div',{'class':'col-sm-6'})
+    for link in gt:
+      jumlah=int(link.find('span').text.split('/')[0])
+      name=link.find('h4').text
+      li=link.find('a',{'class':'btn btn-primary waves-effect waves-light'})['href']
+      services = {
+      'Clks': modulesl.clks_pro,
+      'Try2link': modulesl.try2,
+      'Linksfly': modulesl.linksfly,
+      'Shortsfly': modulesl.shortfly,
+      'Clk': modulesl.clksh,
+      'Owllink': modulesl.owlink
+      }
+      if name in services:
+        for ulang in range(jumlah):
+            url = curl.get(li,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+            answer = services[name](url)
+            if 'failed to bypass' in answer:
+                print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+            else:
+                reward = curl.get(answer)
+              #  print(reward.text)
+                if 'Success!' in reward.text:
+               #   html: '0.00000009 BTC has been sent to your FaucetPay account!',
+                  print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
+      

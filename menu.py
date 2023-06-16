@@ -47,6 +47,7 @@ def menu(banner,modul,modulesl):
     "26": "COINPAY-FAUCET",
     "27": "EUROFAUCET_DE",
     "28": "TEFAUCET.ONLINE",
+    "29": "OSKUT",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
@@ -168,6 +169,10 @@ def menu(banner,modul,modulesl):
       thread.join()
     if select == "28":
       thread = threading.Thread(target=modul.tefaucet, args=(modulesl,banner))
+      thread.start()
+      thread.join()
+    if select == "29":
+      thread = threading.Thread(target=modul.oskut, args=(modulesl,banner))
       thread.start()
       thread.join()
     if select == "0":
