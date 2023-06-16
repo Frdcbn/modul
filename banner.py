@@ -23,4 +23,5 @@ def banner(name):
     print(hijau1+"Provinsi "+putih1+": "+biru1, location_info.state)
     print(hijau1+"Kota "+putih1+": "+biru1, location_info.city)
     print(hijau1+"Koordinat "+putih1+": "+biru1, location_info.latlng)
+    print(putih1+"".center(56,"•"))
     

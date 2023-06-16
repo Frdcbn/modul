@@ -138,7 +138,7 @@ def ctrsh(url):
   except Exception as e:
     return "failed to bypass"
 def try2(url):
-  try:
+  #try:
     curl = requests.Session()
     curl.headers.update({'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36'})
     sesi = True
@@ -149,13 +149,16 @@ def try2(url):
         url = send_data["data"]["alias"]
     while(sesi==True):
         curl.headers.update({'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36'})
+       # print(url)
         if "try2link.com" in url:
                 break
         step1 = curl.get(url)
         send_data = curl.post(urlparse(url).scheme+'://'+urlparse(url).hostname+'/wp-admin/admin-ajax.php', data="action=remove_short_main_session", headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'})
-        if "alias" and "success" in send_data:
-            send_data = json.loads(send_data)
+     #   print(send_data.text)
+        if "alias" and "success" in send_data.text:
+            send_data = json.loads(send_data.text)
             url = send_data["data"]["alias"]
+       #     print(url)
             if "try2link.com" in url:
                 break
         else:
@@ -163,8 +166,8 @@ def try2(url):
     res=one_method(curl,url,headers=None)
     sleep(15)
     return res
-  except Exception as e:
-    return "failed to bypass"
+ # except Exception as e:
+  #  return "failed to bypass"
 def gplinks_bypass(url: str):
   try:
    client = cloudscraper.create_scraper(allow_brotli=False)  
@@ -1143,7 +1146,7 @@ def megaurl(url):
 def link1s_net(url):
   curl=requests.Session()
   res=one_method(curl,url,headers={"referer":"https://nguyenvanbao.com/danh-cho-nguoi-moi-vao-nghe-make-money-online/"})
-  sleep(15)
+  sleep(20)
   return res
 def bitads(url):
  try:
@@ -1387,3 +1390,4 @@ def trafic1s(url):
   if json.loads(final.text)["status"] == "success":
       sleep(15)
       return json.loads(final.text)["url"]
+#print(link1s_net('http://link1s.net/tmg3UCAk'))

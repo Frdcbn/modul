@@ -40,13 +40,13 @@ def menu(banner,modul,modulesl):
     "19": "TIKIEARN",
     "20": "ALLFAUCET",
     "21": "BITMONK",
-    "22": "OSKUT",
-    "23": "LANDOFBITS",
-    "24": "COINSFARM",
-    "25": "CRYPTO2U",
-    "26": "JAMES-TRUSSY",
-    "27": "COINPAY-FAUCET",
-    "28": "EUROFAUCET_DE",
+    "22": "LANDOFBITS",
+    "23": "COINSFARM",
+    "24": "CRYPTO2U",
+    "25": "JAMES-TRUSSY",
+    "26": "COINPAY-FAUCET",
+    "27": "EUROFAUCET_DE",
+    "28": "TEFAUCET.ONLINE",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
@@ -143,31 +143,31 @@ def menu(banner,modul,modulesl):
       thread.start()
       thread.join()
     if select == "22":
-      thread = threading.Thread(target=modul.oskut, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "23":
       thread = threading.Thread(target=modul.landofbits, args=(modulesl,banner))
       thread.start()
       thread.join()
-    if select == "24":
+    if select == "23":
       thread = threading.Thread(target=modul.coinsfarm, args=(modulesl,banner))
       thread.start()
       thread.join()
-    if select == "25":
+    if select == "24":
       thread = threading.Thread(target=modul.crypto2u, args=(modulesl,banner))
       thread.start()
       thread.join()
-    if select == "26":
+    if select == "25":
       thread = threading.Thread(target=modul.james_trussy, args=(modulesl,banner))
       thread.start()
       thread.join()
-    if select == "27":
+    if select == "26":
       thread = threading.Thread(target=modul.coinpay_faucet, args=(modulesl,banner))
       thread.start()
       thread.join()
-    if select == "28":
+    if select == "27":
       thread = threading.Thread(target=modul.eurofaucet_de, args=(modulesl,banner))
+      thread.start()
+      thread.join()
+    if select == "28":
+      thread = threading.Thread(target=modul.tefaucet, args=(modulesl,banner))
       thread.start()
       thread.join()
     if select == "0":
