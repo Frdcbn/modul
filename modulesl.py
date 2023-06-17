@@ -1409,7 +1409,11 @@ def gain_lk(url):
   verif=curl.post(url_,data=data,headers={"referer":step3.url,"content-type":"application/x-www-form-urlencoded"},allow_redirects=False).headers['location']
   ref=step3.url
   for ulang in range(2):
-    verif1=curl.get(verif,headers={"referer":ref}).text.split('"')[1].split('"')[0]
+    verif1=curl.get(verif,headers={"referer":ref}).text
+    if ';google.navigateTo(parent,window,redirectUrl);})' in verif1:
+      verif1=verif1.split('content="0;url=')[1].split('"')[0]
+    else:
+      verif1=verif1.split('"')[1].split('"')[0]
     step1=curl.get(verif1,headers={"referer":verif})
    # print(step1.text)
     csrf=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
@@ -1417,6 +1421,7 @@ def gain_lk(url):
     url_=bs(step1.text,'html.parser').find('form',{'onkeydown':"return event.key !== 'Enter';"})['action']
     data=f"answer=2&csrf_token_name={csrf}"
     verif=curl.post(url_,data=data,headers={"referer":step3.url,"content-type":"application/x-www-form-urlencoded"},allow_redirects=False).headers['location']
+    #print(verif)
     ref=step1.url
   host=urlparse(verif).netloc
   final = curl.get(verif,headers={"referer":ref}).text
@@ -1432,3 +1437,4 @@ def gain_lk(url):
  except:
    return "failed to bypass"
    pass
+#print(gain_lk('https://gainl.ink/vqldW1'))

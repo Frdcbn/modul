@@ -3239,6 +3239,114 @@ def oskut(modulesl,banner):
                 if 'Success!' in reward.text:
                #   html: '0.00000009 BTC has been sent to your FaucetPay account!',
                   print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
+def cryptofuture(modulesl,banner):
+  system('clear')
+  def save_data(name):
+    try:
+        dir_path = f'data/{name}'
+        os.makedirs(dir_path, exist_ok=True)  # Membuat direktori jika belum ada
+
+        file_path = f'{dir_path}/{name}.json'
+        
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                email = data.get('email')
+        else:
+            email = input('Masukkan email mu > ')
+        
+        data = {
+            'email': email
+        }
+
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
+
+        return email
+    except FileNotFoundError:
+        email = input('Masukkan email mu > ')
+        
+        data = {
+            'email': email
+        }
+
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
+
+        return email
+  def load_data(name):
+    try:
+        file_path = f'data/{name}/{name}.json'
+        
+        if os.path.isfile(file_path):  # Memeriksa apakah file ada, bukan direktori
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                email = data.get('email')
+                return email
+        else:
+            return None
+    except FileNotFoundError:
+        return None
+  banner.banner('CRYPTOFUTURE')
+  cookies= load_data('cryptofuture')
+  if not os.path.exists("data/cryptofuture/cryptofuture.json"):
+    save_data('cryptofuture')
+    cryptofuture(modulesl,banner)
+  curl=requests.Session()
+  step1=curl.get('https://CryptoFuture.co.in/?r=25876')
+  fd=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  data=f"wallet={cookies}&csrf_token_name={fd}"
+  step2=curl.post('https://cryptofuture.co.in/auth/login',data=data,headers={"content-type":"application/x-www-form-urlencoded"})
+  if 'Login Success' in step2.text:
+    print(f'{putih1}[{hijau1} √ {putih1}] Login Success')
+    options = {
+    '1': 'LTC',
+    '2': 'BNB',
+    '3': 'BCH',
+    '4': 'DOGE',
+    '5': 'ETH',
+    '6': 'FEY',
+    '7': 'SOL',
+    '8': 'TRX',
+    '9': 'ZEC'
+    }
+    print('Pilihan kripto:')
+    for key, value in options.items():
+        print(f'{key}. {value}')
+    user_input = input('Pilih kripto yang diinginkan: ')
+    selected_crypto = options.get(user_input).lower()
+    system('clear')
+    banner.banner('CRYPTOFUTURE')
+    get_links=curl.get('https://cryptofuture.co.in/links/currency/'+selected_crypto)
+    gt=bs(get_links.text,'html.parser').find_all('div',{'class':'col-sm-6'})
+    for link in gt:
+      jumlah=int(link.find('span').text.split('/')[0])
+      name=link.find('h4').text
+      li=link.find('a',{'class':'btn btn-primary waves-effect waves-light'})['href']
+  #    print(name)
+  #    print(li)
+   #   print(jumlah)
+      services = {
+    #  'Clks': modulesl.clks_pro,
+   #   'Try2link': modulesl.try2,
+      'LinksFly': modulesl.linksfly,
+      'ShortsFly.me': modulesl.shortfly,
+      'Usalink': modulesl.usalink,
+     # 'Clk': modulesl.clksh,
+     # 'Owllink': modulesl.owlink
+      }
+      if name in services:
+        for ulang in range(jumlah):
+            url = curl.get(li,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+            answer = services[name](url)
+            if 'failed to bypass' in answer:
+                print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+            else:
+                reward = curl.get(answer)
+              #  print(reward.text)
+                if 'Success!' in reward.text:
+               #   html: '0.00000009 BTC has been sent to your FaucetPay account!',
+                  print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
 def endenfaucet(modulesl,banner):
   system('clear')
   def save_data(name):
@@ -3310,6 +3418,7 @@ def endenfaucet(modulesl,banner):
       if 'https://edenfaucet.com/links/currency/DOGE' in get_links:
         get_links=curl.get('https://edenfaucet.com/links/reopen',allow_redirects=False).headers['location']
       answer=modulesl.gain_lk(get_links)
+      print(answer)
       if 'failed to bypass' in answer:
         pass
       else:
