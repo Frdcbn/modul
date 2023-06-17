@@ -1390,4 +1390,45 @@ def trafic1s(url):
   if json.loads(final.text)["status"] == "success":
       sleep(15)
       return json.loads(final.text)["url"]
-#print(link1s_net('http://link1s.net/tmg3UCAk'))
+def gain_lk(url):
+ try:
+  curl=requests.Session()
+  ua={
+    "User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36",
+    "x-requested-with":"mark.via.gp"
+   }
+  step1=curl.get(url).text.split('"')[1].split('"')[0]
+  #print(step1)
+  step2=curl.get(step1,headers={"referer":url}).text.split('url=')[1].split('"')[0]
+  step3=curl.get(step2,headers={"referer":step2})
+  ve=curl.get(f'https://{urlparse(step3.url).netloc}/blog/blog/validate',headers={"referer":step3.url})
+  csrf=bs(step3.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  sleep(15)
+  url_=bs(step3.text,'html.parser').find('form',{'onkeydown':"return event.key !== 'Enter';"})['action']
+  data=f"answer=2&csrf_token_name={csrf}"
+  verif=curl.post(url_,data=data,headers={"referer":step3.url,"content-type":"application/x-www-form-urlencoded"},allow_redirects=False).headers['location']
+  ref=step3.url
+  for ulang in range(2):
+    verif1=curl.get(verif,headers={"referer":ref}).text.split('"')[1].split('"')[0]
+    step1=curl.get(verif1,headers={"referer":verif})
+   # print(step1.text)
+    csrf=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+    sleep(15)
+    url_=bs(step1.text,'html.parser').find('form',{'onkeydown':"return event.key !== 'Enter';"})['action']
+    data=f"answer=2&csrf_token_name={csrf}"
+    verif=curl.post(url_,data=data,headers={"referer":step3.url,"content-type":"application/x-www-form-urlencoded"},allow_redirects=False).headers['location']
+    ref=step1.url
+  host=urlparse(verif).netloc
+  final = curl.get(verif,headers={"referer":ref}).text
+  sleep(5)
+  bs4 = BeautifulSoup(final, "html.parser")
+  inputs = bs4.find_all("input")
+  data = urlencode({input.get("name"): input.get("value") for input in inputs})
+  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
+  if get_url['status'] == 'success':
+    u= curl.get(get_url["url"],headers={"referer":verif},allow_redirects=False).headers['location']
+    sleep(15)
+    return u
+ except:
+   return "failed to bypass"
+   pass

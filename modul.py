@@ -3239,4 +3239,81 @@ def oskut(modulesl,banner):
                 if 'Success!' in reward.text:
                #   html: '0.00000009 BTC has been sent to your FaucetPay account!',
                   print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
-      
+def endenfaucet(modulesl,banner):
+  system('clear')
+  def save_data(name):
+    try:
+        dir_path = f'data/{name}'
+        os.makedirs(dir_path, exist_ok=True)  # Membuat direktori jika belum ada
+
+        file_path = f'{dir_path}/{name}.json'
+        
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                email = data.get('email')
+        else:
+            email = input('Masukkan email mu > ')
+        
+        data = {
+            'email': email
+        }
+
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
+
+        return email
+    except FileNotFoundError:
+        email = input('Masukkan email mu > ')
+        
+        data = {
+            'email': email
+        }
+
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
+
+        return email
+  def load_data(name):
+    try:
+        file_path = f'data/{name}/{name}.json'
+        
+        if os.path.isfile(file_path):  # Memeriksa apakah file ada, bukan direktori
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                email = data.get('email')
+                return email
+        else:
+            return None
+    except FileNotFoundError:
+        return None
+  banner.banner('EDENFAUCET')
+  cookies= load_data('edenfaucet')
+ # print(cookies)
+  if not os.path.exists("data/edenfaucet/edenfaucet.json"):
+    save_data('edenfaucet')
+    endenfaucet(modulesl,banner)
+  curl=requests.Session()
+  step1=curl.get('https://edenfaucet.com/?r=170')
+  fd=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  data=f"wallet={cookies}&csrf_token_name={fd}"
+  step2=curl.post('https://edenfaucet.com/auth/login',data=data,headers={"content-type":"application/x-www-form-urlencoded"})
+  if 'Login Success' in step2.text:
+    print(f'{putih1}[{hijau1} √ {putih1}] Login Success')
+    get_links=curl.get('https://edenfaucet.com/links/currency/doge')
+  #  print(get_links.text)
+    link=bs(get_links.text,'html.parser')
+    jumlah=int(link.find('span',{'class':'badge badge-info'}).text.split('/')[0])
+   # print(jumlah)
+    for ulang in range(jumlah):
+      get_links=curl.get('https://edenfaucet.com/links/go/1/DOGE',allow_redirects=False).headers['location']
+      if 'https://edenfaucet.com/links/currency/DOGE' in get_links:
+        get_links=curl.get('https://edenfaucet.com/links/reopen',allow_redirects=False).headers['location']
+      answer=modulesl.gain_lk(get_links)
+      if 'failed to bypass' in answer:
+        pass
+      else:
+        reward=curl.get(answer)
+      #  print(reward.text)
+        if 'Success!' in reward.text:
+            print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
