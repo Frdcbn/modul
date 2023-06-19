@@ -50,6 +50,8 @@ def menu(banner,modul,modulesl):
     "29": "OSKUT",
     "30": "EDENFAUCET",
     "31": "CRYPTOFUTURE",
+    "32": "FREECLAIMFAUCET",
+    "33": "CRYPTOGENZ",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
@@ -183,6 +185,14 @@ def menu(banner,modul,modulesl):
       thread.join()
     if select == "31":
       thread = threading.Thread(target=modul.cryptofuture, args=(modulesl,banner))
+      thread.start()
+      thread.join()
+    if select == "32":
+      thread = threading.Thread(target=modul.freeclaimfaucet, args=(modulesl,banner))
+      thread.start()
+      thread.join()
+    if select == "33":
+      thread = threading.Thread(target=modul.cryptogenz, args=(modulesl,banner))
       thread.start()
       thread.join()
     if select == "0":

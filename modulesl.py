@@ -1415,6 +1415,8 @@ def gain_lk(url):
     else:
       verif1=verif1.split('"')[1].split('"')[0]
     step1=curl.get(verif1,headers={"referer":verif})
+    if 'Halaman sebelumnya berusaha untuk mengarahkan Anda ke' in step1.text:
+      step1=curl.get(bs(step1.text,'html.parser').find('a')['href'],headers={"referer":verif})
    # print(step1.text)
     csrf=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
     sleep(15)
@@ -1437,4 +1439,4 @@ def gain_lk(url):
  except:
    return "failed to bypass"
    pass
-#print(gain_lk('https://gainl.ink/vqldW1'))
+#print(gain_lk('https://gainl.ink/r4cioER'))
