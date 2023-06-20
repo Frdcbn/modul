@@ -52,13 +52,13 @@ def menu(banner,modul,modulesl):
     "31": "CRYPTOFUTURE",
     "32": "FREECLAIMFAUCET",
     "33": "CRYPTOGENZ",
- #   "34": "CCTIP",
+   # "34": "CCTIP",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
     for key, value in menu_dict.items():
         print(f"{putih1}[{hijau1}{key}{putih1}]{kuning1}.{value} {putih1}( {hijau1}last run {putih1}: {hijau1}{convrt(data[key])}{putih1})")
-       # time.sleep(0.1)
+        time.sleep(0.1)
 
     # Meminta input pengguna
     select = input(putih1 + "select : ")
@@ -109,7 +109,7 @@ def menu(banner,modul,modulesl):
             "31": modul.cryptofuture,
             "32": modul.freeclaimfaucet,
             "33": modul.cryptogenz,
-           # "34": modul.bot_tele
+         #   "34": modul.bot_tele
         }
     
         if select in thread_map:
