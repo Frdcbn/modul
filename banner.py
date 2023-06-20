@@ -2,12 +2,11 @@ import subprocess
 import geocoder
 import platform
 
-hijau1 = "\033[1;92m"  # Terang
-kuning1 = "\033[1;93m"  # Terang
-putih1 = "\033[1;97m"  # Terang
-merah1 = "\033[1;91m"  # Terang
-biru1 = "\033[1;94m"  # Terang
-
+hijau1 = "\033[1;92m"#Terang
+kuning1 = "\033[1;93m"#Terang
+putih1 = "\033[1;97m"#Terang
+merah1 = "\033[1;91m"#Terang
+biru1 = "\033[1;94m"#Terang
 def get_system_info():
     system_info = {}
     system_info['OS'] = platform.system()
@@ -75,22 +74,22 @@ def banner(name):
 {biru1}╔╦╗╦ ╦╦ ╔╦╗╦╔═╗╦  ╔═╗  ╔═╗╔═╗╦═╗╦╔═╗╔╦╗
 {hijau1}║║║║ ║║  ║ ║╠═╝║  ║╣   ╚═╗║  ╠╦╝║╠═╝ ║ 
 {merah1}╩ ╩╚═╝╩═╝╩ ╩╩  ╩═╝╚═╝  ╚═╝╚═╝╩╚═╩╩   ╩ 
-{putih1} : MR.BADUT      : t.me/MRDEMONSCRIPT      : Python""")
+{merah1} {putih1}: {hijau1}MR.BADUT     {merah1} {putih1}: {hijau1}t.me/MRDEMONSCRIPT     {merah1} {putih1}: {hijau1}Python""")
     print(putih1 + " Your information ".center(56, "•"))
     location_info = get_location_info()
     system_info = get_system_info()
     memory_info = get_memory_info()
     uptime = get_uptime()
-    print(hijau1 + " IP " + putih1 + ":" + biru1, location_info.ip)
-    print(hijau1 + " COUNTRY " + putih1 + ":" + biru1, location_info.country)
-    print(hijau1 + " PROVINCE " + putih1 + ":" + biru1, location_info.state)
-    print(hijau1 + " CITY " + putih1 + ":" + biru1, location_info.city)
-    print(hijau1 + " COORDINATE " + putih1 + ":" + biru1, location_info.latlng)
-    print(hijau1 + " DEVICE OS " + putih1 + ":" + biru1, system_info['OS'], system_info['OS Version'])
-    print(hijau1 + " ARCHITECTURE " + putih1 + ":" + biru1, system_info['Machine'])
-    print(hijau1 + " VERSION " + putih1 + ":" + biru1, platform.uname().release)
-    print(hijau1 + " ACTIVE " + putih1 + ":" + biru1, uptime)
-    print(hijau1 + " RAM " + putih1 + ":" + biru1, memory_info['Used Memory'], "/", memory_info['Total Memory'])
+    print(merah1 + ""+hijau1+" IP " + putih1 + ":" + kuning1, location_info.ip)
+    print(merah1 + ""+hijau1+" COUNTRY " + putih1 + ":" + kuning1, location_info.country)
+    print(merah1 + ""+hijau1+" PROVINCE " + putih1 + ":" + kuning1, location_info.state)
+    print(merah1 + ""+hijau1+" CITY " + putih1 + ":" + kuning1, location_info.city)
+    print(merah1 + ""+hijau1+" COORDINATE " + putih1 + ":" + kuning1, location_info.latlng)
+    print(merah1 + ""+hijau1+" DEVICE OS " + putih1 + ":" + kuning1, system_info['OS'], system_info['OS Version'])
+    print(merah1 + ""+hijau1+" ARCHITECTURE " + putih1 + ":" + kuning1, system_info['Machine'])
+    print(merah1 + ""+hijau1+" VERSION " + putih1 + ":" + kuning1, platform.uname().release)
+    print(merah1 + ""+hijau1+" ACTIVE " + putih1 + ":" + kuning1, uptime)
+    print(merah1 + ""+hijau1+" RAM " + putih1 + ":" + kuning1, memory_info['Used Memory'], "/", memory_info['Total Memory'])
     print(putih1 + "".center(56, "•"))
 
-banner("System Information")
+#banner("System Information")

@@ -1408,7 +1408,7 @@ def gain_lk(url):
   data=f"answer=2&csrf_token_name={csrf}"
   verif=curl.post(url_,data=data,headers={"referer":step3.url,"content-type":"application/x-www-form-urlencoded"},allow_redirects=False).headers['location']
   ref=step3.url
-  for ulang in range(2):
+  for ulang in range(1):
     verif1=curl.get(verif,headers={"referer":ref}).text
     if ';google.navigateTo(parent,window,redirectUrl);})' in verif1:
       verif1=verif1.split('content="0;url=')[1].split('"')[0]

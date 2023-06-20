@@ -56,154 +56,65 @@ def menu(banner,modul,modulesl):
     data=load_data(menu_dict)
     # Cetak daftar menu
     for key, value in menu_dict.items():
-        print(f"{putih1}[{hijau1}{key}{putih1}]{biru1}.{value} (waktu: {convrt(data[key])})")
+        print(f"{putih1}[{hijau1}{key}{putih1}]{kuning1}.{value} {putih1}( {hijau1}last run {putih1}: {hijau1}{convrt(data[key])}{putih1})")
+        time.sleep(0.1)
 
     # Meminta input pengguna
     select = input(putih1 + "select : ")
     waktu_terakhir_dipilih = time.time()
     save(waktu_terakhir_dipilih, select, menu_dict, data)
 
-    if select == "1":
-      thread = threading.Thread(target=modul.btccanyon, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "2":
-      thread = threading.Thread(target=modul.coingax, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "3":
-      thread = threading.Thread(target=modul.claimsatoshi, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "4":
-      thread = threading.Thread(target=modul.coinfola, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "5":
-      thread = threading.Thread(target=modul.claimlite, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "6":
-      thread = threading.Thread(target=modul.simpleads, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "8":
-      thread = threading.Thread(target=modul.earnsolana, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "7":
-      thread = threading.Thread(target=modul.adhives, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "9":
-      thread = threading.Thread(target=modul.claim_ro, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "10":
-      thread = threading.Thread(target=modul.btcadspace, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "11":
-      thread = threading.Thread(target=modul.rushbitcoin, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "12":
-      thread = threading.Thread(target=modul.claimbits, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "13":
-      thread = threading.Thread(target=modul.ltchunt, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "14":
-      thread = threading.Thread(target=modul.faucetcrypto_net, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "15":
-      thread = threading.Thread(target=modul.faucet4u, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "16":
-      thread = threading.Thread(target=modul.nokofaucet, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "17":
-      thread = threading.Thread(target=modul.faucetspeedbtc, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "18":
-      thread = threading.Thread(target=modul.coinzask, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "19":
-      thread = threading.Thread(target=modul.tikiearn, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "20":
-      thread = threading.Thread(target=modul.allfaucet, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "21":
-      thread = threading.Thread(target=modul.bitmonk, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "22":
-      thread = threading.Thread(target=modul.landofbits, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "23":
-      thread = threading.Thread(target=modul.coinsfarm, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "24":
-      thread = threading.Thread(target=modul.crypto2u, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "25":
-      thread = threading.Thread(target=modul.james_trussy, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "26":
-      thread = threading.Thread(target=modul.coinpay_faucet, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "27":
-      thread = threading.Thread(target=modul.eurofaucet_de, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "28":
-      thread = threading.Thread(target=modul.tefaucet, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "29":
-      thread = threading.Thread(target=modul.oskut, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "30":
-      thread = threading.Thread(target=modul.endenfaucet, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "31":
-      thread = threading.Thread(target=modul.cryptofuture, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "32":
-      thread = threading.Thread(target=modul.freeclaimfaucet, args=(modulesl,banner))
-      thread.start()
-      thread.join()
-    if select == "33":
-      thread = threading.Thread(target=modul.cryptogenz, args=(modulesl,banner))
-      thread.start()
-      thread.join()
     if select == "0":
-      print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
-      sel=input(putih1+"select : ")
-      if sel == "0":
-        api_key=input("Api key captcha ai > ")
-        with open("ckey.txt","w") as e:
-          e.write(api_key)
-        menu()
-      exit()
+        print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
+        sel = input(putih1 + "select : ")
+        if sel == "0":
+            api_key = input("Api key captcha ai > ")
+            with open("ckey.txt", "w") as e:
+                e.write(api_key)
+            menu()
+        exit()
+    else:
+        thread_map = {
+            "1": modul.btccanyon,
+            "2": modul.coingax,
+            "3": modul.claimsatoshi,
+            "4": modul.coinfola,
+            "5": modul.claimlite,
+            "6": modul.simpleads,
+            "7": modul.adhives,
+            "8": modul.earnsolana,
+            "9": modul.claim_ro,
+            "10": modul.btcadspace,
+            "11": modul.rushbitcoin,
+            "12": modul.claimbits,
+            "13": modul.ltchunt,
+            "14": modul.faucetcrypto_net,
+            "15": modul.faucet4u,
+            "16": modul.nokofaucet,
+            "17": modul.faucetspeedbtc,
+            "18": modul.coinzask,
+            "19": modul.tikiearn,
+            "20": modul.allfaucet,
+            "21": modul.bitmonk,
+            "22": modul.landofbits,
+            "23": modul.coinsfarm,
+            "24": modul.crypto2u,
+            "25": modul.james_trussy,
+            "26": modul.coinpay_faucet,
+            "27": modul.eurofaucet_de,
+            "28": modul.tefaucet,
+            "29": modul.oskut,
+            "30": modul.endenfaucet,
+            "31": modul.cryptofuture,
+            "32": modul.freeclaimfaucet,
+            "33": modul.cryptogenz
+        }
+    
+        if select in thread_map:
+            thread = threading.Thread(target=thread_map[select], args=(modulesl, banner))
+            thread.start()
+            thread.join()
+
 
 def save(waktu_terakhir_dipilih, select, menu_dict, data):
     file_path = "data.json"
