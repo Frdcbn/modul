@@ -2,13 +2,14 @@ import requests,json,time
 from os import system
 import shutil,os
 from time import sleep
+import random
 from bs4 import BeautifulSoup as bs
 from http.cookies import SimpleCookie
 from urllib.parse import urlparse,urlencode
 from tqdm import tqdm
 from pyfiglet import figlet_format 
 import pathlib
-#import modulesl
+from telethon import TelegramClient, sync, events
 def animasi(menit):
   detik = menit * 60
   pattern_list = list("▁▃▅▇▅▃▁") * detik
@@ -1591,7 +1592,7 @@ def simpleads(modulesl,banner):
                 y=y.split(' clicks remaining')[0].replace(' ','')
               if 'click remaining' in y:
                 y=y.split(' click remaining')[0].replace(' ','')
-              link=i.find('a',{'class':'card shadow text-decoration-none text-dark'})['href']
+              link=i.find('a',{'class':'card shadow text-decoration-none'})['href']
               for ulang in range(int(y)):
                   get_links = curl.get('https://simpleads.io' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
                   print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
@@ -1732,6 +1733,7 @@ def coinsfarm(modulesl,banner):
   for i in gt:
     try:
       name = i.text.strip().splitlines()[0]
+  #    print(name)
       for provider in providers:
           if provider in name:
               y=[i for i in i.text.strip().splitlines() if i][2]
@@ -1739,7 +1741,7 @@ def coinsfarm(modulesl,banner):
                 y=y.split(' clicks remaining')[0].replace(' ','')
               if 'click remaining' in y:
                 y=y.split(' click remaining')[0].replace(' ','')
-              link=i.find('a',{'class':'card shadow text-decoration-none text-dark'})['href']
+              link=i.find('a',{'class':'card shadow text-decoration-none'})['href']
               for ulang in range(int(y)):
                   get_links = curl.get('https://coinsfarmers.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
                   print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
