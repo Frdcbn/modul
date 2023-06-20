@@ -19,6 +19,80 @@ def animasi(menit):
       print(output, end='\r')
       time.sleep(1)
       detik -= 1
+def bot_tele(modulesl, banner):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    banner.banner('BOT CCTIP')
+    api_id = 9209038
+    api_hash = '82d6f5d828fc5f5942e29bdfc1e01d14'
+    nomor = "+6285709765699"
+    
+    async def handle_new_message(event):
+      message = event.message
+      # Process the new message as needed
+      pesan=message.text
+      print(pesan)
+      print(message)
+      id_tip=["962775809","6285122310","5796879502"]
+      ucapan_terimakasih = [
+    "Wah, hoki banget! Makasih ya!",
+    "Hahaha, makasih banget, bro! 🙏",
+    "Wah, terima kasih banyak, bro!",
+    "Makasih, nih! Lumayan buat jajan.",
+    "Gas, bro! Makasih lagi-lagi!",
+    "Anjay, makasih banget, bro!",
+    "Makasih banyak, bro! Nggak nyangka dapat ini.",
+    "Wah, ciamik! Terima kasih ya!",
+    "Makasih banyak, bro! Jadi pengen hantam budi.",
+    "Horee, makasih banget, bro!",
+    "Wah, mantap! Terima kasih ya, bro!",
+    "Makasih, bro! Bikin senyum sepanjang hari.",
+    "Waduh, makin keren aja! Terima kasih, bro!",
+    "Makasih, bro! Bener-bener bikin hari lebih cerah.",
+    "Wah, keren abis! Terima kasih banget!",
+    "Makasih, bro! Nggak bisa ngungkapin rasa terima kasihku.",
+    "Wah, nggak nyangka dapat ini! Makasih banyak, bro!",
+    "Makasih, bro! Jadi makin semangat deh!",
+    "Wuih, keren abis! Terima kasih, bro!",
+    "Makasih banyak, bro! Semoga berkah selalu.",
+    "wih hoki co makasih yah","🤣🤣 makasih bg🙏🙏","wah makasih bg","mayan buat jajan","gas bg lagi²","anjay makasih bg"
+  ]
+    #  ucapan_terimakasih.extend(ucap)
+      ucapan = random.choice(ucapan_terimakasih)
+      if 'pengguna mengumpulkan hujan Anda.' in message.text:
+        await message.reply('wih gw mana cu')
+      if message.mentioned:
+          # Memeriksa apakah akun Anda di-tag dalam pesan
+          if str(message.from_id.user_id) in id_tip:
+             sleep(5)
+             await message.reply(ucapan)  # Merespons dengan pesan "Hai juga!"
+      if 'Membuat undian di ' in message.text:
+       if str(message.from_id.user_id) in id_tip:
+        # if message.mentioned:
+           sleep(1)
+           pesan=pesan.split("Send ")[1].split(" to")[0]
+           await message.reply(pesan)
+      if 'Created an airdrop in ' in message.text:
+       if str(message.from_id.user_id) in id_tip:
+      #   if message.mentioned:
+           sleep(1)
+           pesan=pesan.split("Send ")[1].split(" to")[0]
+           await message.reply(pesan)
+      if 'Created a draw in ' in message.text:
+       if str(message.from_id.user_id) in id_tip:
+     #    if message.mentioned:
+           sleep(1)
+           pesan=pesan.split("Send ")[1].split(" to")[0]
+           await message.reply(pesan)
+       #  else:
+      await client.send_read_acknowledge(message.to_id, max_id=message.id)
+    with TelegramClient('session/' + nomor, api_id, api_hash) as client:
+        @client.on(events.NewMessage(chats=client.get_dialogs()))
+        async def main(event):
+            await handle_new_message(event)
+
+        client.start()
+        client.run_until_disconnected()
+  
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
