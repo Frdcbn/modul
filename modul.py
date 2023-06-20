@@ -8,6 +8,7 @@ from urllib.parse import urlparse,urlencode
 from tqdm import tqdm
 from pyfiglet import figlet_format 
 import pathlib
+#import modulesl
 def animasi(menit):
   detik = menit * 60
   pattern_list = list("▁▃▅▇▅▃▁") * detik
@@ -81,7 +82,7 @@ def load_data(name):
       except FileNotFoundError:
           return None, None
 def btccanyon(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner("BTCCANYON")
   data_control('btccanyon')
   def cek():
@@ -264,7 +265,7 @@ def btccanyon(modulesl,banner):
       for i in tqdm (range (int(600)), leave=False,desc="Please wait..."):
             time.sleep(1)
 def claimlite(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner("CLAIMLITE")
   data_control('claimlite')
   def cek():
@@ -434,7 +435,7 @@ def claimlite(modulesl,banner):
             time.sleep(1)
             pass
 def rushbitcoin(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner("RUSHBITCOIN")
   data_control('rushbitcoin')
   def cek():
@@ -605,7 +606,7 @@ def rushbitcoin(modulesl,banner):
             time.sleep(1)
             pass
 def claimbits(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   nama_host="claimbits"
   host="claimbits.net"
   banner.banner(nama_host.upper())
@@ -824,7 +825,7 @@ def claimbits(modulesl,banner):
      save_data(nama_host)
      claimbits(modulesl,banner)
 def ltchunt(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   nama_host="ltchunt"
   host="ltchunt.com"
   banner.banner(nama_host.upper())
@@ -1022,7 +1023,7 @@ def ltchunt(modulesl,banner):
             time.sleep(1)
             pass
 def coinzask(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   nama_host="coinzask"
   host="coinzsack.com"
   banner.banner(nama_host.upper())
@@ -1202,7 +1203,7 @@ def coinzask(modulesl,banner):
             time.sleep(1)
             pass
 def coingax(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coingax')
   banner.banner('COINGAX')
   cookies, ugentmu = load_data('coingax')
@@ -1270,7 +1271,7 @@ def coingax(modulesl,banner):
      pass
   exit()
 def crypto2u(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('crypto2u')
   banner.banner('CRYPTO2U')
   cookies, ugentmu = load_data('crypto2u')
@@ -1333,7 +1334,7 @@ def crypto2u(modulesl,banner):
           pass
   exit()
 def claimsatoshi(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('claimsatoshi')
   banner.banner('CLAIMSATOSHI')
   cookies, ugentmu = load_data('claimsatoshi')
@@ -1473,7 +1474,7 @@ def claimsatoshi(modulesl,banner):
     animasi(5)
   exit()
 def coinfola(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinfola')
   banner.banner('COINFOLA')
   cookies, ugentmu = load_data('coinfola')
@@ -1548,7 +1549,7 @@ def coinfola(modulesl,banner):
       pass
   exit()
 def simpleads(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('simpleads')
   banner.banner('SIMPLEADS')
   cookies, ugentmu = load_data('simpleads')
@@ -1621,7 +1622,7 @@ def simpleads(modulesl,banner):
      simpleads(modulesl,banner)
   exit()
 def adhives(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('adhives')
   banner.banner('ADHIVES')
   cookies, ugentmu = load_data('adhives')
@@ -1685,7 +1686,7 @@ def adhives(modulesl,banner):
       pass
   exit()
 def coinsfarm(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinsfarmers')
   banner.banner('COINSFARMERS')
   cookies, ugentmu = load_data('coinsfarmers')
@@ -1754,7 +1755,7 @@ def coinsfarm(modulesl,banner):
       pass
   exit()
 def earnsolana(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('earnsolana')
   banner.banner('EARNSOLANA')
   cookies, ugentmu = load_data('earnsolana')
@@ -1845,7 +1846,7 @@ def earnsolana(modulesl,banner):
      exit()
   exit()
 def cryptogenz(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('cryptogenz')
   banner.banner('CRYPTOGENZ')
   cookies, ugentmu = load_data('cryptogenz')
@@ -1910,7 +1911,7 @@ def cryptogenz(modulesl,banner):
     "Owllink": modulesl.owlink,
     "Cuty": modulesl.cuty_io,
     "Short.i": modulesl.shorti_io
-}
+      }
         
         if name in services:
             for ulang in range(jumlah):
@@ -1940,7 +1941,7 @@ def cryptogenz(modulesl,banner):
      exit()
   exit()
 def coinpay_faucet(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinpay-faucet')
   banner.banner('COINPAY-FAUCET')
   cookies, ugentmu = load_data('coinpay-faucet')
@@ -2022,7 +2023,7 @@ def coinpay_faucet(modulesl,banner):
      break
   exit()
 def james_trussy(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('james-trussy')
   banner.banner('JAMES-TRUSSY')
   cookies, ugentmu = load_data('james-trussy')
@@ -2133,7 +2134,7 @@ def james_trussy(modulesl,banner):
       gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
 def freeclaimfaucet(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('freeclaimfaucet')
   banner.banner('freeclaimfaucet')
   cookies, ugentmu = load_data('freeclaimfaucet')
@@ -2235,7 +2236,7 @@ def freeclaimfaucet(modulesl,banner):
       gas=curl.post("https://freeclaimfaucet.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
 def eurofaucet_de(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('eurofaucet.de')
   banner.banner('EUROFAUCET.DE')
   cookies, ugentmu = load_data('eurofaucet.de')
@@ -2325,7 +2326,7 @@ def eurofaucet_de(modulesl,banner):
      break
   exit()
 def tefaucet(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('tefaucet.online')
   banner.banner('TEFAUCET.ONLINE')
   cookies, ugentmu = load_data('tefaucet.online')
@@ -2477,7 +2478,7 @@ def tefaucet(modulesl,banner):
     sleep(5)
   exit()
 def bitmonk(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('bitmonk')
   banner.banner('BITMONK')
   cookies, ugentmu = load_data('bitmonk')
@@ -2579,7 +2580,7 @@ def bitmonk(modulesl,banner):
  
   exit()
 def claim_ro(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('claim_ro')
   banner.banner('CLAIM_RO')
   cookies, ugentmu = load_data('claim_ro')
@@ -2662,7 +2663,7 @@ def claim_ro(modulesl,banner):
         pass
   exit()
 def faucetcrypto_net(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('faucetcrypto_net')
   banner.banner('FAUCETCRYPTO_NET')
   cookies, ugentmu = load_data('faucetcrypto_net')
@@ -2778,7 +2779,7 @@ def faucetcrypto_net(modulesl,banner):
      break
   exit()
 def faucetspeedbtc(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('faucetspeedbtc')
   banner.banner('FAUCETSPEEDBTC')
   cookies, ugentmu = load_data('faucetspeedbtc')
@@ -2873,7 +2874,7 @@ def faucetspeedbtc(modulesl,banner):
      break
   exit()
 def faucet4u(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('faucet4u')
   banner.banner('FAUCET4U')
   cookies, ugentmu = load_data('faucet4u')
@@ -2955,7 +2956,7 @@ def faucet4u(modulesl,banner):
         pass
   exit()
 def tikiearn(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('tikiearn')
   banner.banner('TIKIEARN')
   cookies, ugentmu = load_data('tikiearn')
@@ -3047,7 +3048,7 @@ def tikiearn(modulesl,banner):
         pass
   exit()
 def allfaucet(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('allfaucet')
   banner.banner('ALLFAUCET')
   cookies, ugentmu = load_data('allfaucet')
@@ -3153,7 +3154,7 @@ def allfaucet(modulesl,banner):
      break
   exit()
 def btcadspace(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('btcadspace')
   banner.banner('BTCADSPACE')
   cookies, ugentmu = load_data('btcadspace')
@@ -3247,7 +3248,7 @@ def nokofaucet(modulesl,banner):
           return auth, id_claim
       except FileNotFoundError:
           return None, None
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('nokofaucet')
   banner.banner('NOKOFAUCET')
   auth, id_claim = load_datan('nokofaucet')
@@ -3306,7 +3307,7 @@ def nokofaucet(modulesl,banner):
       animasi(5)
   exit()
 def landofbits(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   data_control('landofbits')
   banner.banner('LANDOFBITS')
   cookies, ugentmu = load_data('landofbits')
@@ -3364,7 +3365,7 @@ def landofbits(modulesl,banner):
      pass
   exit()
 def oskut(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   def save_datan(name):
     try:
         with open(f'data/{name}/{name}.json', 'r') as file:
@@ -3442,7 +3443,7 @@ def oskut(modulesl,banner):
                #   html: '0.00000009 BTC has been sent to your FaucetPay account!',
                   print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
 def cryptofuture(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   def save_data(name):
     try:
         dir_path = f'data/{name}'
@@ -3517,7 +3518,7 @@ def cryptofuture(modulesl,banner):
         print(f'{key}. {value}')
     user_input = input('Pilih kripto yang diinginkan: ')
     selected_crypto = options.get(user_input).lower()
-    system('clear')
+    os.system('cls' if os.name == 'nt' else 'clear')
     banner.banner('CRYPTOFUTURE')
     get_links=curl.get('https://cryptofuture.co.in/links/currency/'+selected_crypto)
     gt=bs(get_links.text,'html.parser').find_all('div',{'class':'col-sm-6'})
@@ -3550,7 +3551,7 @@ def cryptofuture(modulesl,banner):
                #   html: '0.00000009 BTC has been sent to your FaucetPay account!',
                   print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
 def endenfaucet(modulesl,banner):
-  system('clear')
+  os.system('cls' if os.name == 'nt' else 'clear')
   def save_data(name):
     try:
         dir_path = f'data/{name}'

@@ -18,26 +18,51 @@ def get_system_info():
     return system_info
 
 def get_memory_info():
-    memory_info = {}
-    try:
-        output = subprocess.check_output(['free', '-h']).decode('utf-8')
-        lines = output.splitlines()
+  memory_info = {}
+  system = platform.system()
+  try:
+    if system == 'Linux' or system == 'Darwin':  # Linux or macOS
+        try:
+            output = subprocess.check_output(['free', '-h']).decode('utf-8')
+            lines = output.splitlines()
 
-        total_memory = lines[1].split()[1]
-        used_memory = lines[1].split()[2]
-        memory_info['Total Memory'] = total_memory
-        memory_info['Used Memory'] = used_memory
-    except subprocess.CalledProcessError:
+            total_memory = lines[1].split()[1]
+            used_memory = lines[1].split()[2]
+            memory_info['Total Memory'] = total_memory
+            memory_info['Used Memory'] = used_memory
+        except subprocess.CalledProcessError:
+            memory_info['Total Memory'] = 'N/A'
+            memory_info['Used Memory'] = 'N/A'
+    elif system == 'Windows':  # Windows
+        try:
+            output = subprocess.check_output(['wmic', 'OS', 'get', 'TotalVisibleMemorySize,FreePhysicalMemory', '/Value']).decode('utf-8')
+            lines = output.strip().split('\n')
+
+            total_memory = int(lines[0].split('=')[1]) // 1024  # Convert to GB
+            used_memory = (int(lines[1].split('=')[1]) // 1024)  # Convert to GB
+            memory_info['Total Memory'] = f"{total_memory} GB"
+            memory_info['Used Memory'] = f"{used_memory} GB"
+        except subprocess.CalledProcessError:
+            memory_info['Total Memory'] = 'N/A'
+            memory_info['Used Memory'] = 'N/A'
+    else:
         memory_info['Total Memory'] = 'N/A'
         memory_info['Used Memory'] = 'N/A'
 
     return memory_info
+  except Exception as e:
+    memory_info['Total Memory'] = 'N/A'
+    memory_info['Used Memory'] = 'N/A'
+    return memory_info
 
 def get_uptime():
-    try:
-        output = subprocess.check_output(['uptime', '-p']).decode('utf-8').strip()
-        return output
-    except subprocess.CalledProcessError:
+    if platform.system() == 'Linux':
+        try:
+            output = subprocess.check_output(['uptime', '-p']).decode('utf-8').strip()
+            return output
+        except subprocess.CalledProcessError:
+            return 'N/A'
+    else:
         return 'N/A'
 
 def get_location_info():
@@ -69,4 +94,3 @@ def banner(name):
     print(putih1 + "".center(56, "•"))
 
 #banner("System Information")
-
