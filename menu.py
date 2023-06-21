@@ -52,7 +52,7 @@ def menu(banner,modul,modulesl):
     "31": "CRYPTOFUTURE",
     "32": "FREECLAIMFAUCET",
     "33": "CRYPTOGENZ",
-   # "34": "CCTIP",
+    "34": "CCTIP",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
@@ -109,10 +109,29 @@ def menu(banner,modul,modulesl):
             "31": modul.cryptofuture,
             "32": modul.freeclaimfaucet,
             "33": modul.cryptogenz,
-         #   "34": modul.bot_tele
+            "34": modul.bot_tele
         }
     
         if select in thread_map:
+            if '34' in select:
+              print(f"{putih1}[{hijau1}1{putih1}]{kuning1}.Run bot ")
+              print(f"{putih1}[{hijau1}2{putih1}]{kuning1}.Settings kata ")
+              pilih=input(putih1+'Select : ')
+              if pilih=="1":
+                modul.bot_tele(modulesl,banner)
+              if pilih == "2":
+                kata=input("masukan kata pisahkan dengan koma (misal aja ini mah,nah ini yang kedua) : ")
+                nama_file = "data.txt"
+                if not os.path.exists(nama_file):
+                    with open(nama_file, "w") as file:
+                      for huruf in kata.split(","):
+                        file.write(huruf + '\n')
+                else:
+                  with open(nama_file, 'a') as file:
+                    for data in kata:
+                        file.write(data + '\n')
+
+            else:
               thread = threading.Thread(target=thread_map[select], args=(modulesl, banner))
               thread.start()
               thread.join()
