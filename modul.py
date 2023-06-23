@@ -1,4 +1,4 @@
-import requests,json,time
+import requests,json,time,asyncio
 from os import system
 import shutil,os
 from time import sleep
@@ -13,7 +13,7 @@ from telethon import TelegramClient, sync, events
 def random_sleep():
     # Menghasilkan waktu sleep acak antara 5 hingga 35 detik
     sleep_time = random.randint(3, 7)
-    time.sleep(sleep_time)
+    return sleep_time
 def animasi(menit):
   detik = menit * 60
   pattern_list = list("▁▃▅▇▅▃▁") * detik
@@ -37,81 +37,80 @@ def bot_tele(modulesl, banner):
       id_tip=["962775809","6285122310","5796879502","1380459388","6143654908","5311716983"]
       ucapan_terimakasih = open("data.txt").read().splitlines()
       ucapan = random.choice(ucapan_terimakasih)
+      ucapan_selamat = open("data1.txt").read().splitlines()
+      ucap = random.choice(ucapan_selamat)
+      async def send_reply(message, reply,tim):
+        async with client.action(message.chat_id, "typing"):  # Mengirim status "sedang mengetik"
+            await asyncio.sleep(tim)  # Menunda selama 3 detik
+            await message.reply(reply)
       if 'pengguna mengumpulkan hujan Anda.' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
-           random_sleep()
-           await message.reply(ucapan)
+           await send_reply(message, ucapan,random_sleep())
       if 'Berhasil sawer' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
-           random_sleep()
-           await message.reply(ucapan)
+        #   random_sleep()
+           await send_reply(message, ucapan,random_sleep())
          else:
-           random_sleep()
-           await message.reply("congrats")
+         #  random_sleep()
+           await send_reply(message, ucap,random_sleep())
       if 'Airdrop sejumlah ' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
-           random_sleep()
-           await message.reply(ucapan)
+        #   random_sleep()
+           await send_reply(message, ucapan,random_sleep())
          else:
-           random_sleep()
-           await message.reply("congrats")
-      if 'users collected your rain.' in message.text:
+         #  random_sleep()
+           await send_reply(message, ucap,random_sleep())
+      if 'users collected your' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
-           random_sleep()
-           await message.reply(ucapan)
+          # random_sleep()
+           await send_reply(message, ucapan,random_sleep())
          else:
-           random_sleep()
-           await message.reply("congrats")
+           await send_reply(message, ucap,random_sleep())
       if 'pengguna mengumpulkan undian Anda.' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
-           random_sleep()
-           await message.reply(ucapan)
-      if message.mentioned:
-          # Memeriksa apakah akun Anda di-tag dalam pesan
-          if str(message.from_id.user_id) in id_tip:
-             random_sleep()
-             await message.reply(ucapan)  # Merespons dengan pesan "Hai juga!"
+         #  random_sleep()
+           await send_reply(message, ucapan,random_sleep())
       if 'Membuat undian di ' in message.text:
        if str(message.from_id.user_id) in id_tip:
         # if message.mentioned:
-           random_sleep()
+        #   random_sleep()
            pesan=pesan.split("Kirim ")[1].split(" untuk")[0]
-           await message.reply(pesan)
+           await send_reply(message, pesan,random_sleep())
       if 'Membuat airdrop di ' in message.text:
        if str(message.from_id.user_id) in id_tip:
         # if message.mentioned:
-           random_sleep()
+         #  random_sleep()
            pesan=pesan.split("Kirim ")[1].split(" untuk")[0]
-           await message.reply(pesan)
+           await send_reply(message, pesan,random_sleep())
       if 'Giveaway sejumlah ' in message.text:
        if str(message.from_id.user_id) in id_tip:
         # if message.mentioned:
-           random_sleep()
+          # random_sleep()
            pesan=pesan.split("Kata Kunci : `")[1].split("`")[0]
-           await message.reply(pesan)
+           await send_reply(message, pesan,random_sleep())
       if 'Created an airdrop in ' in message.text:
        if str(message.from_id.user_id) in id_tip:
       #   if message.mentioned:
-           random_sleep()
+         #  random_sleep()
            pesan=pesan.split("Send `")[1].split("` to")[0]
-           await message.reply(pesan)
+           await send_reply(message, pesan,random_sleep())
       if 'Created a draw in ' in message.text:
        if str(message.from_id.user_id) in id_tip:
      #    if message.mentioned:
-           random_sleep()
+       #    random_sleep()
            pesan=pesan.split("Send ")[1].split(" to")[0]
-           await message.reply(pesan)
+           await send_reply(message, pesan,random_sleep())
       if 'Create Airdrop Success!! ' in message.text:
        if str(message.from_id.user_id) in id_tip:
      #    if message.mentioned:
-           random_sleep()
+          # random_sleep()
            pesan=pesan.split("Claim: `")[1].split("`")[0]
-           await message.reply(pesan)
+           await send_reply(message, pesan,random_sleep())
       if 'Created a giveaway in ' in message.text:
        if str(message.from_id.user_id) in id_tip:
      #    if message.mentioned:
