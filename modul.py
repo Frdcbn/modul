@@ -12,7 +12,7 @@ import pathlib
 from telethon import TelegramClient, sync, events
 def random_sleep():
     # Menghasilkan waktu sleep acak antara 5 hingga 35 detik
-    sleep_time = random.randint(5, 35)
+    sleep_time = random.randint(3, 7)
     time.sleep(sleep_time)
 def animasi(menit):
   detik = menit * 60
@@ -34,7 +34,7 @@ def bot_tele(modulesl, banner):
       # Process the new message as needed
       pesan=message.text
       print(f'{putih1}[{kuning1} > {putih1}]{hijau1} {pesan}')
-      id_tip=["962775809","6285122310","5796879502","1380459388","6143654908"]
+      id_tip=["962775809","6285122310","5796879502","1380459388","6143654908","5311716983"]
       ucapan_terimakasih = open("data.txt").read().splitlines()
       ucapan = random.choice(ucapan_terimakasih)
       if 'pengguna mengumpulkan hujan Anda.' in message.text:
@@ -98,7 +98,7 @@ def bot_tele(modulesl, banner):
        if str(message.from_id.user_id) in id_tip:
       #   if message.mentioned:
            random_sleep()
-           pesan=pesan.split("Send ")[1].split(" to")[0]
+           pesan=pesan.split("Send `")[1].split("` to")[0]
            await message.reply(pesan)
       if 'Created a draw in ' in message.text:
        if str(message.from_id.user_id) in id_tip:
@@ -112,6 +112,11 @@ def bot_tele(modulesl, banner):
            random_sleep()
            pesan=pesan.split("Claim: `")[1].split("`")[0]
            await message.reply(pesan)
+      if 'Created a giveaway in ' in message.text:
+       if str(message.from_id.user_id) in id_tip:
+     #    if message.mentioned:
+           random_sleep()
+           await message.click(text='👉Grab👈')
        #  else:
       await client.send_read_acknowledge(message.to_id, max_id=message.id)
     with TelegramClient('session/' + nomor, api_id, api_hash) as client:
@@ -701,6 +706,7 @@ def rushbitcoin(modulesl,banner):
                           print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
                         else:
                           print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
+                          break
     except:
         pass
   print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
@@ -1786,7 +1792,7 @@ def adhives(modulesl,banner):
                 y=y.split(' clicks remaining')[0].replace(' ','')
               if 'click remaining' in y:
                 y=y.split(' click remaining')[0].replace(' ','')
-              link=i.find('a',{'class':'card shadow text-decoration-none text-dark'})['href']
+              link=i.find('a',{'class':'card shadow text-decoration-none'})['href']
               for ulang in range(int(y)):
                   get_links = curl.get('https://adhives.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
                   print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
@@ -2301,6 +2307,10 @@ def freeclaimfaucet(modulesl,banner):
         jumlah = int(i.find('span').text.split('/')[0])
         services = {
     'ctr.sh': modulesl.ctrsh,
+    'fc.lc': modulesl.fl_lc,
+    'shrinkearn': modulesl.shrinkearn,
+    'owlink': modulesl.owlink,
+    'clk.sh': modulesl.clksh,
     'clks.pro': modulesl.clks_pro,
     'linksfly': modulesl.linksfly,
     'shortsfly': modulesl.shortfly,

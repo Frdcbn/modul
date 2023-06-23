@@ -128,7 +128,7 @@ def menu(banner,modul,modulesl):
                         file.write(huruf + '\n')
                 else:
                   with open(nama_file, 'a') as file:
-                    for data in kata:
+                    for data in kata.split(","):
                         file.write(data + '\n')
 
             else:
