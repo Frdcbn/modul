@@ -1639,6 +1639,8 @@ def coinfola(modulesl,banner):
     "eXeio":modulesl.exe_io,
     "Cuty":modulesl.cuty_io,
     "AdBitFly":modulesl.adbitfly,
+    "Oii":modulesl.oii,
+    "Zuba":modulesl.zuba_link,
   }
   for i in gt:
     try:
@@ -3329,7 +3331,7 @@ def btcadspace(modulesl,banner):
     data=f"csrfToken={csrf}&g-recaptcha-response={answer}&claim="
     reward=curl.post(get_ucet.url,data=data,headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu,'Host':'btcadspace.com'},cookies=cookies)
     print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("message: '")[1].split("'")[0])
-    animasi(15)
+    animasi(5)
    except Exception as e:
     save_data('btcadspace')
     btcadspace(modulesl,banner)
