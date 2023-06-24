@@ -42,7 +42,7 @@ def bot_tele(modulesl, banner):
       async def send_reply(message, reply,tim):
         async with client.action(message.chat_id, "typing"):  # Mengirim status "sedang mengetik"
             await asyncio.sleep(tim)  # Menunda selama 3 detik
-            await message.reply(reply)
+            await client.send_message(message.chat_id,reply)
       if 'pengguna mengumpulkan hujan Anda.' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
@@ -3503,24 +3503,31 @@ def oskut(modulesl,banner):
       except FileNotFoundError:
           return None, None
   banner.banner('OSKUT')
-  cookies= load_datan('oskut')
+  email= load_datan('oskut')
   if not os.path.exists("data/oskut/oskut.json"):
     save_datan('oskut')
     oskut(modulesl,banner)
   curl=requests.Session()
   step1=curl.get('https://oscut.fun/')
-  fd=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-  data=f"wallet={cookies}&csrf_token_name={fd}"
-  step2=curl.post('https://oscut.fun/auth/login',data=data,headers={"content-type":"application/x-www-form-urlencoded"})
+ # print(step1.text)
+  csrf=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  data=f"wallet={email}&csrf_token_name={csrf}"
+  step2=curl.post('https://oscut.fun/auth/login',data=data,headers={"content-type":"application/x-www-form-urlencoded","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
+  #print(step2.text)
   if 'Login Success' in step2.text:
     print(f'{putih1}[{hijau1} √ {putih1}] Login Success')
     print('1.BTC')
     print('2.USDT')
+    print('2.TRX')
     curen=input('Select : ')
     if curen == '1':
       cur='btc'
+    if curen == '3':
+      cur='trx'
     if curen == '2':
       cur='usdt'
+    os.system('cls' if os.name == 'nt' else 'clear')
+    banner.banner('OSKUT')
     get_links=curl.get('https://oscut.fun/links/currency/'+cur)
     gt=bs(get_links.text,'html.parser').find_all('div',{'class':'col-sm-6'})
     for link in gt:
