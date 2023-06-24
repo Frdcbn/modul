@@ -3471,41 +3471,56 @@ def landofbits(modulesl,banner):
   exit()
 def oskut(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
-  def save_datan(name):
+  def save_data(name):
     try:
-        with open(f'data/{name}/{name}.json', 'r') as file:
-            data = json.load(file)
-            cookies = data.get('email')
-       #     user_agent = data.get('user_agent')
-            cookies = input(hijau1 + 'Masukkan email mu > ')
-            data = {
-                'email': cookies,
-            }
-            with open(f'data/{name}/{name}.json', 'w') as file:
-                json.dump(data, file)
-          #  return cookies, user_agent
-    except FileNotFoundError:
-        cookies = input(hijau1 + 'Masukkan email mu > ')
+        dir_path = f'data/{name}'
+        os.makedirs(dir_path, exist_ok=True)  # Membuat direktori jika belum ada
+
+        file_path = f'{dir_path}/{name}.json'
+        
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                email = data.get('email')
+        else:
+            email = input('Masukkan email mu > ')
+        
         data = {
-            'email': cookies,
-       #     'user_agent': user_agent
+            'email': email
         }
-        with open(f'data/{name}/{name}.json', 'w') as file:
+
+        with open(file_path, 'w') as file:
             json.dump(data, file)
-        return cookies
-  def load_datan(name):
-      try:
-          with open(f'data/{name}/{name}.json', 'r') as file:
-              data = json.load(file)
-          cookies = data['email']
-      #    user_agent = data['user_agent']
-          return cookies
-      except FileNotFoundError:
-          return None, None
+
+        return email
+    except FileNotFoundError:
+        email = input('Masukkan email mu > ')
+        
+        data = {
+            'email': email
+        }
+
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
+
+        return email
+  def load_data(name):
+    try:
+        file_path = f'data/{name}/{name}.json'
+        
+        if os.path.isfile(file_path):  # Memeriksa apakah file ada, bukan direktori
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                email = data.get('email')
+                return email
+        else:
+            return None
+    except FileNotFoundError:
+        return None
   banner.banner('OSKUT')
-  email= load_datan('oskut')
+  email= load_data('oskut')
   if not os.path.exists("data/oskut/oskut.json"):
-    save_datan('oskut')
+    save_data('oskut')
     oskut(modulesl,banner)
   curl=requests.Session()
   step1=curl.get('https://oscut.fun/')
