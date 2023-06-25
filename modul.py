@@ -10,6 +10,7 @@ from tqdm import tqdm
 from pyfiglet import figlet_format 
 import pathlib
 from telethon import TelegramClient, sync, events
+import modulesl
 def random_sleep():
     # Menghasilkan waktu sleep acak antara 5 hingga 35 detik
     sleep_time = random.randint(3, 7)
@@ -2029,7 +2030,8 @@ def cryptogenz(modulesl,banner):
     "Birdurl": modulesl.birdurl,
     "Owllink": modulesl.owlink,
     "Cuty": modulesl.cuty_io,
-    "Short.i": modulesl.shorti_io
+    "Short.i": modulesl.shorti_io,
+    "Linkvor(very easy)": modulesl.linkvor_pw
       }
         
         if name in services:
@@ -3653,17 +3655,10 @@ def cryptofuture(modulesl,banner):
       jumlah=int(link.find('span').text.split('/')[0])
       name=link.find('h4').text
       li=link.find('a',{'class':'btn btn-primary waves-effect waves-light'})['href']
-  #    print(name)
-  #    print(li)
-   #   print(jumlah)
       services = {
-    #  'Clks': modulesl.clks_pro,
-   #   'Try2link': modulesl.try2,
       'LinksFly': modulesl.linksfly,
       'ShortsFly.me': modulesl.shortfly,
       'Usalink': modulesl.usalink,
-     # 'Clk': modulesl.clksh,
-     # 'Owllink': modulesl.owlink
       }
       if name in services:
         for ulang in range(jumlah):
@@ -3673,9 +3668,7 @@ def cryptofuture(modulesl,banner):
                 print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
             else:
                 reward = curl.get(answer)
-              #  print(reward.text)
                 if 'Success!' in reward.text:
-               #   html: '0.00000009 BTC has been sent to your FaucetPay account!',
                   print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
 def endenfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -3757,3 +3750,143 @@ def endenfaucet(modulesl,banner):
       #  print(reward.text)
         if 'Success!' in reward.text:
             print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
+def paid_family(url,sitkey,email,services,modulesl):
+  curl=requests.Session()
+  login=curl.get(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
+  frc=bs(login.text,'html.parser').find('input',{'name':'frsc'})['value']
+  answer=modulesl.RecaptchaV2(key=sitkey,url=url)
+  data=f"frsc={frc}&guest_email={email}&captcha=recaptchaV2&g-recaptcha-response={answer}&Guest_Login=Guest_Login"
+  login=curl.post(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","content-type":"application/x-www-form-urlencoded"},data=data)
+  if 'user' in login.url:
+    print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Login Success!!                                  ')
+    link=bs(login.text,'html.parser').find_all('tr')
+    del link[0]
+    for links in link:
+      li=links.find('a')['href']
+      lis= [element.strip() for element in links.text.strip().splitlines()]
+      name=lis[0]
+      jumlah=int(lis[9].split('/')[0])
+      if name in services:
+        for ulang in range(jumlah):
+       #   while True:
+            url = curl.get(li,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"},allow_redirects=False).text.split('<script>location.href = "')[1].split('";</script>')[0]
+            answer = services[name](url)
+            if 'failed to bypass' in answer:
+                print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+            else:
+                sleep(70)
+                reward = curl.get(answer,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
+                if 'Well done :)' in reward.text:
+                  sukses=bs(reward.text,'html.parser').find('div',{'class':'alert alert-success d-flex'}).text
+                  print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+sukses)
+                if 'Error!!' in reward.text:
+                  sukses=bs(reward.text,'html.parser').find('div',{'class':'alert alert-danger d-flex'}).text
+                 # if 'Error!! Shortlink Failed!' in sukses:
+                  #  print(f'{putih1}[{merah1} x {putih1}] {merah1}'+sukses,end='\r')
+               #   else:
+                 #   print(f'{putih1}[{merah1} x {putih1}] {merah1}'+sukses)
+                  #  break
+                
+def all_in_one(modulesl,banner):
+  def save_data(name):
+    try:
+        dir_path = f'data/{name}'
+        os.makedirs(dir_path, exist_ok=True)  # Membuat direktori jika belum ada
+
+        file_path = f'{dir_path}/{name}.json'
+        
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                email = data.get('email')
+        else:
+            email = input('Masukkan email mu > ')
+        
+        data = {
+            'email': email
+        }
+
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
+
+        return email
+    except FileNotFoundError:
+        email = input('Masukkan email mu > ')
+        
+        data = {
+            'email': email
+        }
+
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
+
+        return email
+  def load_data(name):
+    try:
+        file_path = f'data/{name}/{name}.json'
+        
+        if os.path.isfile(file_path):  # Memeriksa apakah file ada, bukan direktori
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                email = data.get('email')
+                return email
+        else:
+            return None
+    except FileNotFoundError:
+        return None
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner('ALL IN ONE PAID FAMILY')
+  cookies= load_data('all_in_one')
+  if not os.path.exists("data/all_in_one/all_in_one.json"):
+    save_data('all_in_one')
+    all_in_one(modulesl,banner)
+  service = {
+      'Try2link.com': modulesl.try2,
+      'Shrinkearn.com': modulesl.shrinkearn,
+      'Usalink.io': modulesl.usalink,
+      'Clk.sh': modulesl.clksh,
+      'Linksfly.me': modulesl.linksfly,
+      'Shortsfly.me': modulesl.shortfly,
+      'Shorti.io': modulesl.shorti_io,
+      'Oii.io': modulesl.oii,
+      'Illink.net': modulesl.illink_net,
+      'Owllink.net': modulesl.owlink,
+      'Birdurls.com': modulesl.birdurl,
+      'Fc.lc': modulesl.fl_lc,
+      'Exe.io': modulesl.exe_io
+  }
+  print(hijau1+"> "+kuning1+"Start bypass liteearn.com")
+  paid_family('https://liteearn.com/',"6Lejju8UAAAAAMCxObwhQJliWyTUXwEcUc43KOiQ",cookies,service,modulesl)
+  service = {
+      'Try2link.com': modulesl.try2,
+      'Shrinkearn.com': modulesl.shrinkearn,
+      'Clk.sh': modulesl.clksh,
+      'Linksfly.me': modulesl.linksfly,
+      'Shortsfly.me': modulesl.shortfly,
+      'Shorti.io': modulesl.shorti_io,
+      'Oii.io': modulesl.oii,
+      'Illink.net': modulesl.illink_net,
+      'Owllink.net': modulesl.owlink,
+      'Birdurls.com': modulesl.birdurl,
+      'Fc.lc': modulesl.fl_lc,
+      'Exe.io': modulesl.exe_io
+  }
+  print(hijau1+"> "+kuning1+"Start bypass paidtomoney.com")
+  paid_family('https://paidtomoney.com/',"6LfZswEVAAAAAHXORtki0EFzDZZIV02Wo0krcxRo",cookies,service,modulesl)
+  service = {
+      'Try2link.com': modulesl.try2,
+      'Shrinkearn.com': modulesl.shrinkearn,
+      'Usalink.io': modulesl.usalink,
+      'Clk.sh': modulesl.clksh,
+      'Linksfly.me': modulesl.linksfly,
+      'Shortsfly.me': modulesl.shortfly,
+      'Shorti.io': modulesl.shorti_io,
+      'Oii.io': modulesl.oii,
+      'Illink.net': modulesl.illink_net,
+      'Owllink.net': modulesl.owlink,
+      'Birdurls.com': modulesl.birdurl,
+      'Fc.lc': modulesl.fl_lc,
+      'Exe.io': modulesl.exe_io
+  }
+  print(hijau1+"> "+kuning1+"Start bypass cryptosfaucet.top")
+  paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,service,modulesl)

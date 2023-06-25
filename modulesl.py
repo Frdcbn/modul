@@ -474,6 +474,7 @@ def usalink(url):
     curl=requests.Session()
     url_base=urlparse(url)
     step1=curl.get('https://go.theconomy.me/'+url_base.path).text
+ #   print(step1)
     fin=bs(step1,'html.parser')
     get_key=json.loads(step1.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
     answer=RecaptchaV2(key=get_key,url='https://go.theconomy.me/'+url_base.path)
@@ -492,7 +493,7 @@ def usalink(url):
     sleep(15)
     final=curl.post('https://go.theconomy.me'+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
     if json.loads(final.text)["status"] == "success":
-        sleep(15)
+        sleep(18)
         return json.loads(final.text)["url"]
   except Exception as e:
     return "failed to bypass"
@@ -1439,4 +1440,4 @@ def gain_lk(url):
  except:
    return "failed to bypass"
    pass
-#print(gain_lk('https://gainl.ink/r4cioER'))
+#print(usalink('https://link.usalink.io/GyhmT3c0'))

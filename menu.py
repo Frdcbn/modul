@@ -53,6 +53,7 @@ def menu(banner,modul,modulesl):
     "32": "FREECLAIMFAUCET",
     "33": "CRYPTOGENZ",
     "34": "CCTIP",
+    "35": "PAID FAMILY ALL IN ONE",
 }
     data=load_data(menu_dict)
     # Cetak daftar menu
@@ -109,19 +110,32 @@ def menu(banner,modul,modulesl):
             "31": modul.cryptofuture,
             "32": modul.freeclaimfaucet,
             "33": modul.cryptogenz,
-            "34": modul.bot_tele
+            "34": modul.bot_tele,
+            "35": modul.all_in_one,
         }
     
         if select in thread_map:
             if '34' in select:
               print(f"{putih1}[{hijau1}1{putih1}]{kuning1}.Run bot ")
-              print(f"{putih1}[{hijau1}2{putih1}]{kuning1}.Settings kata ")
+              print(f"{putih1}[{hijau1}2{putih1}]{kuning1}.Settings kata terimakasih")
+              print(f"{putih1}[{hijau1}3{putih1}]{kuning1}.Settings kata selamat")
               pilih=input(putih1+'Select : ')
               if pilih=="1":
                 modul.bot_tele(modulesl,banner)
               if pilih == "2":
                 kata=input("masukan kata pisahkan dengan koma (misal aja ini mah,nah ini yang kedua) : ")
                 nama_file = "data.txt"
+                if not os.path.exists(nama_file):
+                    with open(nama_file, "w") as file:
+                      for huruf in kata.split(","):
+                        file.write(huruf + '\n')
+                else:
+                  with open(nama_file, 'a') as file:
+                    for data in kata.split(","):
+                        file.write(data + '\n')
+              if pilih == "3":
+                kata=input("masukan kata pisahkan dengan koma (misal aja ini mah,nah ini yang kedua) : ")
+                nama_file = "data1.txt"
                 if not os.path.exists(nama_file):
                     with open(nama_file, "w") as file:
                       for huruf in kata.split(","):
