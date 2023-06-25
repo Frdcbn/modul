@@ -10,7 +10,7 @@ from tqdm import tqdm
 from pyfiglet import figlet_format 
 import pathlib
 from telethon import TelegramClient, sync, events
-import modulesl
+#import modulesl
 def random_sleep():
     # Menghasilkan waktu sleep acak antara 5 hingga 35 detik
     sleep_time = random.randint(3, 7)
