@@ -1,4 +1,4 @@
-import requests,json,time,asyncio
+import requests,json,time,asyncio,re
 from os import system
 import shutil,os
 from time import sleep
@@ -11,6 +11,21 @@ from pyfiglet import figlet_format
 import pathlib
 from telethon import TelegramClient, sync, events
 #import modulesl
+def parse_rupiah_saldo(data):
+    for data in data.splitlines():
+     if "Saldo" in data:
+         return ''.join(data.split('├└ Saldo : ')[1].split(','))
+        # break
+
+def get_balance_cctip(data):
+  balance_data = {}
+  lines = data.split('\n')
+  for line in lines:
+      if not line.startswith('Available Balance') and ':' in line and 'Try /balance' not in line:
+          key, value = line.split(': ')
+          balance_data[key] = value
+
+  return balance_data
 def random_sleep():
     # Menghasilkan waktu sleep acak antara 5 hingga 35 detik
     sleep_time = random.randint(3, 7)
@@ -28,18 +43,106 @@ def bot_tele(modulesl, banner):
     os.system('cls' if os.name == 'nt' else 'clear')
     banner.banner('BOT CCTIP')
     api_id = 9209038
+    owner=open('owner.txt').read().splitlines()[0]
     api_hash = '82d6f5d828fc5f5942e29bdfc1e01d14'
     nomor=open('nomor.txt').read().splitlines()[0]
     async def handle_new_message(event):
       message = event.message
-      # Process the new message as needed
       pesan=message.text
-      print(f'{putih1}[{kuning1} > {putih1}]{hijau1} {pesan}')
       id_tip=["962775809","6285122310","5796879502","1380459388","6143654908","5311716983"]
-      ucapan_terimakasih = open("data.txt").read().splitlines()
-      ucapan = random.choice(ucapan_terimakasih)
-      ucapan_selamat = open("data1.txt").read().splitlines()
-      ucap = random.choice(ucapan_selamat)
+      if '/command' in message.text:
+        if str(message.from_id.user_id) == owner:
+          await message.reply('''
+silahkan gunakan command seperti ini `/kirim_saldo nama_bot jumlah nama_coinya`
+silahkan gunakan command seperti ini `/cek_saldo nama_bot`
+''')
+      if '/kirim_saldo' in message.text:
+        if  str(message.from_id.user_id) == owner:
+          if ' ' not in message.text:
+            await message.reply('silahkan gunakan command seperti ini `/kirim_saldo nama_bot jumlah nama_coinya`')
+          else:
+            name_bot=['cctip','mahawallet','payfun']
+            mes=message.text.split(' ')
+            #print(mes)
+            if mes[1].lower() in name_bot:
+              if mes[1].lower() == 'cctip':
+                if mes[2].lower() == 'all':
+                  if len(mes) == 3:
+                    await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
+                    sleep(1)
+                    pas=await client.get_messages(entity="@cctip_bot",limit=1)
+                   # if str(message.from_id.user_id) in id_tip:
+                    #if 'Available Balance:' in pesan:
+                    bal=get_balance_cctip(pas[0].message)
+                   # print(bal)
+                    for nama,jumlah in bal.items():
+                      if jumlah != "0":
+                        await message.reply('/tip '+jumlah+' '+nama)
+                      sleep(2)
+                  else:
+                    await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
+                    sleep(1)
+                    pas=await client.get_messages(entity="@cctip_bot",limit=1)
+                   # if str(message.from_id.user_id) in id_tip:
+                    #if 'Available Balance:' in pesan:
+                    bal=get_balance_cctip(pas[0].message)
+                    try:
+                      await message.reply('/tip '+bal[mes[3].upper()]+' '+mes[3])
+                    except Exception as e:
+                      await message.reply('Coin not found')
+                else:
+                      bal=get_balance_cctip(message.text)
+                      await message.reply('/tip '+mes[2]+' '+mes[3])
+              if mes[1].lower() == 'payfun':
+                if mes[2].lower() == 'all':
+                  await client.send_message(entity="@PayFun_tip_bot",message="💰Balance")
+                  sleep(3)
+                  pas=await client.get_messages(entity="@PayFun_tip_bot",limit=1)
+                  saldo=pas[0].message.splitlines()[0].replace("saldo lu: Rp", "").strip()
+                  await message.reply('/cip '+saldo)
+                else:
+                  await message.reply('/cip '+mes[2])
+              if mes[1].lower() == 'mahawallet':
+                if mes[2].lower() == 'all':
+                  await client.send_message(entity="@MahaWalletBot",message="💰 Saldo")
+                  sleep(5)
+                  pas=await client.get_messages(entity="@MahaWalletBot",limit=1)
+                #  print(pas[0].message)
+                  saldo=parse_rupiah_saldo(pas[0].message)
+                #  print(saldo)
+                  await message.reply('/kirim '+saldo)
+                else:
+                  await message.reply('/kirim '+mes[2])
+            else:
+              await message.reply('''maaf seperti nya bot tip itu tidak di dukung bot tip yang di dukung
+- `CCTIP`
+- `MAHA WALLET` 
+- `PAYFUN`''')
+      if '/cek_saldo' in message.text:
+        if  str(message.from_id.user_id) == owner:
+          if ' ' not in message.text:
+            await message.reply('silahkan gunakan command seperti ini `/cek_saldo nama_bot`')
+          else:
+            name_bot=['cctip','mahawallet','payfun']
+            mes=message.text.split(' ')
+            #print(mes)
+            if mes[1].lower() in name_bot:
+              if mes[1].lower() == 'cctip':
+                await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
+                sleep(2)
+                pas=await client.get_messages(entity="@cctip_bot",limit=1)
+                await message.reply(pas[0].message)
+              if mes[1].lower() == 'payfun':
+                await client.send_message(entity="@PayFun_tip_bot",message="💰Balance")
+                sleep(3)
+                pas=await client.get_messages(entity="@PayFun_tip_bot",limit=1)
+                await message.reply(pas[0].message)
+              if mes[1].lower() == 'mahawallet':
+                await client.send_message(entity="@MahaWalletBot",message="💰 Saldo")
+                sleep(3)
+                pas=await client.get_messages(entity="@MahaWalletBot",limit=1)
+                await message.reply(pas[0].message)
+      print(f'{putih1}[{kuning1} > {putih1}]{hijau1} {pesan}')
       async def send_reply(message, reply,tim):
         async with client.action(message.chat_id, "typing"):  # Mengirim status "sedang mengetik"
             await asyncio.sleep(tim)  # Menunda selama 3 detik
@@ -47,35 +150,35 @@ def bot_tele(modulesl, banner):
       if 'pengguna mengumpulkan hujan Anda.' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
-           await send_reply(message, ucapan,random_sleep())
+           pass
       if 'Berhasil sawer' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
         #   random_sleep()
-           await send_reply(message, ucapan,random_sleep())
+           pass
          else:
          #  random_sleep()
-           await send_reply(message, ucap,random_sleep())
+           pass
       if 'Airdrop sejumlah ' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
         #   random_sleep()
-           await send_reply(message, ucapan,random_sleep())
+           pass
          else:
          #  random_sleep()
-           await send_reply(message, ucap,random_sleep())
+           pass
       if 'users collected your' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
           # random_sleep()
-           await send_reply(message, ucapan,random_sleep())
+           pass
          else:
-           await send_reply(message, ucap,random_sleep())
+           pass
       if 'pengguna mengumpulkan undian Anda.' in message.text:
         if str(message.from_id.user_id) in id_tip:
          if message.mentioned:
          #  random_sleep()
-           await send_reply(message, ucapan,random_sleep())
+           pass
       if 'Membuat undian di ' in message.text:
        if str(message.from_id.user_id) in id_tip:
         # if message.mentioned:
@@ -3786,7 +3889,6 @@ def paid_family(url,sitkey,email,services,modulesl):
                #   else:
                  #   print(f'{putih1}[{merah1} x {putih1}] {merah1}'+sukses)
                   #  break
-                
 def all_in_one(modulesl,banner):
   def save_data(name):
     try:
@@ -3890,3 +3992,107 @@ def all_in_one(modulesl,banner):
   }
   print(hijau1+"> "+kuning1+"Start bypass cryptosfaucet.top")
   paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,service,modulesl)
+def bitscript_family(url,services,modulesl,banner):
+  host=urlparse(url).netloc
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner(host.upper())
+  data_control(host)
+  cookies, ugentmu = load_data(host)
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host)
+    bitscript_family(url,services,modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":host,
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  dahs=curl.get(url+'account',headers=ua,cookies=cookies)
+ # print(dahs.text)
+  if 'Balance' not in dahs.text:
+    save_data(host)
+    bitscript_family(url,services,modulesl,banner)
+  fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
+  print(hijau1+"> "+kuning1+"Account information")
+  print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
+  print(hijau1+'> '+fd[0].text.strip().splitlines()[4]+' : '+fd[0].text.strip().splitlines()[5])
+  link=curl.get(url+'shortlinks',headers=ua,cookies=cookies)
+  gt=bs(link.text,'html.parser').find_all('div',{'class':'col-lg-4 mt-4'})
+  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
+  providers=services
+  for i in gt:
+    try:
+      name = i.text.strip().splitlines()[0]
+    #  print(i)
+      for provider in providers:
+          if provider in name:
+             # print(name)
+              y=[i for i in i.text.strip().splitlines() if i][2]
+              if 'clicks remaining' in y:
+                y=y.split(' clicks remaining')[0].replace(' ','')
+              if 'click remaining' in y:
+                y=y.split(' click remaining')[0].replace(' ','')
+              link=i.find('a',{'class':'card shadow text-decoration-none text-dark'})['href']
+              for ulang in range(int(y)):
+                  get_links = curl.get(url+ link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
+                  print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
+                  answer = providers[provider](get_links)
+        #          print(reward.text)
+                  if 'failed to bypass' in answer:
+                      print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+                  else:
+                    reward = curl.get(answer, headers=ua, cookies=cookies)
+                    if 'Congratulations.' in reward.text:
+                      _1 = reward.text.split("message: '")[1].split("'")[0]
+                      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
+    except Exception as e:
+      pass
+def earnfree_cash(modulesl,banner):
+  services={
+      'LinksFly': modulesl.linksfly,
+      'MegaURL': modulesl.megaurl,
+      'ShrinkEarn': modulesl.shrinkearn,
+      'Ctr.sh': modulesl.ctrsh,
+      'Ex-Foary': modulesl.ex_foary_com,
+      'illink': modulesl.illink_net,
+      'Usalink': modulesl.usalink,
+      "Clks":modulesl.clks_pro,
+      "Clk.sh":modulesl.clksh,
+     # 'Chl': None,
+      'BirdUrls': modulesl.birdurl,
+      'Adshort': modulesl.adshorti_co,
+      'OwlLink': modulesl.owlink,
+      'Fc.Lc': modulesl.fl_lc,
+      'Cuty': modulesl.cuty_io,
+     # 'Flyadvip': None,
+      'Exe': modulesl.exe_io,
+      'Mitly': modulesl.mitly,
+      'Shorti': modulesl.shorti_io
+  }
+  bitscript_family('https://earnfree.cash/',services,modulesl,banner)
+def paidbucks(modulesl,banner):
+  
+  services={
+      'Linksfly': modulesl.linksfly,
+      'MegaURL': modulesl.megaurl,
+      'ShrinkEarn': modulesl.shrinkearn,
+      'Ctr.sh': modulesl.ctrsh,
+      'Ex-Foary': modulesl.ex_foary_com,
+      'illink': modulesl.illink_net,
+      'Usalink': modulesl.usalink,
+     # 'Chl': None,
+      'BirdUrls': modulesl.birdurl,
+   #   'Adshort': None,
+      'OwlLink': modulesl.owlink,
+      'Fclc': modulesl.fl_lc,
+      'Cuty': modulesl.cuty_io,
+     # 'Flyadvip': None,
+      'Exe': modulesl.exe_io,
+      'Mitly': modulesl.mitly,
+      'Clksh': modulesl.clksh,
+      'Shorti': modulesl.shorti_io
+  }
+  bitscript_family('https://paidbucks.xyz/',services,modulesl,banner)

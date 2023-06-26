@@ -1120,30 +1120,47 @@ def shareus(url):
  except Exception as e:
    return 'failed to bypass'
 def megaurl(url):
- try:
-  curl=requests.Session()
-  url_base=url.replace('go','get')
-  step1=curl.get(url_base,headers={"referer":"https://app.trangchu.news/scandisk-rogue-removal-how-to-completely-remove-the-scandisk-virus-from-your-pc.html"}).text
-  tf=bs(step1,'html.parser')
-  csrf=tf.find('input',{'name':'_csrfToken'})["value"]
-  tkf=tf.find('input',{'name':'_Token[fields]'})["value"]
-  tku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
-  get_key=json.loads(step1.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
-  answer=RecaptchaV2(key=get_key,url=url_base)
-  data=f'_method=POST&_csrfToken={csrf}&action=captcha&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-  step2=curl.post(url_base,data=data,headers={'content-type':'application/x-www-form-urlencoded;','referer':url_base}).text
-  sleep(15)
-  fl=bs(step2,'html.parser')
-  csrf=fl.find('input',{'name':'_csrfToken'})["value"]
-  tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
-  form=fl.find('input',{'name':'ad_form_data'})["value"]
-  tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
-  data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-  final=curl.post(f'https://{urlparse(url_base).hostname}/links/go',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
-  if json.loads(final.text)["status"] == "success":
-      return json.loads(final.text)["url"]
- except Exception as e:
-    return "failed to bypass"
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36",
+            "referer": "https://app.trangchu.news/strengths-and-weaknesses-of-android-based-applications.html"
+        }
+
+        session = requests.Session()
+
+        url_base = url.replace('go', 'get')
+        response1 = session.get(url_base, headers=headers).text
+      #  print(response1)
+        bs4 = BeautifulSoup(response1, "html.parser")
+        inputs = bs4.find_all("input")
+        data = {input.get("name"): input.get("value") for input in inputs}
+        get_key = json.loads(response1.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
+        data["g-recaptcha-response"] = RecaptchaV2(get_key, url_base)
+
+        response2 = session.post(url_base, data=urlencode(data), headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","content-type":"application/x-www-form-urlencoded","referer":url_base}).text
+
+        sleep(15)
+        fl = bs(response2, 'html.parser')
+        csrf = fl.find('input', {'name': '_csrfToken'})["value"]
+        tkf = fl.find('input', {'name': '_Token[fields]'})["value"]
+        form = fl.find('input', {'name': 'ad_form_data'})["value"]
+        tku = fl.find('input', {'name': '_Token[unlocked]'})["value"]
+        data = f'_method=POST&_csrfToken={csrf}&ad_form_data={quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+
+        final_url = f'https://{urlparse(url_base).hostname}/links/go'
+        headers["accept"] = 'application/json, text/javascript, */*; q=0.01'
+        headers["x-requested-with"] = 'XMLHttpRequest'
+        headers["content-type"] = 'application/x-www-form-urlencoded;'
+
+        final_response = session.post(final_url, data=data, headers=headers)
+
+        if json.loads(final_response.text)["status"] == "success":
+            sleep(15)
+            return json.loads(final_response.text)["url"]
+
+    except Exception as e:
+        return "failed to bypass"
+
 def link1s_net(url):
   curl=requests.Session()
   res=one_method(curl,url,headers={"referer":"https://nguyenvanbao.com/danh-cho-nguoi-moi-vao-nghe-make-money-online/"})
@@ -1440,4 +1457,4 @@ def gain_lk(url):
  except:
    return "failed to bypass"
    pass
-#print(usalink('https://link.usalink.io/GyhmT3c0'))
+#print(megaurl('http://go.megaurl.in/SbPaTF'))
