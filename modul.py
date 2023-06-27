@@ -1668,31 +1668,6 @@ def claimsatoshi(modulesl,banner):
    except Exception as e:
       break
       pass
-  print(hijau1+"> "+kuning1+"Start faucet")
-  #<h2 class="card-title text-white">49/50</h2>
-  ulang=bs(curl.get('https://claimsatoshi.xyz/faucet',headers=ua,cookies=cookies).text,'html.parser').find_all('h2',{'class':'card-title text-white'})
-  ulang=ulang[len(ulang)-1].text.split('/')[0]
-  for ulang in range(int(ulang)):
-    faucet=curl.get('https://claimsatoshi.xyz/faucet',headers=ua,cookies=cookies)
-    bs4 = bs(faucet.text, "html.parser")
-    inputs = bs4.find_all("input")
-    data = {input.get("name"): input.get("value") for input in inputs}
-    data["captcha"]="recaptchav2"
-    answer=modulesl.RecaptchaV2('6LduER0gAAAAAN1zeqcxdU3FxDAwgOI7PhMGUzR0',faucet.url)
-    data["g-recaptcha-response"]=answer
-    verify=curl.post('https://claimsatoshi.xyz/faucet/verify',data=data,headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"})
-    if 'firewall' in verify.url:
-      bs4 = bs(verify.text, "html.parser")
-      inputs = bs4.find_all("input")
-      data = {input.get("name"): input.get("value") for input in inputs}
-      data["captcha"]="recaptchav2"
-      answer=modulesl.RecaptchaV2('6LduER0gAAAAAN1zeqcxdU3FxDAwgOI7PhMGUzR0',faucet.url)
-      data["g-recaptcha-response"]=answer
-      gas=curl.post('https://claimsatoshi.xyz/firewall/verify',data=data,headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"})
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
-    if 'Good job!' in verify.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-    animasi(5)
   exit()
 def coinfola(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -3417,7 +3392,7 @@ def btcadspace(modulesl,banner):
         try:
           if method in info[0]:
               for jun in range(int(jumlah)):
-                  url = curl.get('https://btcadspace.com' + i.find('a', {'class': 'card shadow text-decoration-none text-dark'})['href'], headers=ua, cookies=cookies, allow_redirects=False).headers['location']
+                  url = curl.get('https://btcadspace.com' + i.find('a', {'class': 'card shadow text-decoration-none'})['href'], headers=ua, cookies=cookies, allow_redirects=False).headers['location']
                   answer = bypass_func(url)
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
@@ -3992,7 +3967,7 @@ def all_in_one(modulesl,banner):
   }
   print(hijau1+"> "+kuning1+"Start bypass cryptosfaucet.top")
   paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,service,modulesl)
-def bitscript_family(url,services,modulesl,banner):
+def bitscript_family(url,services,modulesl,banner,key_links):
   host=urlparse(url).netloc
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner(host.upper())
@@ -4000,7 +3975,7 @@ def bitscript_family(url,services,modulesl,banner):
   cookies, ugentmu = load_data(host)
   if not os.path.exists(f"data/{host}/{host}.json"):
     save_data(host)
-    bitscript_family(url,services,modulesl,banner)
+    bitscript_family(url,services,modulesl,banner,key_links)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -4014,7 +3989,7 @@ def bitscript_family(url,services,modulesl,banner):
  # print(dahs.text)
   if 'Balance' not in dahs.text:
     save_data(host)
-    bitscript_family(url,services,modulesl,banner)
+    bitscript_family(url,services,modulesl,banner,key_links)
   fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
@@ -4029,13 +4004,13 @@ def bitscript_family(url,services,modulesl,banner):
     #  print(i)
       for provider in providers:
           if provider in name:
-             # print(name)
+           #   print(name)
               y=[i for i in i.text.strip().splitlines() if i][2]
               if 'clicks remaining' in y:
                 y=y.split(' clicks remaining')[0].replace(' ','')
               if 'click remaining' in y:
                 y=y.split(' click remaining')[0].replace(' ','')
-              link=i.find('a',{'class':'card shadow text-decoration-none text-dark'})['href']
+              link=i.find('a',{'class':key_links})['href']
               for ulang in range(int(y)):
                   get_links = curl.get(url+ link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
                   print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
@@ -4072,7 +4047,8 @@ def earnfree_cash(modulesl,banner):
       'Mitly': modulesl.mitly,
       'Shorti': modulesl.shorti_io
   }
-  bitscript_family('https://earnfree.cash/',services,modulesl,banner)
+  bitscript_family('https://earnfree.cash/',services,modulesl,banner,"card shadow text-decoration-none")
+  exit()
 def paidbucks(modulesl,banner):
   
   services={
@@ -4095,4 +4071,4 @@ def paidbucks(modulesl,banner):
       'Clksh': modulesl.clksh,
       'Shorti': modulesl.shorti_io
   }
-  bitscript_family('https://paidbucks.xyz/',services,modulesl,banner)
+  bitscript_family('https://paidbucks.xyz/',services,modulesl,banner,"card shadow text-decoration-none text-dark")
