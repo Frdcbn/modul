@@ -16,7 +16,6 @@ def parse_rupiah_saldo(data):
      if "Saldo" in data:
          return ''.join(data.split('├└ Saldo : ')[1].split(','))
         # break
-
 def get_balance_cctip(data):
   balance_data = {}
   lines = data.split('\n')
@@ -2999,10 +2998,10 @@ def faucetspeedbtc(modulesl,banner):
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://faucetspeedbtc.com/links',headers=ua,cookies=cookies).text
   fd=bs(get_links,'html.parser')
-  link=fd.find_all('div',{'class':'col-lg-3'})
+  link=fd.find_all('div',{'class':'col-md-6 col-xl-4'})
   for i in link:
     try:
-        name = i.find('h4').text
+        name = i.find('h5').text
         jumlah = int(i.find('span').text.split('/')[0])
         
         services = {
@@ -4050,7 +4049,6 @@ def earnfree_cash(modulesl,banner):
   bitscript_family('https://earnfree.cash/',services,modulesl,banner,"card shadow text-decoration-none")
   exit()
 def paidbucks(modulesl,banner):
-  
   services={
       'Linksfly': modulesl.linksfly,
       'MegaURL': modulesl.megaurl,
@@ -4072,3 +4070,97 @@ def paidbucks(modulesl,banner):
       'Shorti': modulesl.shorti_io
   }
   bitscript_family('https://paidbucks.xyz/',services,modulesl,banner,"card shadow text-decoration-none text-dark")
+def clickscoin(modulesl,banner):
+  url="https://clickscoin.com/account"
+  host=urlparse(url).netloc
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner(host.upper())
+  data_control(host)
+  cookies, ugentmu = load_data(host)
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host)
+    clickscoin(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":host,
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  dahs=curl.get(url+'/account',headers=ua,cookies=cookies)
+#  print(dahs.text)
+  if 'Balance' not in dahs.text:
+    save_data(host)
+    clickscoin(modulesl,banner)
+  fd=bs(dahs.text,'html.parser').find_all('div',{'class':'info-area'})
+  print(hijau1+"> "+kuning1+"Account information")
+  print(hijau1+'> '+fd[0].text.strip().splitlines()[2]+' : '+fd[0].text.strip().splitlines()[0])
+  link=curl.get("https://clickscoin.com/shortlinks",headers=ua,cookies=cookies)
+ # print(link.text)
+  gt=bs(link.text,'html.parser').find_all('div',{'class':'col-xl-3 col-md-6'})
+  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
+  providers={
+    'TRAFFIC1S': modulesl.trafic1s,
+  #  'EARNNOW': None,
+    'SHORTSFLY': modulesl.shortfly,
+    'CLK.SH': modulesl.clksh,
+    'LINKS FLY.INC': modulesl.linksfly,
+ #   'CLICKSFLY': None,
+    'SHRINKEARN': modulesl.shrinkearn,
+    'EZ4SHORT': modulesl.ez4short,
+  #  'ADLINKCLICK': None,
+    'COINSPARTY': modulesl.coinparty,
+    'LINK1SCOM': modulesl.links1s_com,
+    'DROPLINK': modulesl.droplink,
+    'FCLC': modulesl.fl_lc,
+    'MEGAURL': modulesl.megaurl,
+    'LINKSLY': modulesl.linksly,
+  #  'SHORTANO': None,
+    'LINK1SNET': modulesl.link1s_net,
+    'ADSHORT': modulesl.adshorti_co,
+   # 'TMEARN': None,
+   # 'CLICKSCOIN': None,
+  #  'PROMO-VISITS': None,
+    '1SHORT': modulesl._1short_in,
+ #   'DASH-FREE': None,
+ #   'RAINURL': None,
+    'OWLLINK': modulesl.owlink,
+    'EXFOARY': modulesl.ex_foary_com,
+    'MITLY': modulesl.mitly,
+    'MEGAFLY': modulesl.megafly,
+ #   'FIRE-LINK': None,
+    'ILLINK': modulesl.illink_net,
+ #   'LINKFLY': None,
+ #   'GTLINK': None,
+    'BIRDURLS': modulesl.birdurl,
+    'TRY2LINK': modulesl.try2,
+  #  'SNOWURL': None,
+   # 'SHORTIT': None
+}
+
+  for i in gt:
+    try:
+      name = i.text.strip().splitlines()[0]
+   #   print([i for i in i.text.strip().splitlines() if i])
+      for provider in providers:
+          if provider in name:
+           #   print(name)
+              y=[i for i in i.text.strip().splitlines() if i]
+              link=i.find('a')['href']
+            #  print(link)
+              for ulang in range(int(y[3])):
+                  get_links = curl.get("https://clickscoin.com"+ link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
+                  print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
+                  answer = providers[provider](get_links)
+        #          print(reward.text)
+                  if 'failed to bypass' in answer:
+                      print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+                  else:
+                    reward = curl.get(answer, headers=ua, cookies=cookies)
+                    if 'Congratulations.' in reward.text:
+                      _1 = reward.text.split("message: '")[1].split("'")[0]
+                      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
+    except Exception as e:
+      pass

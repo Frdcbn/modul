@@ -3,20 +3,14 @@ import threading
 import os
 import time
 import datetime
-import json
+import json,sys
 
 def menu(banner,modul,modulesl):
-    os.system("clear")
     hijau1 = "\033[1;92m"  # Terang
     kuning1 = "\033[1;93m"  # Terang
     putih1 = "\033[1;97m"  # Terang
     merah1 = "\033[1;91m"  # Terang
     biru1 = "\033[1;94m"  # Terang
-
-    # Cetak judul banner menu
-    banner.banner(' MAIN MENU ')
-
-    # Muat data dari file JSON
     menu_dict = {
     "0": "METHOD BYPASS",
     "1": "BTCCAYON",
@@ -33,38 +27,49 @@ def menu(banner,modul,modulesl):
     "12": "CLAIMBITS",
     "13": "LTCHUNT",
     "14": "FAUCETCRYPTO_NET",
-    "15": "FAUCET4U",
-    "16": "NOKOFAUCET",
-    "17": "FAUCETSPEEDBTC",
-    "18": "COINZASK",
-    "19": "TIKIEARN",
-    "20": "ALLFAUCET",
-    "21": "BITMONK",
-    "22": "LANDOFBITS",
-    "23": "COINSFARM",
-    "24": "CRYPTO2U",
-    "25": "JAMES-TRUSSY",
-    "26": "COINPAY-FAUCET",
-    "27": "EUROFAUCET_DE",
-    "28": "TEFAUCET.ONLINE",
-    "29": "OSKUT",
-    "30": "EDENFAUCET",
-    "31": "CRYPTOFUTURE",
-    "32": "FREECLAIMFAUCET",
-    "33": "CRYPTOGENZ",
-    "34": "CCTIP",
-    "35": "PAID FAMILY ALL IN ONE",
-    "36": "EARNFREE CASH",
-    "37": "PAIDBUCKS.XYZ",
+    "15": "NOKOFAUCET",
+    "16": "FAUCETSPEEDBTC",
+    "17": "COINZASK",
+    "18": "TIKIEARN",
+    "19": "ALLFAUCET",
+    "20": "BITMONK",
+    "21": "LANDOFBITS",
+    "22": "COINSFARM",
+    "23": "CRYPTO2U",
+    "24": "JAMES-TRUSSY",
+    "25": "COINPAY-FAUCET",
+    "26": "EUROFAUCET_DE",
+    "27": "TEFAUCET.ONLINE",
+    #"28": "OSKUT",
+    "28": "EDENFAUCET",
+    "29": "CRYPTOFUTURE",
+    "30": "FREECLAIMFAUCET",
+    "31": "CRYPTOGENZ",
+    "32": "CCTIP",
+    "33": "PAID FAMILY ALL IN ONE",
+    "34": "EARNFREE CASH",
+    "35": "PAIDBUCKS.XYZ",
+    "36": "CLICKSCOIN",
 }
     data=load_data(menu_dict)
-    # Cetak daftar menu
-    for key, value in menu_dict.items():
-        print(f"{putih1}[{hijau1}{key}{putih1}]{kuning1}.{value} {putih1}( {hijau1}last run {putih1}: {hijau1}{convrt(data[key])}{putih1})")
-        time.sleep(0.1)
-
-    # Meminta input pengguna
-    select = input(putih1 + "select : ")
+    if len(sys.argv) == 2:
+      select = sys.argv[1]
+    else:
+      os.system("clear")
+      
+  
+      # Cetak judul banner menu
+      banner.banner(' MAIN MENU ')
+  
+      # Muat data dari file JSON
+      
+      # Cetak daftar menu
+      for key, value in menu_dict.items():
+          print(f"{putih1}[{hijau1}{key}{putih1}]{kuning1}.{value} {putih1}( {hijau1}last run {putih1}: {hijau1}{convrt(data[key])}{putih1})")
+          time.sleep(0.1)
+  
+      # Meminta input pengguna
+      select = input(putih1 + "select : ")
     waktu_terakhir_dipilih = time.time()
     save(waktu_terakhir_dipilih, select, menu_dict, data)
 
@@ -79,47 +84,48 @@ def menu(banner,modul,modulesl):
         exit()
     else:
         thread_map = {
-            "1": modul.btccanyon,
-            "2": modul.coingax,
-            "3": modul.claimsatoshi,
-            "4": modul.coinfola,
-            "5": modul.claimlite,
-            "6": modul.simpleads,
-            "7": modul.adhives,
-            "8": modul.earnsolana,
-            "9": modul.claim_ro,
-            "10": modul.btcadspace,
-            "11": modul.rushbitcoin,
-            "12": modul.claimbits,
-            "13": modul.ltchunt,
-            "14": modul.faucetcrypto_net,
-            "15": modul.faucet4u,
-            "16": modul.nokofaucet,
-            "17": modul.faucetspeedbtc,
-            "18": modul.coinzask,
-            "19": modul.tikiearn,
-            "20": modul.allfaucet,
-            "21": modul.bitmonk,
-            "22": modul.landofbits,
-            "23": modul.coinsfarm,
-            "24": modul.crypto2u,
-            "25": modul.james_trussy,
-            "26": modul.coinpay_faucet,
-            "27": modul.eurofaucet_de,
-            "28": modul.tefaucet,
-            "29": modul.oskut,
-            "30": modul.endenfaucet,
-            "31": modul.cryptofuture,
-            "32": modul.freeclaimfaucet,
-            "33": modul.cryptogenz,
-            "34": modul.bot_tele,
-            "35": modul.all_in_one,
-            "36": modul.earnfree_cash,
-            "37": modul.paidbucks,
-        }
+    "1": modul.btccanyon,
+    "2": modul.coingax,
+    "3": modul.claimsatoshi,
+    "4": modul.coinfola,
+    "5": modul.claimlite,
+    "6": modul.simpleads,
+    "7": modul.adhives,
+    "8": modul.earnsolana,
+    "9": modul.claim_ro,
+    "10": modul.btcadspace,
+    "11": modul.rushbitcoin,
+    "12": modul.claimbits,
+    "13": modul.ltchunt,
+    "14": modul.faucetcrypto_net,
+    "15": modul.nokofaucet,
+    "16": modul.faucetspeedbtc,
+    "17": modul.coinzask,
+    "18": modul.tikiearn,
+    "19": modul.allfaucet,
+    "20": modul.bitmonk,
+    "21": modul.landofbits,
+    "22": modul.coinsfarm,
+    "23": modul.crypto2u,
+    "24": modul.james_trussy,
+    "25": modul.coinpay_faucet,
+    "26": modul.eurofaucet_de,
+    "27": modul.tefaucet,
+    #"28": modul.oskut,
+    "28": modul.endenfaucet,
+    "29": modul.cryptofuture,
+    "30": modul.freeclaimfaucet,
+    "31": modul.cryptogenz,
+    "32": modul.bot_tele,
+    "33": modul.all_in_one,
+    "34": modul.earnfree_cash,
+    "35": modul.paidbucks,
+    "36": modul.clickscoin,
+}
+
     
         if select in thread_map:
-            if '34' in select:
+            if '32' in select:
               print(f"{putih1}[{hijau1}1{putih1}]{kuning1}.Run bot ")
               print(f"{putih1}[{hijau1}2{putih1}]{kuning1}.Settings id akun utama")
               pilih=input(putih1+'Select : ')
