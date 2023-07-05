@@ -1,16 +1,168 @@
+from libtmux import Server
 import requests,json,time,asyncio,re
 from os import system
 import shutil,os
 from time import sleep
 import random
 from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
 from http.cookies import SimpleCookie
 from urllib.parse import urlparse,urlencode
 from tqdm import tqdm
 from pyfiglet import figlet_format 
 import pathlib
 from telethon import TelegramClient, sync, events
-#import modulesl
+import subprocess
+import threading
+import os
+import requests,queue
+from PIL import Image, ImageDraw, ImageFont
+import socket
+FONT_URL = "https://github.com/stamen/toner-carto/raw/master/fonts/Arial-Unicode-Bold.ttf"  # Ganti dengan URL font yang valid
+FONT_PATH = "Arial-Unicode-Bold.ttf"  # Path font yang diinginkan
+def tiktok_downloader(url, output_name):
+    try:
+        server_url = 'https://musicaldown.com/'
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "DNT": "1",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "TE": "trailers"
+        }
+        session = requests.Session()
+        session.headers.update(headers)
+        req = session.get(server_url)
+        data = {}
+        parse = BeautifulSoup(req.text, 'html.parser')
+        input_elements = parse.find_all('input')
+        for i in input_elements:
+            if i.get("id") == "link_url":
+                data[i.get("name")] = url
+            else:
+                data[i.get("name")] = i.get("value")
+        post_url = server_url + "id/download"
+        req_post = session.post(post_url, data=data, allow_redirects=True)
+        if req_post.status_code == 302 or 'This video is currently not available' in req_post.text or 'Video is private or removed!' in req_post.text:
+            print('- video private or remove')
+            return 'private/remove'
+        elif 'Submitted Url is Invalid, Try Again' in req_post.text:
+            print('- url is invalid')
+            return 'url-invalid'
+        get_all_blank = BeautifulSoup(req_post.text, 'html.parser').find_all('a', attrs={'target': '_blank'})
+        download_link = get_all_blank[0].get('href')
+        r = requests.get(download_link)
+        with open(output_name, "wb") as f:
+            total_length = int(r.headers.get('content-length'))
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+        return True
+    except IndexError:
+        return False
+def receive_data1(data_queue, stop_event):
+    # Menerima data dari skrip pertama
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_address = ('localhost', 2222)  # Ganti dengan alamat dan port yang sesuai
+    sock.bind(server_address)
+    sock.listen(1)
+    print('Menunggu koneksi...')
+    
+    while not stop_event.is_set():
+        try:
+            connection, client_address = sock.accept()
+            data = connection.recv(1024)
+            if data:
+                sleep(1)
+                print(f'Data diterima dari skrip pertama: {data.decode()}')
+                data_queue.put(data.decode())  # Menambahkan data ke dalam queue
+        except Exception as e:
+            print(f'Error saat menerima data: {str(e)}')
+        finally:
+            if connection:
+                connection.close()
+def send_signal1(port, message):
+  try:
+    # Inisialisasi socket
+    send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    send_server_address = ('localhost', 11112)
+    send_sock.connect(send_server_address)
+
+    # Mengirim pesan ke script1
+    send_sock.sendall(message.encode())
+
+    # Menutup koneksi
+    send_sock.close()
+    return None
+  except Exception as e:
+    return str(e)
+def download_font_if_not_exist(font_url, font_path):
+    if not os.path.exists(font_path):
+        response = requests.get(font_url)
+        with open(font_path, "wb") as font_file:
+            font_file.write(response.content)
+def text_to_image(name):
+    # Konfigurasi font
+    capture_command = f"tmux capture-pane -p -t {name} -J"
+    text = subprocess.check_output(capture_command, shell=True).decode('utf-8')
+    font_size = 30
+    
+    download_font_if_not_exist(FONT_URL, FONT_PATH)
+    font = ImageFont.truetype(FONT_PATH, font_size)
+    
+    # Mendapatkan ukuran gambar berdasarkan ukuran teks
+    text_width, text_height = font.getsize_multiline(text)
+    
+    # Membuat gambar kosong dengan latar belakang putih
+    image = Image.new("RGB", (text_width, text_height), "white")
+    draw = ImageDraw.Draw(image)
+    
+    # Menulis teks pada gambar
+    draw.text((0, 0), text, font=font, fill="black")
+    
+    # Menyimpan gambar
+    image.save(name + ".png")
+    return "image berhasil di simpan"
+def parse_data(data):
+    parsed_data = {}
+    try:
+        parsed_json = json.loads(data)
+        coins = parsed_json["coins"]
+        for coin in coins:
+            coin_name = coin["coin"]
+            balance = coin["balance"]
+            parsed_data[coin_name] = balance
+    except (KeyError, json.JSONDecodeError) as e:
+        print("Error parsing data:", str(e))
+    
+    return parsed_data
+def create_tmux_session(session_name, script_path):
+  try:
+    server = Server()
+    session = server.new_session(session_name)
+    window = session.attached_window
+    pane = window.attached_pane
+    pane.send_keys(f'python main.py '+script_path, enter=True)
+  except Exception as e:
+    return str(e)
+def list_sessions():
+    server = Server()
+    sessions = server.list_sessions()
+    session_names = [str("`"+session.get("session_name")+"`") for session in sessions]
+    return session_names
+def kill_session(session_name):
+  try:
+    server = Server()
+    server.kill_session(session_name)
+    return "Success kill session"
+  except Exception as e:
+    return str(e)
 def parse_rupiah_saldo(data):
     for data in data.splitlines():
      if "Saldo" in data:
@@ -38,214 +190,382 @@ def animasi(menit):
       print(output, end='\r')
       time.sleep(1)
       detik -= 1
-def bot_tele(modulesl, banner):
-    os.system('cls' if os.name == 'nt' else 'clear')
-    banner.banner('BOT CCTIP')
-    api_id = 9209038
-    owner=open('owner.txt').read().splitlines()[0]
-    api_hash = '82d6f5d828fc5f5942e29bdfc1e01d14'
-    nomor=open('nomor.txt').read().splitlines()[0]
-    async def handle_new_message(event):
-      message = event.message
-      pesan=message.text
-      id_tip=["962775809","6285122310","5796879502","1380459388","6143654908","5311716983"]
-      if '/command' in message.text:
-        if str(message.from_id.user_id) == owner:
-          await message.reply('''
-silahkan gunakan command seperti ini `/kirim_saldo nama_bot jumlah nama_coinya`
-silahkan gunakan command seperti ini `/cek_saldo nama_bot`
-''')
-      if '/kirim_saldo' in message.text:
-        if  str(message.from_id.user_id) == owner:
-          if ' ' not in message.text:
-            await message.reply('silahkan gunakan command seperti ini `/kirim_saldo nama_bot jumlah nama_coinya`')
-          else:
-            name_bot=['cctip','mahawallet','payfun']
-            mes=message.text.split(' ')
-            #print(mes)
-            if mes[1].lower() in name_bot:
-              if mes[1].lower() == 'cctip':
-                if mes[2].lower() == 'all':
-                  if len(mes) == 3:
-                    await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
-                    sleep(1)
-                    pas=await client.get_messages(entity="@cctip_bot",limit=1)
-                   # if str(message.from_id.user_id) in id_tip:
-                    #if 'Available Balance:' in pesan:
-                    bal=get_balance_cctip(pas[0].message)
-                   # print(bal)
-                    for nama,jumlah in bal.items():
-                      if jumlah != "0":
-                        await message.reply('/tip '+jumlah+' '+nama)
-                      sleep(2)
-                  else:
-                    await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
-                    sleep(1)
-                    pas=await client.get_messages(entity="@cctip_bot",limit=1)
-                   # if str(message.from_id.user_id) in id_tip:
-                    #if 'Available Balance:' in pesan:
-                    bal=get_balance_cctip(pas[0].message)
-                    try:
-                      await message.reply('/tip '+bal[mes[3].upper()]+' '+mes[3])
-                    except Exception as e:
-                      await message.reply('Coin not found')
+c_=None
+cek_p=None
+def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner('BOT CCTIP')
+  api_id = 9209038
+  owner=open('owner.txt').read().splitlines()[0]
+  api_hash = '82d6f5d828fc5f5942e29bdfc1e01d14'
+  nomor=open('nomor.txt').read().splitlines()[0]
+  async def handle_new_message(event):
+    global cek_p
+    global c_
+    #global data_queue
+    message = event.message
+    #print(message)
+    pesan=message.text
+    id_tip=["962775809","6285122310","5796879502","1380459388","6143654908","5311716983"]
+    if '/command' in message.text:
+      if str(message.from_id.user_id) == owner:
+        await message.reply('''
+  silahkan gunakan command seperti ini `/kirim_saldo nama_bot jumlah nama_coinya`
+  silahkan gunakan command seperti ini `/cek_saldo nama_bot`
+  ''')
+    if '/kirim_saldo' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        if ' ' not in message.text:
+          await message.reply('silahkan gunakan command seperti ini `/kirim_saldo nama_bot jumlah nama_coinya`')
+        else:
+          name_bot=['cctip','mahawallet','payfun']
+          mes=message.text.split(' ')
+          #print(mes)
+          if mes[1].lower() in name_bot:
+            if mes[1].lower() == 'cctip':
+              if mes[2].lower() == 'all':
+                if len(mes) == 3:
+                  await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
+                  sleep(1)
+                  pas=await client.get_messages(entity="@cctip_bot",limit=1)
+                 # if str(message.from_id.user_id) in id_tip:
+                  #if 'Available Balance:' in pesan:
+                  bal=get_balance_cctip(pas[0].message)
+                 # print(bal)
+                  for nama,jumlah in bal.items():
+                    if jumlah != "0":
+                      await message.reply('/tip '+jumlah+' '+nama)
+                    sleep(2)
                 else:
-                      bal=get_balance_cctip(message.text)
-                      await message.reply('/tip '+mes[2]+' '+mes[3])
-              if mes[1].lower() == 'payfun':
-                if mes[2].lower() == 'all':
-                  await client.send_message(entity="@PayFun_tip_bot",message="💰Balance")
-                  sleep(3)
-                  pas=await client.get_messages(entity="@PayFun_tip_bot",limit=1)
-                  saldo=pas[0].message.splitlines()[0].replace("saldo lu: Rp", "").strip()
-                  await message.reply('/cip '+saldo)
-                else:
-                  await message.reply('/cip '+mes[2])
-              if mes[1].lower() == 'mahawallet':
-                if mes[2].lower() == 'all':
-                  await client.send_message(entity="@MahaWalletBot",message="💰 Saldo")
-                  sleep(5)
-                  pas=await client.get_messages(entity="@MahaWalletBot",limit=1)
-                #  print(pas[0].message)
-                  saldo=parse_rupiah_saldo(pas[0].message)
-                #  print(saldo)
-                  await message.reply('/kirim '+saldo)
-                else:
-                  await message.reply('/kirim '+mes[2])
-            else:
-              await message.reply('''maaf seperti nya bot tip itu tidak di dukung bot tip yang di dukung
-- `CCTIP`
-- `MAHA WALLET` 
-- `PAYFUN`''')
-      if '/cek_saldo' in message.text:
-        if  str(message.from_id.user_id) == owner:
-          if ' ' not in message.text:
-            await message.reply('silahkan gunakan command seperti ini `/cek_saldo nama_bot`')
-          else:
-            name_bot=['cctip','mahawallet','payfun']
-            mes=message.text.split(' ')
-            #print(mes)
-            if mes[1].lower() in name_bot:
-              if mes[1].lower() == 'cctip':
-                await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
-                sleep(2)
-                pas=await client.get_messages(entity="@cctip_bot",limit=1)
-                await message.reply(pas[0].message)
-              if mes[1].lower() == 'payfun':
+                  await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
+                  sleep(1)
+                  pas=await client.get_messages(entity="@cctip_bot",limit=1)
+                 # if str(message.from_id.user_id) in id_tip:
+                  #if 'Available Balance:' in pesan:
+                  bal=get_balance_cctip(pas[0].message)
+                  try:
+                    await message.reply('/tip '+bal[mes[3].upper()]+' '+mes[3])
+                  except Exception as e:
+                    await message.reply('Coin not found')
+              else:
+                    bal=get_balance_cctip(message.text)
+                    await message.reply('/tip '+mes[2]+' '+mes[3])
+            if mes[1].lower() == 'payfun':
+              if mes[2].lower() == 'all':
                 await client.send_message(entity="@PayFun_tip_bot",message="💰Balance")
                 sleep(3)
                 pas=await client.get_messages(entity="@PayFun_tip_bot",limit=1)
-                await message.reply(pas[0].message)
-              if mes[1].lower() == 'mahawallet':
+                saldo=pas[0].message.splitlines()[0].replace("saldo lu: Rp", "").strip()
+                await message.reply('/cip '+saldo)
+              else:
+                await message.reply('/cip '+mes[2])
+            if mes[1].lower() == 'mahawallet':
+              if mes[2].lower() == 'all':
                 await client.send_message(entity="@MahaWalletBot",message="💰 Saldo")
-                sleep(3)
+                sleep(5)
                 pas=await client.get_messages(entity="@MahaWalletBot",limit=1)
-                await message.reply(pas[0].message)
-      print(f'{putih1}[{kuning1} > {putih1}]{hijau1} {pesan}')
-      async def send_reply(message, reply,tim):
-        async with client.action(message.chat_id, "typing"):  # Mengirim status "sedang mengetik"
-            await asyncio.sleep(tim)  # Menunda selama 3 detik
-            await client.send_message(message.chat_id,reply)
-      if 'pengguna mengumpulkan hujan Anda.' in message.text:
-        if str(message.from_id.user_id) in id_tip:
-         if message.mentioned:
-           pass
-      if 'Berhasil sawer' in message.text:
-        if str(message.from_id.user_id) in id_tip:
-         if message.mentioned:
-        #   random_sleep()
-           pass
-         else:
-         #  random_sleep()
-           pass
-      if 'Airdrop sejumlah ' in message.text:
-        if str(message.from_id.user_id) in id_tip:
-         if message.mentioned:
-        #   random_sleep()
-           pass
-         else:
-         #  random_sleep()
-           pass
-      if 'users collected your' in message.text:
-        if str(message.from_id.user_id) in id_tip:
-         if message.mentioned:
-          # random_sleep()
-           pass
-         else:
-           pass
-      if 'pengguna mengumpulkan undian Anda.' in message.text:
-        if str(message.from_id.user_id) in id_tip:
-         if message.mentioned:
-         #  random_sleep()
-           pass
-      if 'Membuat undian di ' in message.text:
-       if str(message.from_id.user_id) in id_tip:
-        # if message.mentioned:
-        #   random_sleep()
-           pesan=pesan.split("Kirim ")[1].split(" untuk")[0]
-           await send_reply(message, pesan,random_sleep())
-      if 'Membuat airdrop di ' in message.text:
-       if str(message.from_id.user_id) in id_tip:
-        # if message.mentioned:
-         #  random_sleep()
-           pesan=pesan.split("Kirim ")[1].split(" untuk")[0]
-           await send_reply(message, pesan,random_sleep())
-      if 'Giveaway sejumlah ' in message.text:
-       if str(message.from_id.user_id) in id_tip:
-        # if message.mentioned:
-          # random_sleep()
-           pesan=pesan.split("Kata Kunci : `")[1].split("`")[0]
-           await send_reply(message, pesan,random_sleep())
-      if 'Created an airdrop in ' in message.text:
-       if str(message.from_id.user_id) in id_tip:
-      #   if message.mentioned:
-         #  random_sleep()
-           pesan=pesan.split("Send `")[1].split("` to")[0]
-           await send_reply(message, pesan,random_sleep())
-      if 'Created a draw in ' in message.text:
-       if str(message.from_id.user_id) in id_tip:
-     #    if message.mentioned:
-       #    random_sleep()
-           pesan=pesan.split("Send ")[1].split(" to")[0]
-           await send_reply(message, pesan,random_sleep())
-      if 'Create Airdrop Success!! ' in message.text:
-       if str(message.from_id.user_id) in id_tip:
-     #    if message.mentioned:
-          # random_sleep()
-           pesan=pesan.split("Claim: `")[1].split("`")[0]
-           await send_reply(message, pesan,random_sleep())
-      if 'Created a giveaway in ' in message.text:
-       if str(message.from_id.user_id) in id_tip:
-     #    if message.mentioned:
-           random_sleep()
-           await message.click(text='👉Grab👈')
-       #  else:
-      await client.send_read_acknowledge(message.to_id, max_id=message.id)
-    with TelegramClient('session/' + nomor, api_id, api_hash) as client:
-        client.connect()
-        if not client.is_user_authorized():
-         try:
-            client.send_code_request(phone_number)
-            me = client.sign_in(phone_number, input(f"{putih1}MASUKAN KODE YANG KAMU TERIMA DI TELEGRAM : "))
-            client.disconnect()
-            bot_tele(modulesl,banner)
-         except Exception as e:
-           print(e)
-        user = client.get_me()
-        print(hijau1+"> "+kuning1+"Account information")
-        print(hijau1+"> "+hijau1+f"Name {putih1}: {hijau1}{user.first_name}")
-        print(hijau1+"> "+kuning1+"Start bot")
-        @client.on(events.NewMessage(chats=client.get_dialogs()))
-        async def main(event):
-            await handle_new_message(event)
-
-        client.start()
-        client.run_until_disconnected()
+              #  print(pas[0].message)
+                saldo=parse_rupiah_saldo(pas[0].message)
+              #  print(saldo)
+                await message.reply('/kirim '+saldo)
+              else:
+                await message.reply('/kirim '+mes[2])
+          else:
+            await message.reply('''maaf seperti nya bot tip itu tidak di dukung bot tip yang di dukung
+  - `CCTIP`
+  - `MAHA WALLET` 
+  - `PAYFUN`''')
+    if '/cek_saldo' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        if ' ' not in message.text:
+          await message.reply('silahkan gunakan command seperti ini `/cek_saldo nama_bot`')
+        else:
+          name_bot=['cctip','mahawallet','payfun']
+          mes=message.text.split(' ')
+          #print(mes)
+          if mes[1].lower() in name_bot:
+            if mes[1].lower() == 'cctip':
+              await client.send_message(entity="@cctip_bot",message="🏦My Wallet")
+              sleep(2)
+              pas=await client.get_messages(entity="@cctip_bot",limit=1)
+              await message.reply(pas[0].message)
+            if mes[1].lower() == 'payfun':
+              await client.send_message(entity="@PayFun_tip_bot",message="💰Balance")
+              sleep(3)
+              pas=await client.get_messages(entity="@PayFun_tip_bot",limit=1)
+              await message.reply(pas[0].message)
+            if mes[1].lower() == 'mahawallet':
+              await client.send_message(entity="@MahaWalletBot",message="💰 Saldo")
+              sleep(3)
+              pas=await client.get_messages(entity="@MahaWalletBot",limit=1)
+              await message.reply(pas[0].message)
+    if '/cek_session' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        sessions = list_sessions()
+        await message.reply("\n".join(sessions))
+      else:
+        await message.reply("BODO AMAT!!")
+    if '/kill_session' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        if ' ' not in message.text:
+          await message.reply("gunakan command seperti ini `/kill_session nama_sesi`")
+        else:
+          nama=message.text.split(' ')[1]
+          await message.reply(kill_session(nama))
+      else:
+        await message.reply("BODO AMAT!!")
+    if '/menu' in message.text:
+      if  str(message.from_id.user_id) == owner:
+          menu_text = "\n".join(f"{str(key)}. {value.upper()}" for key, value in menu_dict.items())
+          await message.reply("menu script yang ada di script MR.BADUT")
+          await message.reply(menu_text)
+      else:
+        await message.reply("BODO AMAT!!")
+    if '/gambar_sesi' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        if ' ' not in message.text:
+          await message.reply("gunakan command seperti ini `/kirim_gambar_sesi nama_sesi`")
+        else:
+          nama=message.text.split(' ')[1]
+          if ',' in nama:
+            for nama in nama.split(','):
+              status=text_to_image(nama)
+              if "image berhasil di simpan" in status:
+                await message.reply(status)
+               # image_file:
+                chat = await message.get_chat()
+                sent_message = await client.send_file(chat, nama+".png", caption=f"Gambar sesi {nama}")
+                os.remove(nama+".png")
+          status=text_to_image(nama)
+          if "image berhasil di simpan" in status:
+            await message.reply(status)
+           # image_file:
+            chat = await message.get_chat()
+            sent_message = await client.send_file(chat, nama+".png", caption=f"Gambar sesi {nama}")
+            os.remove(nama+".png")
+            # Reply dengan gambar
+          else:
+            await message.reply("ERROR")
+      else:
+        await message.reply("BODO AMAT!!")
+    if '/tiktok' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        c_=message.peer_id.channel_id
+        if ' ' not in message.text:
+          await message.reply("gunakan command seperti ini `/run_script nomor_menu`")
+        else:
+          url=message.text.split('/tiktok ')[1]
+          ua={
+     # 'Host': 'www.tiktok.com',
+      'upgrade-insecure-requests': '1',
+      'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36',
+      'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+      'dnt': '1',
+      'x-requested-with': 'mark.via.gp',
+      'sec-fetch-site': 'none',
+      'sec-fetch-mode': 'navigate',
+      'sec-fetch-user': '?1',
+      'sec-fetch-dest': 'document',
+      'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7'
+      }
+          nama=requests.get(url,headers=ua)
+          y=bs(nama.text,'html.parser').find('title')
+          if '@' in y.text:
+            y=y.text.replace('@','')
+          else:
+            y=y.text
+          output_name = y+'.mp4'  # Ganti dengan nama file output yang diinginkan
+          result = tiktok_downloader(url, output_name)
+          if result == True:
+            await message.reply(file=output_name,message="Video telah di download")
+            os.remove(output_name)
+          else:
+            await message.reply("Video gagal di download")
+    if '/run' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        if 'chat_id' in str(message):
+          c_=message.peer_id.chat_id
+        else:
+          c_=message.peer_id.channel_id
+        if ' ' not in message.text:
+          await message.reply("gunakan command seperti ini `/run_script nomor_menu`")
+        else:
+          nama=message.text.split(' ')[1]
+          await message.reply("Please wait")
+          if cek_p == True:
+            await message.reply("Maaf sepertinya ada script yang sedang menunggu cookies mohon selesaikan dulu script tersebut sebelum menjalankan yang baru")
+          else:
+            st=create_tmux_session(menu_dict[int(nama)].upper(), nama)
+            if st:
+              await message.reply(st)
+            else:
+              await message.reply("Sukses run script di sesi "+menu_dict[int(nama)].upper())
+  
+      else:
+        await message.reply("BODO AMAT!!")
+    if c_ != None:
+      if not data_queue.empty():
+        inf=await client.get_entity(int(owner))
+        await client.send_message(c_, f"@{inf.username} "+data_queue.get())
+        cek_p=True
+    if '/cookies' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        if ' ' not in message.text:
+          await message.reply("gunakan command seperti ini `/cookies nama_sesi cookies_anda$user_agent`")
+        else:
+          pesan=message.text
+          send_signal1(1111, pesan)
+          await message.reply("Data Sukses di save")
+          cek_p=None
+    if '/select' in message.text:
+      if  str(message.from_id.user_id) == owner:
+        if ' ' not in message.text:
+          await message.reply("gunakan command seperti ini `/select nama_sesi nomor`")
+        else:
+          pesan=message.text
+          send_signal1(1111, pesan)
+          await message.reply("Data Sukses di kirim")
+          cek_p=None
+    print(f'{putih1}[{kuning1} > {putih1}]{hijau1} {pesan}')
+    async def send_reply(message, reply,tim):
+      async with client.action(message.chat_id, "typing"):  # Mengirim status "sedang mengetik"
+          await asyncio.sleep(tim)  # Menunda selama 3 detik
+          await client.send_message(message.chat_id,reply)
+    if 'pengguna mengumpulkan hujan Anda.' in message.text:
+      if str(message.from_id.user_id) in id_tip:
+       if message.mentioned:
+         pass
+    if 'Berhasil sawer' in message.text:
+      if str(message.from_id.user_id) in id_tip:
+       if message.mentioned:
+      #   random_sleep()
+         pass
+       else:
+       #  random_sleep()
+         pass
+    if 'Airdrop sejumlah ' in message.text:
+      if str(message.from_id.user_id) in id_tip:
+       if message.mentioned:
+      #   random_sleep()
+         pass
+       else:
+       #  random_sleep()
+         pass
+    if 'users collected your' in message.text:
+      if str(message.from_id.user_id) in id_tip:
+       if message.mentioned:
+        # random_sleep()
+         pass
+       else:
+         pass
+    if 'pengguna mengumpulkan undian Anda.' in message.text:
+      if str(message.from_id.user_id) in id_tip:
+       if message.mentioned:
+       #  random_sleep()
+         pass
+    if 'Membuat undian di ' in message.text:
+     if str(message.from_id.user_id) in id_tip:
+      # if message.mentioned:
+      #   random_sleep()
+         pesan=pesan.split("Kirim ")[1].split(" untuk")[0]
+         await send_reply(message, pesan,random_sleep())
+    if 'Membuat airdrop di ' in message.text:
+     if str(message.from_id.user_id) in id_tip:
+      # if message.mentioned:
+       #  random_sleep()
+         pesan=pesan.split("Kirim ")[1].split(" untuk")[0]
+         await send_reply(message, pesan,random_sleep())
+    if 'Giveaway sejumlah ' in message.text:
+     if str(message.from_id.user_id) in id_tip:
+      # if message.mentioned:
+        # random_sleep()
+         pesan=pesan.split("Kata Kunci : `")[1].split("`")[0]
+         await send_reply(message, pesan,random_sleep())
+    if 'Created an airdrop in ' in message.text:
+     if str(message.from_id.user_id) in id_tip:
+         pesan=pesan.split("Send `")[1].split("` to")[0]
+         await send_reply(message, pesan,random_sleep())
+    if 'Created a draw in ' in message.text:
+     if str(message.from_id.user_id) in id_tip:
+         pesan=pesan.split("Send ")[1].split(" to")[0]
+         await send_reply(message, pesan,random_sleep())
+    if 'Create Airdrop Success!! ' in message.text:
+     if str(message.from_id.user_id) in id_tip:
+         pesan=pesan.split("Claim: `")[1].split("`")[0]
+         await send_reply(message, pesan,random_sleep())
+    if 'Created a giveaway in ' in message.text:
+     if str(message.from_id.user_id) in id_tip:
+         random_sleep()
+         await message.click(text='👉Grab👈')
+     #  else:
+    await client.send_read_acknowledge(message.to_id, max_id=message.id)
+  with TelegramClient('session/' + nomor, api_id, api_hash) as client:
+      client.connect()
+      if not client.is_user_authorized():
+       try:
+          client.send_code_request(phone_number)
+          me = client.sign_in(phone_number, input(f"{putih1}MASUKAN KODE YANG KAMU TERIMA DI TELEGRAM : "))
+          client.disconnect()
+          bot_tele(modulesl,banner)
+       except Exception as e:
+         print(e)
+      user = client.get_me()
+      print(hijau1+"> "+kuning1+"Account information")
+      print(hijau1+"> "+hijau1+f"Name {putih1}: {hijau1}{user.first_name}")
+      print(hijau1+"> "+kuning1+"Start bot")
+      @client.on(events.NewMessage(chats=client.get_dialogs()))
+      async def main(event):
+          c_=None
+          await handle_new_message(event)
+  
+      client.start()
+      client.run_until_disconnected()
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
 merah1 = "\033[1;91m"#Terang
 biru1 = "\033[1;94m"#Terang
+def send_signal(port, message):
+    send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    send_server_address = ('localhost', 2222)
+    send_sock.connect(send_server_address)
+
+    # Mengirim pesan ke script1
+    send_sock.sendall(message.encode())
+
+    # Menutup koneksi
+    send_sock.close()
+def receive_signal(port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_address = ('localhost', 11112)
+    sock.bind(server_address)
+    sock.listen(1)
+    while True:
+        print("Menunggu sinyal...")
+        sleep(1)
+        try:
+            # Menerima koneksi dari pengirim
+            connection, client_address = sock.accept()
+
+            try:
+                # Menerima pesan
+                message = connection.recv(1024).decode()
+
+                # Menghandle pesan yang diterima
+                if message == None:
+                    pass
+                else:
+                    sock.close()
+                    return message
+            finally:
+                # Menutup koneksi
+                sock.close()
+        except socket.timeout:
+            sock.close()
+            return None
+
+    # Return None jika tidak ada pesan masuk dalam waktu 5 detik
+    return None
 def cache_control(name):
   main_folder = 'cache'
   sub_folder = name
@@ -264,20 +584,25 @@ def data_control(name):
   sub_folder_path = main_folder_path / sub_folder
   if not sub_folder_path.exists():
       sub_folder_path.mkdir()
-def save_data(name):
+def save_data(tele,name=None):
     try:
         with open(f'data/{name}/{name}.json', 'r') as file:
             data = json.load(file)
             cookies = data.get('cookies')
             user_agent = data.get('user_agent')
-            if user_agent:
+            print(tele)
+            if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                cookies,user_agent=mes.split(name.upper()+' ')[1].split('$')
+            else:
                 print(f'{putih1}[{kuning1} ~ {putih1}] {hijau1}User-Agent sudah ada tetap update User-Agent? jika User-Agent sudah di update tetap cf gunakan User-Agent : XYZ/3.0')
                 jawab = input('y/n : '.lower())
                 if jawab == 'y':
                   user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
                 cookies = input(hijau1 + 'Masukkan cookies mu > ')
-            else:
-                user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
             data = {
                 'cookies': cookies,
                 'user_agent': user_agent
@@ -286,15 +611,22 @@ def save_data(name):
                 json.dump(data, file)
           #  return cookies, user_agent
     except FileNotFoundError:
-        cookies = input(hijau1 + 'Masukkan cookies mu > ')
-        user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
-        data = {
-            'cookies': cookies,
-            'user_agent': user_agent
-        }
-        with open(f'data/{name}/{name}.json', 'w') as file:
-            json.dump(data, file)
-        return cookies, user_agent
+          if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                cookies,user_agent=mes.split(name.upper()+' ')[1].split('$')
+          else:
+              cookies = input(hijau1 + 'Masukkan cookies mu > ')
+              user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
+          data = {
+              'cookies': cookies,
+              'user_agent': user_agent
+          }
+          with open(f'data/{name}/{name}.json', 'w') as file:
+              json.dump(data, file)
+          return cookies, user_agent
 def load_data(name):
       try:
           with open(f'data/{name}/{name}.json', 'r') as file:
@@ -304,7 +636,7 @@ def load_data(name):
           return cookies, user_agent
       except FileNotFoundError:
           return None, None
-def btccanyon(modulesl,banner):
+def btccanyon(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner("BTCCANYON")
   data_control('btccanyon')
@@ -354,8 +686,8 @@ def btccanyon(modulesl,banner):
       return answer
   cookies, ugentmu = load_data('btccanyon')
   if not os.path.exists("data/btccanyon/btccanyon.json"):
-    save_data('btccanyon')
-    btccanyon(modulesl,banner)
+    save_data(tele,'btccanyon')
+    btccanyon(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -365,14 +697,17 @@ def btccanyon(modulesl,banner):
   }
   curl=requests.Session()
   get_sl=curl.get('https://btccanyon.com/shortlinks.html',headers=ua,cookies=cookies)
+  if 'Account Balance' not in get_sl.text:
+    save_data(tele,'btccanyon')
+    btccanyon(modulesl,banner,tele)
   try:
     print(hijau1+"> "+kuning1+"Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
       print(hijau1+'> '+info.text.strip())
   except Exception as e:
-    save_data('btccanyon')
-    btccanyon(modulesl,banner)
+    save_data(tele,'btccanyon')
+    btccanyon(modulesl,banner,tele)
   print(hijau1+"> "+kuning1+"Start working on ptc")
   get_ptc=curl.get('https://btccanyon.com/ptc.html',headers=ua,cookies=cookies)
   def balance():
@@ -487,7 +822,7 @@ def btccanyon(modulesl,banner):
       print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
       for i in tqdm (range (int(600)), leave=False,desc="Please wait..."):
             time.sleep(1)
-def claimlite(modulesl,banner):
+def claimlite(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner("CLAIMLITE")
   data_control('claimlite')
@@ -537,8 +872,8 @@ def claimlite(modulesl,banner):
       return answer
   cookies, ugentmu = load_data('claimlite')
   if not os.path.exists("data/claimlite/claimlite.json"):
-    save_data('claimlite')
-    claimlite(modulesl,banner)
+    save_data(tele,'claimlite')
+    claimlite(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -548,14 +883,17 @@ def claimlite(modulesl,banner):
   }
   curl=requests.Session()
   get_sl=curl.get('https://claimlite.club/shortlinks.html',headers=ua,cookies=cookies)
+  if 'Account Balance' not in get_sl.text:
+    save_data(tele,'claimlite')
+    claimlite(modulesl,banner,tele)
   try:
     print(hijau1+"> "+kuning1+"Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
       print(hijau1+'> '+info.text.strip())
   except Exception as e:
-    save_data('claimlite')
-    claimlite(modulesl,banner)
+    save_data(tele,'claimlite')
+    claimlite(modulesl,banner,tele)
   print(hijau1+"> "+kuning1+"Start working on ptc")
   get_ptc=curl.get('https://claimlite.club/ptc.html',headers=ua,cookies=cookies)
   def balance():
@@ -657,7 +995,7 @@ def claimlite(modulesl,banner):
       for i in tqdm (range (int(300)), leave=False,desc="Please wait..."):
             time.sleep(1)
             pass
-def rushbitcoin(modulesl,banner):
+def rushbitcoin(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner("RUSHBITCOIN")
   data_control('rushbitcoin')
@@ -707,8 +1045,8 @@ def rushbitcoin(modulesl,banner):
       return answer
   cookies, ugentmu = load_data('rushbitcoin')
   if not os.path.exists("data/rushbitcoin/rushbitcoin.json"):
-    save_data('rushbitcoin')
-    rushbitcoin(modulesl,banner)
+    save_data(tele,'rushbitcoin')
+    rushbitcoin(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -718,14 +1056,17 @@ def rushbitcoin(modulesl,banner):
   }
   curl=requests.Session()
   get_sl=curl.get('https://rushbitcoin.com/shortlinks.html',headers=ua,cookies=cookies)
+  if 'Account Balance' not in get_sl.text:
+    save_data(tele,'rushbitcoin')
+    rushbitcoin(modulesl,banner,tele)
   try:
     print(hijau1+"> "+kuning1+"Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
       print(hijau1+'> '+info.text.strip())
   except Exception as e:
-    save_data('rushbitcoin')
-    rushbitcoin(modulesl,banner)
+    save_data(tele,'rushbitcoin')
+    rushbitcoin(modulesl,banner,tele)
   print(hijau1+"> "+kuning1+"Start working on ptc")
   get_ptc=curl.get('https://rushbitcoin.com/ptc.html',headers=ua,cookies=cookies)
   def balance():
@@ -755,8 +1096,8 @@ def rushbitcoin(modulesl,banner):
         sesi=True
    except Exception as e:
      print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
-     save_data('rushbitcoin')
-     rushbitcoin(modulesl,banner)
+     save_data(tele,'rushbitcoin')
+     rushbitcoin(modulesl,banner,tele)
   print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://rushbitcoin.com/shortlinks.html',headers=ua,cookies=cookies)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
@@ -830,16 +1171,22 @@ def rushbitcoin(modulesl,banner):
       for i in tqdm (range (int(420)), leave=False,desc="Please wait..."):
             time.sleep(1)
             pass
-def claimbits(modulesl,banner):
+def claimbits(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   nama_host="claimbits"
   host="claimbits.net"
   banner.banner(nama_host.upper())
   data_control(''+nama_host+'')
-  def save_data(name):
+  def save_data(tele,name):
     try:
-            cookies = input(hijau1 + 'Masukkan cookies mu > ')
-            user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
+            if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
+              mes=receive_signal(1111)
+              if "CLAIMBITS" in mes:
+                cookies,user_agent=mes.split('CLAIMBITS ')[1].split('$')
+            else:
+              cookies = input(hijau1 + 'Masukkan cookies mu > ')
+              user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
             data = {
                 'cookies': cookies,
                 'user_agent': user_agent
@@ -848,6 +1195,11 @@ def claimbits(modulesl,banner):
                 json.dump(data, file)
           #  return cookies, user_agent
     except FileNotFoundError:
+        if tele == True:
+            send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
+            mes=receive_signal(1111)
+            if "CLAIMBITS" in mes:
+              cookies,user_agent=mes.split('CLAIMBITS ')[1].split('$')
         cookies = input(hijau1 + 'Masukkan cookies mu > ')
         user_agent = input(hijau1 + 'Masukkan User-Agent mu > ')
         data = {
@@ -912,8 +1264,8 @@ def claimbits(modulesl,banner):
       return answer
   cookies, ugentmu = load_data(''+nama_host+'')
   if not os.path.exists('data/'+nama_host+'/'+nama_host+'.json'):
-    save_data(nama_host)
-    claimbits(modulesl,banner)
+    save_data(tele,nama_host)
+    claimbits(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -922,18 +1274,18 @@ def claimbits(modulesl,banner):
     "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
   }
   curl=requests.Session()
-  get_sl=curl.get('https://'+host+'/shortlinks.html',headers=ua,cookies=cookies)
+  get_sl=curl.get('https://claimbits.net/faucet.html',headers=ua,cookies=cookies)
   try:
     print(hijau1+"> "+kuning1+"Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     if 'Balance' not in get_sl.text:
-      save_data(nama_host)
-      claimbits(modulesl,banner)
+      save_data(tele,nama_host)
+      claimbits(modulesl,banner,tele)
     for info in get_inf:
       print(hijau1+'> '+info.text.strip())
   except Exception as e:
-    save_data(nama_host)
-    claimbits(modulesl,banner)
+    save_data(tele,nama_host)
+    claimbits(modulesl,banner,tele)
   print(hijau1+"> "+kuning1+"Start working on ptc")
   get_ptc=curl.get('https://'+host+'/ptc.html',headers=ua,cookies=cookies)
   def balance():
@@ -963,8 +1315,8 @@ def claimbits(modulesl,banner):
         sesi=True
    except Exception as e:
      print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
-     save_data(nama_host)
-     claimbits(modulesl,banner)
+     save_data(tele,nama_host)
+     claimbits(modulesl,banner,tele)
   print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://'+host+'/shortlinks.html',headers=ua,cookies=cookies)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
@@ -1046,9 +1398,9 @@ def claimbits(modulesl,banner):
             pass
    except Exception as e:
      print('Cloudflare!!')
-     save_data(nama_host)
-     claimbits(modulesl,banner)
-def ltchunt(modulesl,banner):
+     save_data(tele,nama_host)
+     claimbits(modulesl,banner,tele)
+def ltchunt(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   nama_host="ltchunt"
   host="ltchunt.com"
@@ -1100,8 +1452,8 @@ def ltchunt(modulesl,banner):
       return answer
   cookies, ugentmu = load_data(''+nama_host+'')
   if not os.path.exists('data/'+nama_host+'/'+nama_host+'.json'):
-    save_data(nama_host)
-    ltchunt(modulesl,banner)
+    save_data(tele,nama_host)
+    ltchunt(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1111,14 +1463,17 @@ def ltchunt(modulesl,banner):
   }
   curl=requests.Session()
   get_sl=curl.get('https://'+host+'/shortlinks.html',headers=ua,cookies=cookies)
+  if 'Account Balance' not in get_sl.text:
+    save_data(tele,nama_host)
+    ltchunt(modulesl,banner,tele)
   try:
     print(hijau1+"> "+kuning1+"Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
       print(hijau1+'> '+info.text.strip())
   except Exception as e:
-    save_data(nama_host)
-    ltchunt(modulesl,banner)
+    save_data(tele,nama_host)
+    ltchunt(modulesl,banner,tele)
   print(hijau1+"> "+kuning1+"Start working on ptc")
   get_ptc=curl.get('https://'+host+'/ptc.html',headers=ua,cookies=cookies)
   def balance():
@@ -1148,8 +1503,8 @@ def ltchunt(modulesl,banner):
         sesi=True
    except Exception as e:
      print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
-     save_data(nama_host)
-     ltchunt(modulesl,banner)
+     save_data(tele,nama_host)
+     ltchunt(modulesl,banner,tele)
   print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://'+host+'/shortlinks.html',headers=ua,cookies=cookies)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
@@ -1245,7 +1600,7 @@ def ltchunt(modulesl,banner):
       for i in tqdm (range (int(300)), leave=False,desc="Please wait..."):
             time.sleep(1)
             pass
-def coinzask(modulesl,banner):
+def coinzask(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   nama_host="coinzask"
   host="coinzsack.com"
@@ -1297,8 +1652,8 @@ def coinzask(modulesl,banner):
       return answer
   cookies, ugentmu = load_data(''+nama_host+'')
   if not os.path.exists('data/'+nama_host+'/'+nama_host+'.json'):
-    save_data(nama_host)
-    coinzask(modulesl,banner)
+    save_data(tele,nama_host)
+    coinzask(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1308,14 +1663,17 @@ def coinzask(modulesl,banner):
   }
   curl=requests.Session()
   get_sl=curl.get('https://'+host+'/',headers=ua,cookies=cookies)
+  if 'Account Balance' not in get_sl.text:
+    save_data(tele,nama_host)
+    coinzask(modulesl,banner,tele)
   try:
     print(hijau1+"> "+kuning1+"Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
       print(hijau1+'> '+info.text.strip())
   except Exception as e:
-    save_data(nama_host)
-    coinzask(modulesl,banner)
+    save_data(tele,nama_host)
+    coinzask(modulesl,banner,tele)
   print(hijau1+"> "+kuning1+"Start working on ptc")
   get_ptc=curl.get('https://'+host+'/?page=ptc',headers=ua,cookies=cookies)
   def balance():
@@ -1345,8 +1703,8 @@ def coinzask(modulesl,banner):
         sesi=True
    except Exception as e:
      print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
-     save_data(nama_host)
-     coinzask(modulesl,banner)
+     save_data(tele,nama_host)
+     coinzask(modulesl,banner,tele)
   print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://'+host+'/?page=shortlinks',headers=ua,cookies=cookies)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
@@ -1424,14 +1782,14 @@ def coinzask(modulesl,banner):
       for i in tqdm (range (int(600)), leave=False,desc="Please wait..."):
             time.sleep(1)
             pass
-def coingax(modulesl,banner):
+def coingax(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coingax')
   banner.banner('COINGAX')
   cookies, ugentmu = load_data('coingax')
   if not os.path.exists("data/coingax/coingax.json"):
-    save_data('coingax')
-    coingax(modulesl,banner)
+    save_data(tele,'coingax')
+    coingax(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1443,8 +1801,8 @@ def coingax(modulesl,banner):
   curl=requests.Session()
   dahs=curl.get('https://coingax.com/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dahs.text:
-    save_data('coingax')
-    coingax(modulesl,banner)
+    save_data(tele,'coingax')
+    coingax(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('div',{'class':'col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12'})
   print(hijau1+"> "+kuning1+"Account information")
   for i in fd:
@@ -1464,6 +1822,7 @@ def coingax(modulesl,banner):
         if 'failed to bypass' in answer:
           print(f'{putih1}[{merah1} ! {putih1}] {hijau1}Failed to bypass',end='\r')
         else:
+          sleep(105)
           reward = curl.get(answer,headers=ua,cookies=cookies)
           print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("text: '")[1].split("your balance',")[0]+'your balance')
           
@@ -1472,10 +1831,12 @@ def coingax(modulesl,banner):
         link=li.find('a',{'class':'btn btn-success w-100'})['href']
         get_links=curl.get(link,headers=ua,cookies=cookies,allow_redirects=False).headers['Location']
         print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Try to bypass : '+get_links,end='\r')
+        sleep()
         answer=modulesl.shortfly(get_links)
         if 'failed to bypass' in answer:
           print(f'{putih1}[{merah1} ! {putih1}] {hijau1}Failed to bypass',end='\r')
         else:
+          sleep(105)
           reward = curl.get(answer,headers=ua,cookies=cookies)
           print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("text: '")[1].split("your balance',")[0]+'your balance')
     if 'Linksfly - Mid' in name:
@@ -1487,18 +1848,19 @@ def coingax(modulesl,banner):
         if 'failed to bypass' in answer:
           print(f'{putih1}[{merah1} ! {putih1}] {hijau1}Failed to bypass',end='\r')
         else:
+          sleep(105)
           reward = curl.get(answer,headers=ua,cookies=cookies)
           print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("text: '")[1].split("your balance',")[0]+'your balance')
    except Exception as e:pass
   exit()
-def crypto2u(modulesl,banner):
+def crypto2u(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('crypto2u')
   banner.banner('CRYPTO2U')
   cookies, ugentmu = load_data('crypto2u')
   if not os.path.exists("data/crypto2u/crypto2u.json"):
-    save_data('crypto2u')
-    crypto2u(modulesl,banner)
+    save_data(tele,'crypto2u')
+    crypto2u(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1510,8 +1872,8 @@ def crypto2u(modulesl,banner):
   curl=requests.Session()
   dahs=curl.get('https://crypto2u.xyz/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dahs.text:
-    save_data('crypto2u')
-    crypto2u(modulesl,banner)
+    save_data(tele,'crypto2u')
+    crypto2u(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('div',{'class':'col-xl-4 col-lg-6 col-md-6 col-sm-6 col-xs-12'})
   print(hijau1+"> "+kuning1+"Account information")
   for i in fd:
@@ -1547,20 +1909,21 @@ def crypto2u(modulesl,banner):
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} ! {putih1}] {hijau1}Failed to bypass', end='\r')
                   else:
+                      sleep(105)
                       reward = curl.get(answer, headers=ua, cookies=cookies)
                       dahs=curl.get('https://crypto2u.xyz/dashboard',headers=ua,cookies=cookies)
                       fd=bs(dahs.text,'html.parser').find_all('div',{'class':'col-xl-4 col-lg-6 col-md-6 col-sm-6 col-xs-12'})
                       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}' + fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1]+'                                         ')
       except Exception as e:pass
   exit()
-def claimsatoshi(modulesl,banner):
+def claimsatoshi(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('claimsatoshi')
   banner.banner('CLAIMSATOSHI')
   cookies, ugentmu = load_data('claimsatoshi')
   if not os.path.exists("data/claimsatoshi/claimsatoshi.json"):
-    save_data('claimsatoshi')
-    claimsatoshi(modulesl,banner)
+    save_data(tele,'claimsatoshi')
+    claimsatoshi(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1572,8 +1935,8 @@ def claimsatoshi(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://claimsatoshi.xyz/dashboard',headers=ua,cookies=cookies)
   if 'Current Balance' not in dash.text:
-    save_data('claimsatoshi')
-    claimsatoshi(modulesl,banner)
+    save_data(tele,'claimsatoshi')
+    claimsatoshi(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'col-xl-3 col-sm-6'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
@@ -1582,8 +1945,8 @@ def claimsatoshi(modulesl,banner):
   ptc=curl.get('https://claimsatoshi.xyz/ptc',headers=ua,cookies=cookies)
   surf=bs(ptc.text,'html.parser').find_all('div',{'class':'col-12 col-lg-4 mb-3 mb-lg-0'})
   if 'Website Available' not in ptc.text:
-    save_data('claimsatoshi')
-    claimsatoshi(modulesl,banner)
+    save_data(tele,'claimsatoshi')
+    claimsatoshi(modulesl,banner,tele)
   for surf in surf:
     url=surf.find('button',{'class':'btn btn-one bg-dark btn-block'})['onclick'].split("window.location = '")[1].split("'")[0]
     name=surf.find('h2',{'class':'card-title'}).text.strip()
@@ -1610,6 +1973,7 @@ def claimsatoshi(modulesl,banner):
         if 'failed to bypass' in answer:
           print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
         else:
+          sleep(105)
           reward = curl.get(answer, headers=ua, cookies=cookies).text
           #print(reward)
           if 'Good job!' in reward:
@@ -1668,14 +2032,14 @@ def claimsatoshi(modulesl,banner):
       break
       pass
   exit()
-def coinfola(modulesl,banner):
+def coinfola(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinfola')
   banner.banner('COINFOLA')
   cookies, ugentmu = load_data('coinfola')
   if not os.path.exists("data/coinfola/coinfola.json"):
-    save_data('coinfola')
-    coinfola(modulesl,banner)
+    save_data(tele,'coinfola')
+    coinfola(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1687,13 +2051,12 @@ def coinfola(modulesl,banner):
   curl=requests.Session()
   try:
     dahs=curl.get('https://coinfola.com/account',headers=ua,cookies=cookies)
-  #  print(dahs.text)
-    if 'Balance' not in dahs.text:
-      save_data('coinfola')
-      coinfola(modulesl,banner)
   except Exception as e:
-    save_data('coinfola')
-    coinfola(modulesl,banner)
+    save_data(tele,'coinfola')
+    coinfola(modulesl,banner,tele)
+  if 'Balance' not in dahs.text:
+      save_data(tele,'coinfola')
+      coinfola(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-hover table-striped'})
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
@@ -1719,6 +2082,9 @@ def coinfola(modulesl,banner):
     "AdBitFly":modulesl.adbitfly,
     "Oii":modulesl.oii,
     "Zuba":modulesl.zuba_link,
+    "ClickZu":modulesl.clickzu_icu,
+    "FlyZu":modulesl.flyzu,
+    "Linkvor":modulesl.linkvor_pw,
   }
   for i in gt:
     try:
@@ -1737,6 +2103,7 @@ def coinfola(modulesl,banner):
                   get_links = curl.get('https://coinfola.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
                   print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
                   answer = providers[provider](get_links)
+                  sleep(105)
                   reward = curl.get(answer, headers=ua, cookies=cookies)
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
@@ -1747,14 +2114,14 @@ def coinfola(modulesl,banner):
     except Exception as e:
       pass
   exit()
-def simpleads(modulesl,banner):
+def simpleads(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('simpleads')
   banner.banner('SIMPLEADS')
   cookies, ugentmu = load_data('simpleads')
   if not os.path.exists("data/simpleads/simpleads.json"):
-    save_data('simpleads')
-    simpleads(modulesl,banner)
+    save_data(tele,'simpleads')
+    simpleads(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1766,12 +2133,12 @@ def simpleads(modulesl,banner):
   curl=requests.Session()
   try:
     dahs=curl.get('https://simpleads.io/account',headers=ua,cookies=cookies)
-    if 'Balance' not in dahs.text:
-      save_data('simpleads')
-      simpleads(modulesl,banner)
   except Exception as e:
-    save_data('simpleads')
-    simpleads(modulesl,banner)
+    save_data(tele,'simpleads')
+    simpleads(modulesl,banner,tele)
+  if 'Balance' not in dahs.text:
+      save_data(tele,'simpleads')
+      simpleads(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
@@ -1797,6 +2164,7 @@ def simpleads(modulesl,banner):
                   get_links = curl.get('https://simpleads.io' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
                   print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
                   answer = providers[provider](get_links)
+                  sleep(105)
                   reward = curl.get(answer, headers=ua, cookies=cookies)
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
@@ -1817,17 +2185,17 @@ def simpleads(modulesl,banner):
             animasi(3)
    except Exception as e:
      print(f'{putih1}[{merah1} x {putih1}] {hijau1} Cloudflare!!')
-     save_data('simpleads')
-     simpleads(modulesl,banner)
+     save_data(tele,'simpleads')
+     simpleads(modulesl,banner,tele)
   exit()
-def adhives(modulesl,banner):
+def adhives(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('adhives')
   banner.banner('ADHIVES')
   cookies, ugentmu = load_data('adhives')
   if not os.path.exists("data/adhives/adhives.json"):
-    save_data('adhives')
-    adhives(modulesl,banner)
+    save_data(tele,'adhives')
+    adhives(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1839,12 +2207,12 @@ def adhives(modulesl,banner):
   curl=requests.Session()
   try:
     dahs=curl.get('https://adhives.com/account',headers=ua,cookies=cookies)
-    if 'Balance' not in dahs.text:
-      save_data('adhives')
-      adhives(modulesl,banner)
   except Exception as e:
-    save_data('adhives')
-    adhives(modulesl,banner)
+    save_data(tele,'adhives')
+    adhives(modulesl,banner,tele)
+  if 'Balance' not in dahs.text:
+      save_data(tele,'adhives')
+      adhives(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
@@ -1876,6 +2244,7 @@ def adhives(modulesl,banner):
                   get_links = curl.get('https://adhives.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
                   print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
                   answer = providers[provider](get_links)
+                  sleep(105)
                   reward = curl.get(answer, headers=ua, cookies=cookies)
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
@@ -1884,14 +2253,14 @@ def adhives(modulesl,banner):
     except Exception as e:
       pass
   exit()
-def coinsfarm(modulesl,banner):
+def coinsfarm(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinsfarmers')
   banner.banner('COINSFARMERS')
   cookies, ugentmu = load_data('coinsfarmers')
   if not os.path.exists("data/coinsfarmers/coinsfarmers.json"):
-    save_data('coinsfarmers')
-    adhives(modulesl,banner)
+    save_data(tele,'coinsfarmers')
+    coinsfarm(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1903,12 +2272,12 @@ def coinsfarm(modulesl,banner):
   curl=requests.Session()
   try:
     dahs=curl.get('https://coinsfarmers.com/account',headers=ua,cookies=cookies)
-    if 'Balance' not in dahs.text:
-      save_data('coinsfarmers')
-      coinsfarm(modulesl,banner)
   except Exception as e:
-    save_data('coinsfarmers')
-    coinsfarm(modulesl,banner)
+    save_data(tele,'coinsfarmers')
+    coinsfarm(modulesl,banner,tele)
+  if 'Balance' not in dahs.text:
+      save_data(tele,'coinsfarmers')
+      coinsfarm(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
@@ -1946,6 +2315,7 @@ def coinsfarm(modulesl,banner):
                   get_links = curl.get('https://coinsfarmers.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
                   print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
                   answer = providers[provider](get_links)
+                  sleep(105)
                   reward = curl.get(answer, headers=ua, cookies=cookies)
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
@@ -1954,14 +2324,14 @@ def coinsfarm(modulesl,banner):
     except Exception as e:
       pass
   exit()
-def earnsolana(modulesl,banner):
+def earnsolana(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('earnsolana')
   banner.banner('EARNSOLANA')
   cookies, ugentmu = load_data('earnsolana')
   if not os.path.exists("data/earnsolana/earnsolana.json"):
-    save_data('earnsolana')
-    earnsolana(modulesl,banner)
+    save_data(tele,'earnsolana')
+    earnsolana(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1973,14 +2343,17 @@ def earnsolana(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://earnsolana.xyz/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('earnsolana')
-    earnsolana(modulesl,banner)
+    save_data(tele,'earnsolana')
+    earnsolana(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
   print(hijau1+"> "+kuning1+"Start ptc")
   ptc=curl.get('https://earnsolana.xyz/ptc',headers=ua,cookies=cookies)
+  if 'ads available' not in ptc.text:
+    save_data(tele,'earnsolana')
+    earnsolana(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
@@ -1998,6 +2371,9 @@ def earnsolana(modulesl,banner):
    except Exception as e:pass
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://earnsolana.xyz/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'earnsolana')
+    earnsolana(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -2024,6 +2400,7 @@ def earnsolana(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Good job!' in reward:
                         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
@@ -2043,14 +2420,14 @@ def earnsolana(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      exit()
   exit()
-def cryptogenz(modulesl,banner):
+def cryptogenz(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('cryptogenz')
   banner.banner('CRYPTOGENZ')
   cookies, ugentmu = load_data('cryptogenz')
   if not os.path.exists("data/cryptogenz/cryptogenz.json"):
-    save_data('cryptogenz')
-    cryptogenz(modulesl,banner)
+    save_data(tele,'cryptogenz')
+    cryptogenz(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2062,14 +2439,17 @@ def cryptogenz(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://cryptogenz.fun/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('cryptogenz')
-    cryptogenz(modulesl,banner)
+    save_data(tele,'cryptogenz')
+    cryptogenz(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
   print(hijau1+"> "+kuning1+"Start ptc")
   ptc=curl.get('https://cryptogenz.fun/ptc',headers=ua,cookies=cookies)
+  if 'ads available' not in ptc.text:
+    save_data(tele,'cryptogenz')
+    cryptogenz(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
@@ -2087,6 +2467,9 @@ def cryptogenz(modulesl,banner):
    except Exception as e:pass
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://cryptogenz.fun/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'cryptogenz')
+    cryptogenz(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -2097,7 +2480,6 @@ def cryptogenz(modulesl,banner):
         services = {
     "Shortsfly": modulesl.shortfly,
     "Linksfly": modulesl.linksfly,
- #   "Cpmicu": None,
     "Gainlink": modulesl.gain_lk,
     "Shrinkearn": modulesl.shrinkearn,
     "Ctrsh": modulesl.ctrsh,
@@ -2118,6 +2500,7 @@ def cryptogenz(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Good job!' in reward:
                         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
@@ -2137,14 +2520,14 @@ def cryptogenz(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      exit()
   exit()
-def coinpay_faucet(modulesl,banner):
+def coinpay_faucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinpay-faucet')
   banner.banner('COINPAY-FAUCET')
   cookies, ugentmu = load_data('coinpay-faucet')
   if not os.path.exists("data/coinpay-faucet/coinpay-faucet.json"):
-    save_data('coinpay-faucet')
-    coinpay_faucet(modulesl,banner)
+    save_data(tele,'coinpay-faucet')
+    coinpay_faucet(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2163,14 +2546,17 @@ def coinpay_faucet(modulesl,banner):
       gas=curl.post("https://coinpay-faucet.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
   if 'Balance' not in dash.text:
-    save_data('coinpay-faucet')
-    coinpay_faucet(modulesl,banner)
+    save_data(tele,'coinpay-faucet')
+    coinpay_faucet(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://coinpay-faucet.com/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'coinpay-faucet')
+    coinpay_faucet(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -2199,6 +2585,7 @@ def coinpay_faucet(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Good job!' in reward:
                         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
@@ -2218,14 +2605,14 @@ def coinpay_faucet(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
-def james_trussy(modulesl,banner):
+def james_trussy(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('james-trussy')
   banner.banner('JAMES-TRUSSY')
   cookies, ugentmu = load_data('james-trussy')
   if not os.path.exists("data/james-trussy/james-trussy.json"):
-    save_data('james-trussy')
-    james_trussy(modulesl,banner)
+    save_data(tele,'james-trussy')
+    james_trussy(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2245,14 +2632,17 @@ def james_trussy(modulesl,banner):
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
   dash=curl.get('https://james-trussy.com/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('james-trussy')
-    james_trussy(modulesl,banner)
+    save_data(tele,'james-trussy')
+    james_trussy(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://james-trussy.com/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'james-trussy')
+    james_trussy(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -2277,6 +2667,7 @@ def james_trussy(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                   #  print(reward)
                     if 'Good job!' in reward:
@@ -2328,14 +2719,14 @@ def james_trussy(modulesl,banner):
       data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
       gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
-def freeclaimfaucet(modulesl,banner):
+def freeclaimfaucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('freeclaimfaucet')
   banner.banner('freeclaimfaucet')
   cookies, ugentmu = load_data('freeclaimfaucet')
   if not os.path.exists("data/freeclaimfaucet/freeclaimfaucet.json"):
-    save_data('freeclaimfaucet')
-    freeclaimfaucet(modulesl,banner)
+    save_data(tele,'freeclaimfaucet')
+    freeclaimfaucet(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2355,13 +2746,16 @@ def freeclaimfaucet(modulesl,banner):
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
   dash=curl.get('https://freeclaimfaucet.com/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('freeclaimfaucet')
-    freeclaimfaucet(modulesl,banner)
+    save_data(tele,'freeclaimfaucet')
+    freeclaimfaucet(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find('div',{'class':'mt-3 text-3xl font-semibold text-white'})
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> Your Balance : '+info.text.strip())
   print(hijau1+"> "+kuning1+"Start bypass ptc")
   ptc=curl.get('https://freeclaimfaucet.com/ptc',headers=ua,cookies=cookies)
+  if 'ads available' not in ptc.text:
+    save_data(tele,'freeclaimfaucet')
+    freeclaimfaucet(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
@@ -2379,6 +2773,9 @@ def freeclaimfaucet(modulesl,banner):
    except Exception as e:pass
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://freeclaimfaucet.com/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'freeclaimfaucet')
+    freeclaimfaucet(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -2417,7 +2814,6 @@ def freeclaimfaucet(modulesl,banner):
     faucet=curl.get('https://freeclaimfaucet.com/faucet',headers=ua,cookies=cookies)
     info=bs(faucet.text,'html.parser')
     csrf=info.find('input',{'name':'csrf_token_name'})['value']
- #   token=info.find('input',{'name':'token'})['value']
     answer=modulesl.RecaptchaV2('6LcTwH0dAAAAADeD8cRAHIRmwKrS3JNbSh30QWFx','https://freeclaimfaucet.com/faucet')
     data=f"csrf_token_name={csrf}&captcha=recaptchav2&g-recaptcha-response={answer}"
     faucet=curl.post('https://freeclaimfaucet.com/faucet/verify',data=data,headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},cookies=cookies)
@@ -2432,14 +2828,14 @@ def freeclaimfaucet(modulesl,banner):
       data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
       gas=curl.post("https://freeclaimfaucet.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
-def eurofaucet_de(modulesl,banner):
+def eurofaucet_de(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('eurofaucet.de')
   banner.banner('EUROFAUCET.DE')
   cookies, ugentmu = load_data('eurofaucet.de')
   if not os.path.exists("data/eurofaucet.de/eurofaucet.de.json"):
-    save_data('eurofaucet.de')
-    eurofaucet_de(modulesl,banner)
+    save_data(tele,'eurofaucet.de')
+    eurofaucet_de(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2451,14 +2847,17 @@ def eurofaucet_de(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://eurofaucet.de/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('eurofaucet.de')
-    eurofaucet_de(modulesl,banner)
+    save_data(tele,'eurofaucet.de')
+    eurofaucet_de(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
   print(hijau1+"> "+kuning1+"Start bypass ptc")
   ptc=curl.get('https://eurofaucet.de/ptc',headers=ua,cookies=cookies)
+  if 'ads available' not in ptc.text:
+    save_data(tele,'eurofaucet.de')
+    eurofaucet_de(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
@@ -2476,6 +2875,9 @@ def eurofaucet_de(modulesl,banner):
    except Exception as e:pass
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://eurofaucet.de/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'eurofaucet.de')
+    eurofaucet_de(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -2500,6 +2902,7 @@ def eurofaucet_de(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                   #  print(reward)
                     if 'Good job!' in reward:
@@ -2520,14 +2923,14 @@ def eurofaucet_de(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
-def tefaucet(modulesl,banner):
+def tefaucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('tefaucet.online')
   banner.banner('TEFAUCET.ONLINE')
   cookies, ugentmu = load_data('tefaucet.online')
   if not os.path.exists("data/tefaucet.online/tefaucet.online.json"):
-    save_data('tefaucet.online')
-    tefaucet(modulesl,banner)
+    save_data(tele,'tefaucet.online')
+    tefaucet(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2540,14 +2943,17 @@ def tefaucet(modulesl,banner):
   dash=curl.get('http://tefaucet.online/dashboard',headers=ua,cookies=cookies)
   #print(dash.text)
   if 'Balance' not in dash.text:
-    save_data('tefaucet.online')
-    tefaucet(modulesl,banner)
+    save_data(tele,'tefaucet.online')
+    tefaucet(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
   print(hijau1+"> "+kuning1+"Start bypass ptc")
   ptc=curl.get('http://tefaucet.online/ptc',headers=ua,cookies=cookies)
+  if 'ads available' not in ptc.text:
+    save_data(tele,'tefaucet.online')
+    tefaucet(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
@@ -2565,6 +2971,9 @@ def tefaucet(modulesl,banner):
    except Exception as e:pass
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('http://tefaucet.online/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'tefaucet.online')
+    tefaucet(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -2603,6 +3012,7 @@ def tefaucet(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                   #  print(reward)
                     if 'Good job!' in reward:
@@ -2670,14 +3080,14 @@ def tefaucet(modulesl,banner):
    # animasi(5)
     sleep(5)
   exit()
-def bitmonk(modulesl,banner):
+def bitmonk(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('bitmonk')
   banner.banner('BITMONK')
   cookies, ugentmu = load_data('bitmonk')
   if not os.path.exists("data/bitmonk/bitmonk.json"):
-    save_data('bitmonk')
-    bitmonk(modulesl,banner)
+    save_data(tele,'bitmonk')
+    bitmonk(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2689,8 +3099,8 @@ def bitmonk(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://bitmonk.me/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('bitmonk')
-    bitmonk(modulesl,banner)
+    save_data(tele,'bitmonk')
+    bitmonk(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('p',{'class':'text-uppercase fw-medium text-muted text-truncate mb-0'})
   info1=bs(dash.text,'html.parser').find_all('span',{'class':'counter-value'})
   del info[len(info)-2]
@@ -2700,6 +3110,9 @@ def bitmonk(modulesl,banner):
     print(hijau1+'> '+info[inf].text.strip()+' : '+info1[inf]['data-target'])
   print(hijau1+"> "+kuning1+"Start ptc")
   ptc=curl.get('https://bitmonk.me/ptc',headers=ua,cookies=cookies)
+  if 'ADS AVAILABLE' not in ptc.text:
+    save_data(tele,'bitmonk')
+    bitmonk(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-lg-3 col-12'})
   del ptc[len(ptc)-1]
   for ptc in ptc:
@@ -2722,6 +3135,9 @@ def bitmonk(modulesl,banner):
  # exit()
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://bitmonk.me/shortlinks',headers=ua,cookies=cookies).text
+  if 'LINKS AVAILABLE' not in ptc.text:
+    save_data(tele,'bitmonk')
+    bitmonk(modulesl,banner,tele)
  # print(get_links)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-xxl-3 col-sm-6 project-card'})
@@ -2762,6 +3178,7 @@ def bitmonk(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Yahoo! Reward Credited Successfully!' in reward:
                       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split("<div class='alert alert-success alert-border-left alert-dismissible  alert-borderless'>")[1].split('</div>')[0])
@@ -2771,14 +3188,14 @@ def bitmonk(modulesl,banner):
   #exit()
  
   exit()
-def claim_ro(modulesl,banner):
+def claim_ro(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('claim_ro')
   banner.banner('CLAIM_RO')
   cookies, ugentmu = load_data('claim_ro')
   if not os.path.exists("data/claim_ro/claim_ro.json"):
-    save_data('claim_ro')
-    claim_ro(modulesl,banner)
+    save_data(tele,'claim_ro')
+    claim_ro(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2790,8 +3207,8 @@ def claim_ro(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://claimro.com/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('claim_ro')
-    claim_ro(modulesl,banner)
+    save_data(tele,'claim_ro')
+    claim_ro(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
@@ -2799,8 +3216,8 @@ def claim_ro(modulesl,banner):
   print(hijau1+"> "+kuning1+"Start ptc")
   ptc=curl.get('https://claimro.com/ptc',headers=ua,cookies=cookies)
   if 'ads available' not in ptc.text:
-    save_data('claim_ro')
-    claim_ro(modulesl,banner)
+    save_data(tele,'claim_ro')
+    claim_ro(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
@@ -2845,6 +3262,7 @@ def claim_ro(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Good job!' in reward:
                         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
@@ -2852,14 +3270,14 @@ def claim_ro(modulesl,banner):
                         print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
     except Exception as e:pass
   exit()
-def faucetcrypto_net(modulesl,banner):
+def faucetcrypto_net(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('faucetcrypto_net')
   banner.banner('FAUCETCRYPTO_NET')
   cookies, ugentmu = load_data('faucetcrypto_net')
   if not os.path.exists("data/faucetcrypto_net/faucetcrypto_net.json"):
-    save_data('faucetcrypto_net')
-    faucetcrypto_net(modulesl,banner)
+    save_data(tele,'faucetcrypto_net')
+    faucetcrypto_net(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2871,8 +3289,8 @@ def faucetcrypto_net(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://faucetcrypto.net/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('faucetcrypto_net')
-    faucetcrypto_net(modulesl,banner)
+    save_data(tele,'faucetcrypto_net')
+    faucetcrypto_net(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'d-flex d-lg-flex d-md-block align-items-center'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
@@ -2880,8 +3298,8 @@ def faucetcrypto_net(modulesl,banner):
   print(hijau1+"> "+kuning1+"Start ptc")
   ptc=curl.get('https://faucetcrypto.net/ptc',headers=ua,cookies=cookies)
   if 'ads available' not in ptc.text:
-    save_data('faucetcrypto_net')
-    faucetcrypto_net(modulesl,banner)
+    save_data(tele,'faucetcrypto_net')
+    faucetcrypto_net(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
@@ -2895,14 +3313,20 @@ def faucetcrypto_net(modulesl,banner):
     answer=modulesl.RecaptchaV2('6LfY3WQhAAAAAJ4gw6l_9zKOw50G0har2R8pVt0_',link)
     data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
     verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+    if 'ads available' not in verify.text:
+      save_data(tele,'faucetcrypto_net')
+      faucetcrypto_net(modulesl,banner,tele)
     if 'Good job!' in verify.text:
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
-        save_data('faucetcrypto_net')
-        faucetcrypto_net(modulesl,banner)
+        save_data(tele,'faucetcrypto_net')
+        faucetcrypto_net(modulesl,banner,tele)
         pass
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://faucetcrypto.net/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'faucetcrypto_net')
+    faucetcrypto_net(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -2948,7 +3372,11 @@ def faucetcrypto_net(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
+                    if 'links available' not in reward:
+                      save_data(tele,'faucetcrypto_net')
+                      faucetcrypto_net(modulesl,banner,tele)
                     if 'Good job!' in reward:
                         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
                     else:
@@ -2967,14 +3395,14 @@ def faucetcrypto_net(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
-def faucetspeedbtc(modulesl,banner):
+def faucetspeedbtc(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('faucetspeedbtc')
   banner.banner('FAUCETSPEEDBTC')
   cookies, ugentmu = load_data('faucetspeedbtc')
   if not os.path.exists("data/faucetspeedbtc/faucetspeedbtc.json"):
-    save_data('faucetspeedbtc')
-    faucetspeedbtc(modulesl,banner)
+    save_data(tele,'faucetspeedbtc')
+    faucetspeedbtc(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -2986,18 +3414,18 @@ def faucetspeedbtc(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://faucetspeedbtc.com/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('faucetspeedbtc')
-    faucetspeedbtc(modulesl,banner)
+    save_data(tele,'faucetspeedbtc')
+    faucetspeedbtc(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'media-body'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
- # print(hijau1+"> "+kuning1+"Start ptc")
-  
-  
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://faucetspeedbtc.com/links',headers=ua,cookies=cookies).text
   fd=bs(get_links,'html.parser')
+  if 'Links' not in get_links:
+    save_data(tele,'faucetspeedbtc')
+    faucetspeedbtc(modulesl,banner,tele)
   link=fd.find_all('div',{'class':'col-md-6 col-xl-4'})
   for i in link:
     try:
@@ -3043,6 +3471,7 @@ def faucetspeedbtc(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Good job!' in reward:
                         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
@@ -3061,14 +3490,14 @@ def faucetspeedbtc(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
-def faucet4u(modulesl,banner):
+def faucet4u(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('faucet4u')
   banner.banner('FAUCET4U')
   cookies, ugentmu = load_data('faucet4u')
   if not os.path.exists("data/faucet4u/faucet4u.json"):
-    save_data('faucet4u')
-    faucet4u(modulesl,banner)
+    save_data(tele,'faucet4u')
+    faucet4u(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -3081,14 +3510,17 @@ def faucet4u(modulesl,banner):
   dash=curl.get('https://faucet4u.com/dashboard',headers=ua,cookies=cookies)
   #print(dash.text)
   if 'Balance' not in dash.text:
-    save_data('faucet4u')
-    faucet4u(modulesl,banner)
+    save_data(tele,'faucet4u')
+    faucet4u(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'media-body'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
     print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://faucet4u.com/links',headers=ua,cookies=cookies).text
+  if 'links available' not in get_links:
+    save_data(tele,'faucet4u')
+    faucet4u(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
@@ -3135,6 +3567,7 @@ def faucet4u(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Good job!' in reward:
                         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
@@ -3142,14 +3575,14 @@ def faucet4u(modulesl,banner):
                         print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
     except Exception as e:pass
   exit()
-def tikiearn(modulesl,banner):
+def tikiearn(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('tikiearn')
   banner.banner('TIKIEARN')
   cookies, ugentmu = load_data('tikiearn')
   if not os.path.exists("data/tikiearn/tikiearn.json"):
-    save_data('tikiearn')
-    tikiearn(modulesl,banner)
+    save_data(tele,'tikiearn')
+    tikiearn(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -3161,8 +3594,8 @@ def tikiearn(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://tikiearn.com/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('tikiearn')
-    tikiearn(modulesl,banner)
+    save_data(tele,'tikiearn')
+    tikiearn(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'media-body'})
   print(hijau1+"> "+kuning1+"Account information")
   del info[0]
@@ -3172,8 +3605,8 @@ def tikiearn(modulesl,banner):
   ptc=curl.get('https://tikiearn.com/ptc',headers=ua,cookies=cookies)
   #print(ptc.text)
   if 'ads available' not in ptc.text:
-    save_data('tikiearn')
-    tikiearn(modulesl,banner)
+    save_data(tele,'tikiearn')
+    tikiearn(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-3'})
   for ptc in ptc:
    try:
@@ -3190,8 +3623,8 @@ def tikiearn(modulesl,banner):
       if 'Good job!' in verify.text:
         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
-        save_data('tikiearn')
-        tikiearn(modulesl,banner)
+        save_data(tele,'tikiearn')
+        tikiearn(modulesl,banner,tele)
         pass
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://tikiearn.com/links',headers=ua,cookies=cookies).text
@@ -3226,6 +3659,7 @@ def tikiearn(modulesl,banner):
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Good job!' in reward:
                         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
@@ -3233,14 +3667,14 @@ def tikiearn(modulesl,banner):
                         print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
     except Exception as e:pass
   exit()
-def allfaucet(modulesl,banner):
+def allfaucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('allfaucet')
   banner.banner('ALLFAUCET')
   cookies, ugentmu = load_data('allfaucet')
   if not os.path.exists("data/allfaucet/allfaucet.json"):
-    save_data('allfaucet')
-    allfaucet(modulesl,banner)
+    save_data(tele,'allfaucet')
+    allfaucet(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -3252,8 +3686,8 @@ def allfaucet(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://allfaucet.xyz/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('allfaucet')
-    allfaucet(modulesl,banner)
+    save_data(tele,'allfaucet')
+    allfaucet(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'invoice-box'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
@@ -3262,8 +3696,8 @@ def allfaucet(modulesl,banner):
   print(hijau1+"> "+kuning1+"Start ptc")
   ptc=curl.get('https://allfaucet.xyz/ptc',headers=ua,cookies=cookies)
   if 'Ads Available' not in ptc.text:
-    save_data('allfaucet')
-    allfaucet(modulesl,banner)
+    save_data(tele,'allfaucet')
+    allfaucet(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
@@ -3281,11 +3715,14 @@ def allfaucet(modulesl,banner):
       if 'Good job!' in verify.text:
         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! '+verify.text.split("text: '")[1].split("',")[0])
    except Exception as e:
-        save_data('allfaucet')
-        allfaucet(modulesl,banner)
+        save_data(tele,'allfaucet')
+        allfaucet(modulesl,banner,tele)
         pass
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
   get_links=curl.get('https://allfaucet.xyz/links',headers=ua,cookies=cookies).text
+  if 'Links available' not in get_links:
+    save_data(tele,'allfaucet')
+    allfaucet(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'link-block'})
  # print(link)
@@ -3312,10 +3749,10 @@ def allfaucet(modulesl,banner):
                 data=f"csrf_token_name={csrf}&token={token}"
                 url = curl.post(i.find('form')["action"], headers={'content-type':'application/x-www-form-urlencoded'}, data=data,cookies=cookies, allow_redirects=False).text.split('location.href = "')[1].split('"; </script>')[0]
                 answer = shortlink_func(url)
-                sleep(10)
                 if 'failed to bypass' in answer:
                     print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                 else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies).text
                     if 'Good job!' in reward:
                         reward_msg = reward.split("text: '")[1].split("',")[0]
@@ -3338,14 +3775,14 @@ def allfaucet(modulesl,banner):
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
-def btcadspace(modulesl,banner):
+def btcadspace(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('btcadspace')
   banner.banner('BTCADSPACE')
   cookies, ugentmu = load_data('btcadspace')
   if not os.path.exists("data/btcadspace/btcadspace.json"):
-    save_data('btcadspace')
-    btcadspace(modulesl,banner)
+    save_data(tele,'btcadspace')
+    btcadspace(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -3359,11 +3796,11 @@ def btcadspace(modulesl,banner):
     dash=curl.get('https://btcadspace.com/account',headers=ua,cookies=cookies)
   #  print(dash.text)
     if 'Main Balance' not in dash.text:
-      save_data('btcadspace')
-      btcadspace(modulesl,banner)
+      save_data(tele,'btcadspace')
+      btcadspace(modulesl,banner,tele)
   except Exception as e:
-    save_data('btcadspace')
-    btcadspace(modulesl,banner)
+    save_data(tele,'btcadspace')
+    btcadspace(modulesl,banner,tele)
   fd=bs(dash.text,'html.parser').find_all('div',{'class':'col-md-4 stretch-card grid-margin mt-3'})
   print(hijau1+"> "+kuning1+"Account information")
   for i in fd:
@@ -3396,6 +3833,7 @@ def btcadspace(modulesl,banner):
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                   else:
+                      sleep(105)
                       get_reward = curl.get(answer, headers=ua, cookies=cookies)
                       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("message: '")[1].split("'")[0])
         except Exception as e:
@@ -3412,15 +3850,20 @@ def btcadspace(modulesl,banner):
     print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("message: '")[1].split("'")[0])
     animasi(5)
    except Exception as e:
-    save_data('btcadspace')
-    btcadspace(modulesl,banner)
-def nokofaucet(modulesl,banner):
-  def save_datan(name):
-      auth=input(hijau1+'masukan auth mu > ')
-      id_claim=input(hijau1+'masukan id_claim mu > ')
+    save_data(tele,'btcadspace')
+    btcadspace(modulesl,banner,tele)
+def nokofaucet(modulesl,banner,tele=None):
+  def save_datan(tele,name):
+      if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim auth : `/cookies nama_sesi auth`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                cookies,user_agent=mes.split(name.upper()+' ')[1].split('$')
+      else:
+        auth=input(hijau1+'masukan auth mu > ')
       data = {
           'auth': auth,
-          'id_claim': id_claim
       }
       # Menyimpan data dalam format JSON
       with open(f'data/{name}/{name}.json', 'w') as file:
@@ -3430,17 +3873,16 @@ def nokofaucet(modulesl,banner):
           with open(f'data/{name}/{name}.json', 'r') as file:
               data = json.load(file)
           auth = data['auth']
-          id_claim = data['id_claim']
-          return auth, id_claim
+          return auth
       except FileNotFoundError:
           return None, None
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('nokofaucet')
   banner.banner('NOKOFAUCET')
-  auth, id_claim = load_datan('nokofaucet')
+  auth = load_datan('nokofaucet')
   if not os.path.exists("data/nokofaucet/nokofaucet.json"):
-    save_datan('nokofaucet')
-    nokofaucet(modulesl,banner)
+    save_datan(tele,'nokofaucet')
+    nokofaucet(modulesl,banner,tele)
   curl=requests.Session()
   ua={
   "accept":"application/json, text/plain, */*",
@@ -3449,14 +3891,20 @@ def nokofaucet(modulesl,banner):
   try:
     print(hijau1+"> "+kuning1+"Account information")
     get_user=json.loads(curl.get('https://api.nokofaucet.com/api/auth/me',headers=ua).text)
+    _id1=get_user["_id"]
     print(hijau1+'> '+"Username : "+get_user["username"]+' | Email : '+get_user["email"])
     print(hijau1+'> '+"Balance : "+str(get_user["balance"])+' | Energy : '+str(get_user["energy"]))
   except Exception as e:
-    save_datan('nokofaucet')
-    nokofaucet(modulesl,banner)
+    save_datan(tele,'nokofaucet')
+    nokofaucet(modulesl,banner,tele)
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  sl=curl.get('https://api.nokofaucet.com/api/shortlink/getPagnigation?keyword=&page=1&perPage=30&sortDate=undefined&sortBy=undefined&paginationVersion=2',headers=ua)
+  sl=curl.get('https://api.nokofaucet.com/api/shortlink/getPagnigation?keyword=&page=1&perPage=50&sortDate=undefined&sortBy=undefined&paginationVersion=2',headers=ua)
   methods = {
+    '1Short.io': modulesl.shorti_io,
+    'Bitads.pro': modulesl.bitads,
+    'ShortFly': modulesl.shortfly,
+    'LinksFly': modulesl.linksfly,
+    'Linkvor': modulesl.linkvor_pw,
     'Try2link': modulesl.try2,
     'Cutty': modulesl.cuty_io,
     'Srinkearn': modulesl.shrinkearn,
@@ -3467,38 +3915,43 @@ def nokofaucet(modulesl,banner):
     'Usalink': modulesl.usalink,
     'Web 1s normal': modulesl.web1s_info,
   }
-  for data in json.loads(sl.text)["data"]:
+  for data in sl.json()["data"]:
     name=data['title']
     jumlah=data['remain_view']
-    url=data['url']
+    _id=data['_id']
     for method, bypass_func in methods.items():
         try:
           if method in name:
-              for jun in range(jumlah):
-                answer = bypass_func(url)
-                if 'failed to bypass' in answer:
-                  pass
-                else:
-                  reward=curl.get('https://api.nokofaucet.com/api/shortlink/view/'+answer.split('user/short-link/')[1],headers=ua)
-                  print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+json.loads(reward.text)["message"]+'               ')
+               for jun in range(jumlah):
+                url=curl.get('https://api.nokofaucet.com/api/shortlink/generate/'+_id,headers=ua).json()
+                if 'url' in str(url):
+                  answer = bypass_func(url["url"])
+             #     print(answer)
+                  if 'failed to bypass' in answer:
+                    pass
+                  else:
+                    sleep(15)
+                    key=answer.split('https://nokofaucet.com/user/short-link/')[1]
+                    reward=curl.post("https://api.nokofaucet.com/api/shortlink/verify-shortlink",headers=ua,data={"key":key})
+                    print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+json.loads(reward.text)["message"]+'               ')
         except Exception as e:pass
   print(hijau1+"> "+kuning1+"Start bypass faucet")
   for i in range(int(get_user["remain_claim"])):
-    reward=json.loads(curl.patch('https://api.nokofaucet.com/api/user/claim/'+id_claim,headers=ua).text)
+    reward=curl.patch('https://api.nokofaucet.com/api/user/claim/'+_id1,headers=ua).json()
     if 'successfully' in reward['message']:
       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward['message'])
       animasi(5)
     else:
       animasi(5)
   exit()
-def landofbits(modulesl,banner):
+def landofbits(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('landofbits')
   banner.banner('LANDOFBITS')
   cookies, ugentmu = load_data('landofbits')
   if not os.path.exists("data/landofbits/landofbits.json"):
-    save_data('landofbits')
-    landofbits(modulesl,banner)
+    save_data(tele,'landofbits')
+    landofbits(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -3510,8 +3963,8 @@ def landofbits(modulesl,banner):
   curl=requests.Session()
   dash=curl.get('https://landofbits.com/dashboard',headers=ua,cookies=cookies)
   if 'Balance' not in dash.text:
-    save_data('landofbits')
-    landofbits(modulesl,banner)
+    save_data(tele,'landofbits')
+    landofbits(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'col-lg-3 col-md-6'})
   print(hijau1+"> "+kuning1+"Account information")
   for info in info:
@@ -3543,14 +3996,15 @@ def landofbits(modulesl,banner):
           if 'failed to bypass' in answer:
               print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
           else:
+              sleep(105)
               reward = curl.get(answer, headers=ua, cookies=cookies)
               if 'Good job!' in reward.text:
                 print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Good job! '+reward.text.split("text: '")[1].split("',")[0])
    except Exception as e:pass
   exit()
-def oskut(modulesl,banner):
+def cryptofuture(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
-  def save_data(name):
+  def save_data(tele,name):
     try:
         dir_path = f'data/{name}'
         os.makedirs(dir_path, exist_ok=True)  # Membuat direktori jika belum ada
@@ -3561,6 +4015,12 @@ def oskut(modulesl,banner):
             with open(file_path, 'r') as file:
                 data = json.load(file)
                 email = data.get('email')
+        if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim email faucetpay contoh : `/cookies nama_sesi email_fp`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                email=mes.split(name.upper()+' ')[1]
         else:
             email = input('Masukkan email mu > ')
         
@@ -3573,107 +4033,14 @@ def oskut(modulesl,banner):
 
         return email
     except FileNotFoundError:
-        email = input('Masukkan email mu > ')
-        
-        data = {
-            'email': email
-        }
-
-        with open(file_path, 'w') as file:
-            json.dump(data, file)
-
-        return email
-  def load_data(name):
-    try:
-        file_path = f'data/{name}/{name}.json'
-        
-        if os.path.isfile(file_path):  # Memeriksa apakah file ada, bukan direktori
-            with open(file_path, 'r') as file:
-                data = json.load(file)
-                email = data.get('email')
-                return email
+        if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim email faucetpay contoh : `/cookies nama_sesi email_fp`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                email=mes.split(name.upper()+' ')[1]
         else:
-            return None
-    except FileNotFoundError:
-        return None
-  banner.banner('OSKUT')
-  email= load_data('oskut')
-  if not os.path.exists("data/oskut/oskut.json"):
-    save_data('oskut')
-    oskut(modulesl,banner)
-  curl=requests.Session()
-  step1=curl.get('https://oscut.fun/')
- # print(step1.text)
-  csrf=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-  data=f"wallet={email}&csrf_token_name={csrf}"
-  step2=curl.post('https://oscut.fun/auth/login',data=data,headers={"content-type":"application/x-www-form-urlencoded","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
-  #print(step2.text)
-  if 'Login Success' in step2.text:
-    print(f'{putih1}[{hijau1} √ {putih1}] Login Success')
-    print('1.BTC')
-    print('2.USDT')
-    print('2.TRX')
-    curen=input('Select : ')
-    if curen == '1':
-      cur='btc'
-    if curen == '3':
-      cur='trx'
-    if curen == '2':
-      cur='usdt'
-    os.system('cls' if os.name == 'nt' else 'clear')
-    banner.banner('OSKUT')
-    get_links=curl.get('https://oscut.fun/links/currency/'+cur)
-    gt=bs(get_links.text,'html.parser').find_all('div',{'class':'col-sm-6'})
-    for link in gt:
-      jumlah=int(link.find('span').text.split('/')[0])
-      name=link.find('h4').text
-      li=link.find('a',{'class':'btn btn-primary waves-effect waves-light'})['href']
-      services = {
-      'Clks': modulesl.clks_pro,
-      'Try2link': modulesl.try2,
-      'Linksfly': modulesl.linksfly,
-      'Shortsfly': modulesl.shortfly,
-      'Clk': modulesl.clksh,
-      'Owllink': modulesl.owlink
-      }
-      if name in services:
-        for ulang in range(jumlah):
-            url = curl.get(li,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-            answer = services[name](url)
-            if 'failed to bypass' in answer:
-                print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-            else:
-                reward = curl.get(answer)
-              #  print(reward.text)
-                if 'Success!' in reward.text:
-               #   html: '0.00000009 BTC has been sent to your FaucetPay account!',
-                  print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
-def cryptofuture(modulesl,banner):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  def save_data(name):
-    try:
-        dir_path = f'data/{name}'
-        os.makedirs(dir_path, exist_ok=True)  # Membuat direktori jika belum ada
-
-        file_path = f'{dir_path}/{name}.json'
-        
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as file:
-                data = json.load(file)
-                email = data.get('email')
-        else:
-            email = input('Masukkan email mu > ')
-        
-        data = {
-            'email': email
-        }
-
-        with open(file_path, 'w') as file:
-            json.dump(data, file)
-
-        return email
-    except FileNotFoundError:
-        email = input('Masukkan email mu > ')
+          email = input('Masukkan email mu > ')
         
         data = {
             'email': email
@@ -3699,8 +4066,8 @@ def cryptofuture(modulesl,banner):
   banner.banner('CRYPTOFUTURE')
   cookies= load_data('cryptofuture')
   if not os.path.exists("data/cryptofuture/cryptofuture.json"):
-    save_data('cryptofuture')
-    cryptofuture(modulesl,banner)
+    save_data(tele,'cryptofuture')
+    cryptofuture(modulesl,banner,tele)
   curl=requests.Session()
   step1=curl.get('https://CryptoFuture.co.in/?r=25876')
   fd=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
@@ -3719,10 +4086,18 @@ def cryptofuture(modulesl,banner):
     '8': 'TRX',
     '9': 'ZEC'
     }
-    print('Pilihan kripto:')
-    for key, value in options.items():
-        print(f'{key}. {value}')
-    user_input = input('Pilih kripto yang diinginkan: ')
+    if tele==True:
+      menu_text = "\n".join(f"{key}. {value}" for key, value in options.items())
+      name="cryptofuture"
+      send_signal(1111,f"`{name.upper()}` mengirim request input, Pilihan kripto : \n`{menu_text}`")
+      mes=receive_signal(1111)
+      if name.upper() in mes:
+        user_input=mes.split(name.upper()+' ')[1]
+    else:
+      print('Pilihan kripto:')
+      for key, value in options.items():
+          print(f'{key}. {value}')
+      user_input = input('Pilih kripto yang diinginkan: ')
     selected_crypto = options.get(user_input).lower()
     os.system('cls' if os.name == 'nt' else 'clear')
     banner.banner('CRYPTOFUTURE')
@@ -3747,9 +4122,9 @@ def cryptofuture(modulesl,banner):
                 reward = curl.get(answer)
                 if 'Success!' in reward.text:
                   print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
-def endenfaucet(modulesl,banner):
+def endenfaucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
-  def save_data(name):
+  def save_data(tele,name):
     try:
         dir_path = f'data/{name}'
         os.makedirs(dir_path, exist_ok=True)  # Membuat direktori jika belum ada
@@ -3760,6 +4135,12 @@ def endenfaucet(modulesl,banner):
             with open(file_path, 'r') as file:
                 data = json.load(file)
                 email = data.get('email')
+        if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim email faucetpay contoh : `/cookies nama_sesi email_fp`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                email=mes.split(name.upper()+' ')[1]
         else:
             email = input('Masukkan email mu > ')
         
@@ -3772,7 +4153,14 @@ def endenfaucet(modulesl,banner):
 
         return email
     except FileNotFoundError:
-        email = input('Masukkan email mu > ')
+        if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim email faucetpay contoh : `/cookies nama_sesi email_fp`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                email=mes.split(name.upper()+' ')[1]
+        else:
+          email = input('Masukkan email mu > ')
         
         data = {
             'email': email
@@ -3799,8 +4187,8 @@ def endenfaucet(modulesl,banner):
   cookies= load_data('edenfaucet')
  # print(cookies)
   if not os.path.exists("data/edenfaucet/edenfaucet.json"):
-    save_data('edenfaucet')
-    endenfaucet(modulesl,banner)
+    save_data(tele,'edenfaucet')
+    endenfaucet(modulesl,banner,tele)
   curl=requests.Session()
   step1=curl.get('https://edenfaucet.com/?r=170')
   fd=bs(step1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
@@ -3822,12 +4210,13 @@ def endenfaucet(modulesl,banner):
       if 'failed to bypass' in answer:
         pass
       else:
+        sleep(105)
         reward=curl.get(answer)
        # print(reward.text)
       #  print(reward.text)
         if 'Success!' in reward.text:
             print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Success! '+reward.text.split("html: '")[1].split("',")[0])
-def paid_family(url,sitkey,email,services,modulesl):
+def paid_family(url,sitkey,email,services,modulesl,tele):
   curl=requests.Session()
   login=curl.get(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
   frc=bs(login.text,'html.parser').find('input',{'name':'frsc'})['value']
@@ -3851,7 +4240,7 @@ def paid_family(url,sitkey,email,services,modulesl):
             if 'failed to bypass' in answer:
                 print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
             else:
-                sleep(70)
+                sleep(105)
                 reward = curl.get(answer,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
                 if 'Well done :)' in reward.text:
                   sukses=bs(reward.text,'html.parser').find('div',{'class':'alert alert-success d-flex'}).text
@@ -3863,8 +4252,8 @@ def paid_family(url,sitkey,email,services,modulesl):
                #   else:
                  #   print(f'{putih1}[{merah1} x {putih1}] {merah1}'+sukses)
                   #  break
-def all_in_one(modulesl,banner):
-  def save_data(name):
+def all_in_one(modulesl,banner,tele=None):
+  def save_data(tele,name):
     try:
         dir_path = f'data/{name}'
         os.makedirs(dir_path, exist_ok=True)  # Membuat direktori jika belum ada
@@ -3875,6 +4264,12 @@ def all_in_one(modulesl,banner):
             with open(file_path, 'r') as file:
                 data = json.load(file)
                 email = data.get('email')
+        if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim email faucetpay contoh : `/cookies nama_sesi email_fp`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                email=mes.split(name.upper()+' ')[1]
         else:
             email = input('Masukkan email mu > ')
         
@@ -3887,7 +4282,14 @@ def all_in_one(modulesl,banner):
 
         return email
     except FileNotFoundError:
-        email = input('Masukkan email mu > ')
+        if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim email faucetpay contoh : `/cookies nama_sesi email_fp`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                email=mes.split(name.upper()+' ')[1]
+        else:
+          email = input('Masukkan email mu > ')
         
         data = {
             'email': email
@@ -3914,8 +4316,8 @@ def all_in_one(modulesl,banner):
   banner.banner('ALL IN ONE PAID FAMILY')
   cookies= load_data('all_in_one')
   if not os.path.exists("data/all_in_one/all_in_one.json"):
-    save_data('all_in_one')
-    all_in_one(modulesl,banner)
+    save_data(tele,'all_in_one')
+    all_in_one(modulesl,banner,tele)
   service = {
       'Try2link.com': modulesl.try2,
       'Shrinkearn.com': modulesl.shrinkearn,
@@ -3932,7 +4334,7 @@ def all_in_one(modulesl,banner):
       'Exe.io': modulesl.exe_io
   }
   print(hijau1+"> "+kuning1+"Start bypass liteearn.com")
-  paid_family('https://liteearn.com/',"6Lejju8UAAAAAMCxObwhQJliWyTUXwEcUc43KOiQ",cookies,service,modulesl)
+  paid_family('https://liteearn.com/',"6Lejju8UAAAAAMCxObwhQJliWyTUXwEcUc43KOiQ",cookies,service,modulesl,tele)
   service = {
       'Try2link.com': modulesl.try2,
       'Shrinkearn.com': modulesl.shrinkearn,
@@ -3948,7 +4350,7 @@ def all_in_one(modulesl,banner):
       'Exe.io': modulesl.exe_io
   }
   print(hijau1+"> "+kuning1+"Start bypass paidtomoney.com")
-  paid_family('https://paidtomoney.com/',"6LfZswEVAAAAAHXORtki0EFzDZZIV02Wo0krcxRo",cookies,service,modulesl)
+  paid_family('https://paidtomoney.com/',"6LfZswEVAAAAAHXORtki0EFzDZZIV02Wo0krcxRo",cookies,service,modulesl,tele)
   service = {
       'Try2link.com': modulesl.try2,
       'Shrinkearn.com': modulesl.shrinkearn,
@@ -3965,16 +4367,16 @@ def all_in_one(modulesl,banner):
       'Exe.io': modulesl.exe_io
   }
   print(hijau1+"> "+kuning1+"Start bypass cryptosfaucet.top")
-  paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,service,modulesl)
-def bitscript_family(url,services,modulesl,banner,key_links):
+  paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,service,modulesl,tele)
+def bitscript_family(url,services,modulesl,banner,key_links,tele):
   host=urlparse(url).netloc
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner(host.upper())
   data_control(host)
   cookies, ugentmu = load_data(host)
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host)
-    bitscript_family(url,services,modulesl,banner,key_links)
+    save_data(tele,host)
+    bitscript_family(url,services,modulesl,banner,key_links,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -3987,8 +4389,8 @@ def bitscript_family(url,services,modulesl,banner,key_links):
   dahs=curl.get(url+'account',headers=ua,cookies=cookies)
  # print(dahs.text)
   if 'Balance' not in dahs.text:
-    save_data(host)
-    bitscript_family(url,services,modulesl,banner,key_links)
+    save_data(tele,host)
+    bitscript_family(url,services,modulesl,banner,key_links,tele)
   fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
@@ -4018,13 +4420,14 @@ def bitscript_family(url,services,modulesl,banner,key_links):
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                   else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies)
                     if 'Congratulations.' in reward.text:
                       _1 = reward.text.split("message: '")[1].split("'")[0]
                       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
     except Exception as e:
       pass
-def earnfree_cash(modulesl,banner):
+def earnfree_cash(modulesl,banner,tele=None):
   services={
       'LinksFly': modulesl.linksfly,
       'MegaURL': modulesl.megaurl,
@@ -4048,7 +4451,7 @@ def earnfree_cash(modulesl,banner):
   }
   bitscript_family('https://earnfree.cash/',services,modulesl,banner,"card shadow text-decoration-none")
   exit()
-def paidbucks(modulesl,banner):
+def paidbucks(modulesl,banner,tele=None):
   services={
       'Linksfly': modulesl.linksfly,
       'MegaURL': modulesl.megaurl,
@@ -4070,7 +4473,7 @@ def paidbucks(modulesl,banner):
       'Shorti': modulesl.shorti_io
   }
   bitscript_family('https://paidbucks.xyz/',services,modulesl,banner,"card shadow text-decoration-none text-dark")
-def clickscoin(modulesl,banner):
+def clickscoin(modulesl,banner,tele=None):
   url="https://clickscoin.com/account"
   host=urlparse(url).netloc
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -4078,8 +4481,8 @@ def clickscoin(modulesl,banner):
   data_control(host)
   cookies, ugentmu = load_data(host)
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host)
-    clickscoin(modulesl,banner)
+    save_data(tele,host)
+    clickscoin(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -4090,10 +4493,9 @@ def clickscoin(modulesl,banner):
   }
   curl=requests.Session()
   dahs=curl.get(url+'/account',headers=ua,cookies=cookies)
-#  print(dahs.text)
   if 'Balance' not in dahs.text:
-    save_data(host)
-    clickscoin(modulesl,banner)
+    save_data(tele,host)
+    clickscoin(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('div',{'class':'info-area'})
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> '+fd[0].text.strip().splitlines()[2]+' : '+fd[0].text.strip().splitlines()[0])
@@ -4138,7 +4540,7 @@ def clickscoin(modulesl,banner):
     'TRY2LINK': modulesl.try2,
   #  'SNOWURL': None,
    # 'SHORTIT': None
-}
+  }
 
   for i in gt:
     try:
@@ -4158,9 +4560,143 @@ def clickscoin(modulesl,banner):
                   if 'failed to bypass' in answer:
                       print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
                   else:
+                    sleep(105)
                     reward = curl.get(answer, headers=ua, cookies=cookies)
                     if 'Congratulations.' in reward.text:
                       _1 = reward.text.split("message: '")[1].split("'")[0]
                       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
     except Exception as e:
       pass
+def tron0x(modulesl,banner,tele=None):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  data_control('tron0x')
+  banner.banner('TRON0X')
+  cookies, ugentmu = load_data('tron0x')
+  if not os.path.exists("data/tron0x/tron0x.json"):
+    save_data(tele,'tron0x')
+    tron0x(modulesl,banner,tele)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":"tron0x.com",
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  dash=curl.get('https://tron0x.com/dashboard',headers=ua,cookies=cookies)
+  if 'Balance' not in dash.text:
+    save_data(tele,'tron0x')
+    tron0x(modulesl,banner,tele)
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
+  print(hijau1+"> "+kuning1+"Account information")
+  for info in info:
+    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
+  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
+  get_links=curl.get('https://tron0x.com/links',headers=ua,cookies=cookies).text
+  fd=bs(get_links,'html.parser')
+  link=fd.find_all('div',{'class':'col-lg-3'})
+  for i in link:
+    try:
+        name = i.find('h4').text
+        jumlah = int(i.find('span').text.split('/')[0])
+        services = {
+    "Exe": modulesl.exe_io,
+    "Mega Fly": modulesl.megafly,
+    "Mega URL": modulesl.megaurl,
+    "Owl Link": modulesl.owlink,
+    "Il Link": modulesl.illink_net,
+    "Bird Urls": modulesl.birdurl,
+    "Fc.lc": modulesl.fl_lc,
+    "Shorti": modulesl.shorti_io,
+    "Clk.sh": modulesl.clksh,
+    "Try2link": modulesl.try2,
+    "Link1s": modulesl.links1s_com,
+    "Shrinkme": modulesl.shrinkme,
+    "Cuty": modulesl.cuty_io,
+    "LinksFly": modulesl.linksfly,
+    "Shrink Earn": modulesl.shrinkearn,
+    "Clks": modulesl.clks_pro,
+    "Bitads": modulesl.bitads,
+    "Ctr.sh": modulesl.ctrsh,
+    "USA Link": modulesl.usalink
+  }
+        if name in services:
+            for ulang in range(jumlah):
+                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+                answer = services[name](url)
+                if 'failed to bypass' in answer:
+                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+                else:
+                    sleep(105)
+                    reward = curl.get(answer, headers=ua, cookies=cookies).text
+                    if 'Good job!' in reward:
+                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    else:
+                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
+    except Exception as e:pass
+  print(hijau1+"> "+kuning1+"Start auto faucet")
+  while True:
+   try:
+    get_=curl.get('https://tron0x.com/auto',headers=ua,cookies=cookies)
+    token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
+    sleep(60)
+    reward=curl.post('https://tron0x.com/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    if 'Good job!' in reward.text:
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except Exception as e:
+     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     exit()
+  exit()
+def faucetpayz(modulesl,banner,tele=None):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  data_control('faucetpayz')
+  banner.banner('FAUCETPAYZ')
+  cookies, ugentmu = load_data('faucetpayz')
+  if not os.path.exists("data/faucetpayz/faucetpayz.json"):
+    save_data(tele,'faucetpayz')
+    faucetpayz(modulesl,banner,tele)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    "Host":"faucetpayz.com",
+    'User-Agent': ugentmu,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  }
+  curl=requests.Session()
+  dash=curl.get('https://faucetpayz.com/dashboard',headers=ua,cookies=cookies)
+  if 'Balance' not in dash.text:
+    save_data(tele,'faucetpayz')
+    faucetpayz(modulesl,banner,tele)
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
+  print(hijau1+"> "+kuning1+"Account information")
+  for info in info:
+    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
+  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
+  get_links=curl.get('https://faucetpayz.com/links',headers=ua,cookies=cookies).text
+  fd=bs(get_links,'html.parser')
+  link=fd.find_all('div',{'class':'col-lg-3'})
+  for i in link:
+    try:
+        name = i.find('h4').text
+        jumlah = int(i.find('span').text.split('/')[0])
+        services = {
+          "Shortsfly":modulesl.shortfly,
+          "Linksfly":modulesl.linksfly,
+    }
+        if name in services:
+            for ulang in range(jumlah):
+                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+                answer = services[name](url)
+                if 'failed to bypass' in answer:
+                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+                else:
+                    sleep(105)
+                    reward = curl.get(answer, headers=ua, cookies=cookies).text
+                    if 'Good job!' in reward:
+                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    else:
+                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
+    except Exception as e:pass
+  exit()

@@ -3,7 +3,7 @@ import threading
 import os
 import time
 import datetime
-import json,sys
+import json,sys,queue
 
 def menu(banner,modul,modulesl):
     hijau1 = "\033[1;92m"  # Terang
@@ -12,49 +12,53 @@ def menu(banner,modul,modulesl):
     merah1 = "\033[1;91m"  # Terang
     biru1 = "\033[1;94m"  # Terang
     menu_dict = {
-    "0": "METHOD BYPASS",
-    "1": "BTCCAYON",
-    "2": "COINGAX",
-    "3": "CLAIMSATOSHI",
-    "4": "COINFOLA",
-    "5": "CLAIMLITE",
-    "6": "SIMPLEADS",
-    "7": "ADHIVES",
-    "8": "EARNSOLANA",
-    "9": "CLAIM.RO",
-    "10": "BTCADSPACE",
-    "11": "RUSHBITCOIN",
-    "12": "CLAIMBITS",
-    "13": "LTCHUNT",
-    "14": "FAUCETCRYPTO_NET",
-    "15": "NOKOFAUCET",
-    "16": "FAUCETSPEEDBTC",
-    "17": "COINZASK",
-    "18": "TIKIEARN",
-    "19": "ALLFAUCET",
-    "20": "BITMONK",
-    "21": "LANDOFBITS",
-    "22": "COINSFARM",
-    "23": "CRYPTO2U",
-    "24": "JAMES-TRUSSY",
-    "25": "COINPAY-FAUCET",
-    "26": "EUROFAUCET_DE",
-    "27": "TEFAUCET.ONLINE",
-    #"28": "OSKUT",
-    "28": "EDENFAUCET",
-    "29": "CRYPTOFUTURE",
-    "30": "FREECLAIMFAUCET",
-    "31": "CRYPTOGENZ",
-    "32": "CCTIP",
-    "33": "PAID FAMILY ALL IN ONE",
-    "34": "EARNFREE CASH",
-    "35": "PAIDBUCKS.XYZ",
-    "36": "CLICKSCOIN",
+    0: "method bypass",
+    1: "adhives",
+    2: "allfaucet",
+    3: "bitmonk",
+    4: "bot_tele",
+    5: "btcadspace",
+    6: "btccanyon",
+    7: "claim_ro",
+    8: "claimbits",
+    9: "claimlite",
+    10: "claimsatoshi",
+    11: "clickscoin",
+    12: "coinfola",
+    13: "coingax",
+    14: "coinpay_faucet",
+    15: "coinsfarm",
+    16: "coinzask",
+    17: "crypto2u",
+    18: "cryptofuture",
+    19: "cryptogenz",
+    20: "earnfree_cash",
+    21: "earnsolana",
+    22: "endenfaucet",
+    23: "eurofaucet_de",
+    24: "faucet4u",
+    25: "faucetcrypto_net",
+    26: "faucetpayz",
+    27: "faucetspeedbtc",
+    28: "freeclaimfaucet",
+    29: "james_trussy",
+    30: "landofbits",
+    31: "ltchunt",
+    32: "nokofaucet",
+    33: "paid_family",
+    34: "paidbucks",
+    35: "rushbitcoin",
+    36: "simpleads",
+    37: "tefaucet",
+    38: "tikiearn",
+    39: "tron0x"
 }
     data=load_data(menu_dict)
     if len(sys.argv) == 2:
+      tele=True
       select = sys.argv[1]
     else:
+      tele=None
       os.system("clear")
       
   
@@ -65,7 +69,7 @@ def menu(banner,modul,modulesl):
       
       # Cetak daftar menu
       for key, value in menu_dict.items():
-          print(f"{putih1}[{hijau1}{key}{putih1}]{kuning1}.{value} {putih1}( {hijau1}last run {putih1}: {hijau1}{convrt(data[key])}{putih1})")
+          print(f"{putih1}[{hijau1}{str(key)}{putih1}]{kuning1}.{value.upper()} {putih1}( {hijau1}last run {putih1}: {hijau1}{convrt(data[str(key)])}{putih1})")
           time.sleep(0.1)
   
       # Meminta input pengguna
@@ -84,53 +88,59 @@ def menu(banner,modul,modulesl):
         exit()
     else:
         thread_map = {
-    "1": modul.btccanyon,
-    "2": modul.coingax,
-    "3": modul.claimsatoshi,
-    "4": modul.coinfola,
-    "5": modul.claimlite,
-    "6": modul.simpleads,
-    "7": modul.adhives,
-    "8": modul.earnsolana,
-    "9": modul.claim_ro,
-    "10": modul.btcadspace,
-    "11": modul.rushbitcoin,
-    "12": modul.claimbits,
-    "13": modul.ltchunt,
-    "14": modul.faucetcrypto_net,
-    "15": modul.nokofaucet,
-    "16": modul.faucetspeedbtc,
-    "17": modul.coinzask,
-    "18": modul.tikiearn,
-    "19": modul.allfaucet,
-    "20": modul.bitmonk,
-    "21": modul.landofbits,
-    "22": modul.coinsfarm,
-    "23": modul.crypto2u,
-    "24": modul.james_trussy,
-    "25": modul.coinpay_faucet,
-    "26": modul.eurofaucet_de,
-    "27": modul.tefaucet,
-    #"28": modul.oskut,
-    "28": modul.endenfaucet,
-    "29": modul.cryptofuture,
-    "30": modul.freeclaimfaucet,
-    "31": modul.cryptogenz,
-    "32": modul.bot_tele,
-    "33": modul.all_in_one,
-    "34": modul.earnfree_cash,
-    "35": modul.paidbucks,
-    "36": modul.clickscoin,
+"1":modul.adhives,
+"2":modul.allfaucet,
+"3":modul.bitmonk,
+"4":modul.bot_tele,
+"5":modul.btcadspace,
+"6":modul.btccanyon,
+"7":modul.claim_ro,
+"8":modul.claimbits,
+"9":modul.claimlite,
+"10":modul.claimsatoshi,
+"11":modul.clickscoin,
+"12":modul.coinfola,
+"13":modul.coingax,
+"14":modul.coinpay_faucet,
+"15":modul.coinsfarm,
+"16":modul.coinzask,
+"17":modul.crypto2u,
+"18":modul.cryptofuture,
+"19":modul.cryptogenz,
+"20":modul.earnfree_cash,
+"21":modul.earnsolana,
+"22":modul.endenfaucet,
+"23":modul.eurofaucet_de,
+"24":modul.faucet4u,
+"25":modul.faucetcrypto_net,
+"26":modul.faucetpayz,
+"27":modul.faucetspeedbtc,
+"28":modul.freeclaimfaucet,
+"29":modul.james_trussy,
+"30":modul.landofbits,
+"31":modul.ltchunt,
+"32":modul.nokofaucet,
+"33":modul.all_in_one,
+"34":modul.paidbucks,
+"35":modul.rushbitcoin,
+"36":modul.simpleads,
+"37":modul.tefaucet,
+"38":modul.tikiearn,
+"39":modul.tron0x,
 }
-
-    
         if select in thread_map:
-            if '32' in select:
+            if select=='4':
               print(f"{putih1}[{hijau1}1{putih1}]{kuning1}.Run bot ")
               print(f"{putih1}[{hijau1}2{putih1}]{kuning1}.Settings id akun utama")
               pilih=input(putih1+'Select : ')
               if pilih=="1":
-                modul.bot_tele(modulesl,banner)
+                c_=None
+                cek_p=None
+                data_queue = queue.Queue()
+                stop_event = threading.Event()
+                receive_thread = threading.Thread(target=modul.receive_data1, args=(data_queue, stop_event))
+                receive_thread.start()
+                modul.bot_tele(modulesl,banner,menu_dict,thread_map,data_queue)
               if pilih == "2":
                 kata=input("masukan id owner : ")
                 nama_file = "owner.txt"
@@ -138,11 +148,9 @@ def menu(banner,modul,modulesl):
                   for huruf in kata.split(","):
                     file.write(huruf + '\n')
             else:
-              thread = threading.Thread(target=thread_map[select], args=(modulesl, banner))
-              thread.start()
-              thread.join()
-
-
+                thread = threading.Thread(target=thread_map[select], args=(modulesl, banner,tele))
+                thread.start()
+                thread.join()
 def save(waktu_terakhir_dipilih, select, menu_dict, data):
     file_path = "data.json"
 
