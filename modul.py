@@ -312,6 +312,7 @@ def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue):
         else:
           nama=message.text.split(' ')[1]
           await message.reply(kill_session(nama))
+          cek_p=False
       else:
         await message.reply("BODO AMAT!!")
     if '/menu' in message.text:
