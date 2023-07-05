@@ -57,6 +57,7 @@ def menu(banner,modul,modulesl):
     if len(sys.argv) == 2:
       tele=True
       select = sys.argv[1]
+      fl=sys.argv[0]
     else:
       tele=None
       os.system("clear")
@@ -140,7 +141,7 @@ def menu(banner,modul,modulesl):
                 stop_event = threading.Event()
                 receive_thread = threading.Thread(target=modul.receive_data1, args=(data_queue, stop_event))
                 receive_thread.start()
-                modul.bot_tele(modulesl,banner,menu_dict,thread_map,data_queue)
+                modul.bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl)
               if pilih == "2":
                 kata=input("masukan id owner : ")
                 nama_file = "owner.txt"

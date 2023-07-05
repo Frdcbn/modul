@@ -142,13 +142,13 @@ def parse_data(data):
         print("Error parsing data:", str(e))
     
     return parsed_data
-def create_tmux_session(session_name, script_path):
+def create_tmux_session(session_name, script_path,fl):
   try:
     server = Server()
     session = server.new_session(session_name)
     window = session.attached_window
     pane = window.attached_pane
-    pane.send_keys(f'python main.py '+script_path, enter=True)
+    pane.send_keys(f'python '+fl+' '+script_path, enter=True)
   except Exception as e:
     return str(e)
 def list_sessions():
@@ -192,7 +192,7 @@ def animasi(menit):
       detik -= 1
 c_=None
 cek_p=None
-def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue):
+def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl):
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner('BOT CCTIP')
   api_id = 9209038
@@ -396,7 +396,7 @@ def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue):
           if cek_p == True:
             await message.reply("Maaf sepertinya ada script yang sedang menunggu cookies mohon selesaikan dulu script tersebut sebelum menjalankan yang baru")
           else:
-            st=create_tmux_session(menu_dict[int(nama)].upper(), nama)
+            st=create_tmux_session(menu_dict[int(nama)].upper(), nama,fl)
             if st:
               await message.reply(st)
             else:
