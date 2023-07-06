@@ -4450,7 +4450,7 @@ def earnfree_cash(modulesl,banner,tele=None):
       'Mitly': modulesl.mitly,
       'Shorti': modulesl.shorti_io
   }
-  bitscript_family('https://earnfree.cash/',services,modulesl,banner,"card shadow text-decoration-none")
+  bitscript_family('https://earnfree.cash/',services,modulesl,banner,"card shadow text-decoration-none",tele)
   exit()
 def paidbucks(modulesl,banner,tele=None):
   services={
@@ -4473,7 +4473,7 @@ def paidbucks(modulesl,banner,tele=None):
       'Clksh': modulesl.clksh,
       'Shorti': modulesl.shorti_io
   }
-  bitscript_family('https://paidbucks.xyz/',services,modulesl,banner,"card shadow text-decoration-none text-dark")
+  bitscript_family('https://paidbucks.xyz/',services,modulesl,banner,"card shadow text-decoration-none text-dark",tele)
 def clickscoin(modulesl,banner,tele=None):
   url="https://clickscoin.com/account"
   host=urlparse(url).netloc

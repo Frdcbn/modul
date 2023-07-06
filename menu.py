@@ -60,6 +60,7 @@ def menu(banner,modul,modulesl):
       fl=sys.argv[0]
     else:
       tele=None
+      fl=sys.argv[0]
       os.system("clear")
       
   
@@ -141,6 +142,7 @@ def menu(banner,modul,modulesl):
                 stop_event = threading.Event()
                 receive_thread = threading.Thread(target=modul.receive_data1, args=(data_queue, stop_event))
                 receive_thread.start()
+              #  global fl
                 modul.bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl)
               if pilih == "2":
                 kata=input("masukan id owner : ")
