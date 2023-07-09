@@ -995,6 +995,7 @@ def faucetgigs(modulesl,banner,tele=None):
   print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
   print(hijau1+"> "+kuning1+"Bypass faucet")
   while True:
+   try:
     get_sl=curl.get('https://faucetgigs.com/',headers=ua,cookies=cookies)
     if 'You can claim again in' in get_sl.text:
       tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
@@ -1010,6 +1011,8 @@ def faucetgigs(modulesl,banner,tele=None):
       print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
       for i in tqdm (range (int(300)), leave=False,desc="Please wait..."):
             time.sleep(1)
+   except Exception as e:
+     pass
 def claimlite(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner("CLAIMLITE")
