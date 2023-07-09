@@ -51,7 +51,8 @@ def menu(banner,modul,modulesl):
     36: "simpleads",
     37: "tefaucet",
     38: "tikiearn",
-    39: "tron0x"
+    39: "tron0x",
+    40: "faucetgigs",
 }
     data=load_data(menu_dict)
     if len(sys.argv) == 2:
@@ -72,7 +73,7 @@ def menu(banner,modul,modulesl):
       # Cetak daftar menu
       for key, value in menu_dict.items():
           print(f"{putih1}[{hijau1}{str(key)}{putih1}]{kuning1}.{value.upper()} {putih1}( {hijau1}last run {putih1}: {hijau1}{convrt(data[str(key)])}{putih1})")
-          time.sleep(0.1)
+          #time.sleep(0.1)
   
       # Meminta input pengguna
       select = input(putih1 + "select : ")
@@ -129,6 +130,7 @@ def menu(banner,modul,modulesl):
 "37":modul.tefaucet,
 "38":modul.tikiearn,
 "39":modul.tron0x,
+"40":modul.faucetgigs,
 }
         if select in thread_map:
             if select=='4':
