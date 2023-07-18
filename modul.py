@@ -206,7 +206,7 @@ def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl):
     message = event.message
     #print(message)
     pesan=message.text
-    id_tip=["962775809","6285122310","5796879502","1380459388","6143654908","5311716983"]
+    id_tip=["962775809","6285122310","5796879502","1380459388","6143654908","5311716983","6332632919"]
     if '/command' in message.text:
       if str(message.from_id.user_id) == owner:
         await message.reply('''
