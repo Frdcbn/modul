@@ -3962,20 +3962,7 @@ def btcadspace(modulesl,banner,tele=None):
                       print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("message: '")[1].split("'")[0])
         except Exception as e:
           pass
-  print(hijau1+"> "+kuning1+"Bypass faucet")
-  k="6LdN-eIZAAAAAJJg4yaUbAvIvZZS85Zfa8j9XuXx"
-  while True:
-   try:
-    get_ucet=curl.get('https://btcadspace.com/faucet',headers=ua, cookies=cookies)
-    csrf=bs(get_ucet.text,'html.parser').find('input',{'name':'csrfToken'})['value']
-    answer=modulesl.RecaptchaV2(key=k,url=get_ucet.url)
-    data=f"csrfToken={csrf}&g-recaptcha-response={answer}&claim="
-    reward=curl.post(get_ucet.url,data=data,headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu,'Host':'btcadspace.com'},cookies=cookies)
-    print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("message: '")[1].split("'")[0])
-    animasi(5)
-   except Exception as e:
-    save_data(tele,'btcadspace')
-    btcadspace(modulesl,banner,tele)
+  
 def nokofaucet(modulesl,banner,tele=None):
   def save_datan(tele,name):
       if tele == True:
