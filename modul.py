@@ -303,8 +303,8 @@ def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl):
       if  str(message.from_id.user_id) == owner:
         sessions = list_sessions()
         await message.reply("\n".join(sessions))
-      else:
-        await message.reply("BODO AMAT!!")
+      #else:
+     #   await message.reply("BODO AMAT!!")
     if '/kill_session' in message.text:
       if  str(message.from_id.user_id) == owner:
         if ' ' not in message.text:
@@ -313,15 +313,15 @@ def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl):
           nama=message.text.split(' ')[1]
           await message.reply(kill_session(nama))
           cek_p=False
-      else:
-        await message.reply("BODO AMAT!!")
+      #else:
+      #  await message.reply("BODO AMAT!!")
     if '/menu' in message.text:
       if  str(message.from_id.user_id) == owner:
           menu_text = "\n".join(f"{str(key)}. {value.upper()}" for key, value in menu_dict.items())
           await message.reply("menu script yang ada di script MR.BADUT")
           await message.reply(menu_text)
-      else:
-        await message.reply("BODO AMAT!!")
+    #  else:
+      #  await message.reply("BODO AMAT!!")
     if '/gambar_sesi' in message.text:
       if  str(message.from_id.user_id) == owner:
         if ' ' not in message.text:
@@ -347,8 +347,8 @@ def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl):
             # Reply dengan gambar
           else:
             await message.reply("ERROR")
-      else:
-        await message.reply("BODO AMAT!!")
+    #  else:
+       # await message.reply("BODO AMAT!!")
     if '/tiktok' in message.text:
       if  str(message.from_id.user_id) == owner:
         c_=message.peer_id.channel_id
@@ -402,8 +402,8 @@ def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl):
             else:
               await message.reply("Sukses run script di sesi "+menu_dict[int(nama)].upper())
   
-      else:
-        await message.reply("BODO AMAT!!")
+    #  else:
+       # await message.reply("BODO AMAT!!")
     if c_ != None:
       if not data_queue.empty():
         inf=await client.get_entity(int(owner))
