@@ -37,11 +37,14 @@ def RecaptchaV2(key, url):
 
                     get_ans_text = get_ans(api, id)
                     elapsed_time = time.time() - start_time
-
+                    
                     if 'CAPCHA_NOT_READY' in get_ans_text:
                         print('Belum ada respon dari reCAPTCHA', end='\r')
                     elif 'OK' in get_ans_text:
                         return get_ans_text.split('|')[1]
+                    else:
+                      print(get_ans_text, end='\r')
+                      return None
         else:
             print('Get ID', end='\r')
 
@@ -1457,4 +1460,27 @@ def gain_lk(url):
  except:
    return "failed to bypass"
    pass
-#print(megaurl('http://go.megaurl.in/SbPaTF'))
+def sl_ask(url):
+  curl=requests.Session()
+  step1=curl.get(url)
+  bs4 = BeautifulSoup(step1.text, "html.parser")
+  inputs = bs4.find_all("input")
+  data = urlencode({input.get("name"): input.get("value") for input in inputs})
+  step2=curl.post(url,data=data,headers={"content-type":"application/x-www-form-urlencoded"})
+  while True:
+    bs4 = BeautifulSoup(step2.text, "html.parser")
+    inputs = bs4.find_all("input")
+    data = urlencode({input.get("name"): input.get("value") for input in inputs})
+    step2=curl.post(url,data=data,headers={"content-type":"application/x-www-form-urlencoded"})
+  #  print(step2.text)
+    if f'action="{urlparse(url).path}"' not in step2.text:
+      sleep(30)
+      bs4 = BeautifulSoup(step2.text, "html.parser")
+      inputs = bs4.find_all("input")
+      data = urlencode({input.get("name"): input.get("value") for input in inputs})
+      get_url = curl.post(f'https://{urlparse(url).netloc}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded'}, data=data).json()
+     # print(get_url)
+      if get_url['status'] == 'success':
+          return get_url["url"]
+      break
+#print(sl_ask('https://sl-2.askpaccosi.com/XfzBSj'))
