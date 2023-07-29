@@ -17,10 +17,10 @@ import threading
 import os
 import requests,queue
 from PIL import Image, ImageDraw, ImageFont
-import socket
+import socket,modulesl,banner
 FONT_URL = "https://github.com/stamen/toner-carto/raw/master/fonts/Arial-Unicode-Bold.ttf"  # Ganti dengan URL font yang valid
 FONT_PATH = "Arial-Unicode-Bold.ttf"  # Path font yang diinginkan
-def bypass_link(url):
+def bypass_link(url,modulesl):
   dictnya={
   "1short.info":modulesl._1short_in,
   "adbitfly.com":modulesl.adbitfly,
@@ -2200,7 +2200,7 @@ def coinfola(modulesl,banner,tele=None):
       for ulang in range(int(y)):
           get_links = curl.get('https://coinfola.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
           print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
-          answer = bypass_link(get_links)
+          answer = bypass_link(get_links,modulesl)
           if answer==False:
                 break
           sleep(105)
@@ -2267,7 +2267,7 @@ def adhives(modulesl,banner,tele=None):
       for ulang in range(int(y)):
           get_links = curl.get('https://adhives.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
           print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
-          answer = bypass_link(get_links)
+          answer = bypass_link(get_links,modulesl)
           if answer == False:
             break
           else:
@@ -2587,7 +2587,7 @@ def james_trussy(modulesl,banner,tele=None):
         jumlah = int(i.find('span').text.split('/')[0])
         for ulang in range(jumlah):
                 url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = bypass_link(url)
+                answer = bypass_link(url,modulesl)
                 if answer==False:
                   break
                 if 'failed to bypass' in answer:
@@ -4106,7 +4106,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
           jumlah = int(i.find('span').text.split('/')[0])
           for ulang in range(jumlah):
               url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-              answer = bypass_link(url)
+              answer = bypass_link(url,modulesl)
               if answer==False:
                 break
               if 'failed to bypass' in answer:
@@ -4226,7 +4226,7 @@ def cryptoscop(modulesl,banner,tele=None):
       answer=modulesl.RecaptchaV2("6LcwWM8mAAAAAG477PUv-DUINczEel-bejrD2iYH",url)
       data=f"csrf_token_name={csrf}&captcha=recaptchav2&g-recaptcha-response={answer}"
       gt_links=curl.post(url.replace("pre_verify","go"),headers=ua_p,cookies=cookies,data=data,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-      answer=bypass_link(gt_links)
+      answer=bypass_link(gt_links,modulesl)
       if answer==False:
         break
       else:
