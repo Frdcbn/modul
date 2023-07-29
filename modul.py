@@ -17,7 +17,7 @@ import threading
 import os
 import requests,queue
 from PIL import Image, ImageDraw, ImageFont
-import socket,modulesl,banner
+import socket
 FONT_URL = "https://github.com/stamen/toner-carto/raw/master/fonts/Arial-Unicode-Bold.ttf"  # Ganti dengan URL font yang valid
 FONT_PATH = "Arial-Unicode-Bold.ttf"  # Path font yang diinginkan
 def bypass_link(url):
