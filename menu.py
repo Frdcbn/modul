@@ -24,8 +24,6 @@ def menu(banner,modul,modulesl):
 "coinfola":modul.coinfola,
 "coinpay_faucet":modul.coinpay_faucet,
 "coinzask":modul.coinzask,
-"cryptofuture":modul.cryptofuture,
-"cryptogenz":modul.cryptogenz,
 "earnfree_cash":modul.earnfree_cash,
 "earnsolana":modul.earnsolana,
 "eurofaucet_de":modul.eurofaucet_de,
