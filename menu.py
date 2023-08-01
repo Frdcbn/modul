@@ -41,6 +41,9 @@ def menu(banner,modul,modulesl):
 "tikiearn":modul.tikiearn,
 "faucetgigs":modul.faucetgigs,
 "cryptoscoop_online":modul.cryptoscop,
+"earnrub_pw":modul.earnrub_pw,
+"cryptohits":modul.cryptohits,
+"instanfaucet_xyz":modul.instanfaucet_xyz,
 }
     menu_dict=list(thread_map.items())
     if len(sys.argv) == 2:

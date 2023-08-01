@@ -15,11 +15,30 @@ from telethon import TelegramClient, sync, events
 import subprocess
 import threading
 import os
-import requests,queue
+import requests,queue,cloudscraper
 from PIL import Image, ImageDraw, ImageFont
 import socket
 FONT_URL = "https://github.com/stamen/toner-carto/raw/master/fonts/Arial-Unicode-Bold.ttf"  # Ganti dengan URL font yang valid
 FONT_PATH = "Arial-Unicode-Bold.ttf"  # Path font yang diinginkan
+def ua(host, user_agent, accept, content_type=None):
+    headers = {
+        'Host': host,
+        'User-Agent': user_agent,
+        'Accept': accept
+    }
+    if content_type:
+        headers['Content-Type'] = content_type
+    return headers
+def parser(text):
+    if len(text) <= 30:
+        return text
+    else:
+        return text[:30] + '.' * 3
+def parser_list(lis):
+  filtered_list = list(filter(lambda x: x.strip(), lis))
+  return filtered_list
+def end():
+  return ' '*20+'\r'
 def bypass_link(url,modulesl):
   dictnya={
   "1short.info":modulesl._1short_in,
@@ -2371,12 +2390,11 @@ def earnsolana(modulesl,banner,tele=None):
     sleep(30)
     reward=curl.post('https://earnsolana.xyz/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
     if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replae(',',''))
+      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
      print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      exit()
   exit()
-
 def coinpay_faucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinpay-faucet')
@@ -3434,7 +3452,6 @@ def nokofaucet(modulesl,banner,tele=None):
     else:
       animasi(menit=5)
   exit()
- 
 def paid_family(url,sitkey,email,services,modulesl,tele):
   curl=requests.Session()
   login=curl.get(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
@@ -3587,7 +3604,7 @@ def all_in_one(modulesl,banner,tele=None):
   }
   print(hijau1+"> "+kuning1+"Start bypass cryptosfaucet.top")
   paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,service,modulesl,tele)
-def bitscript_family(url,services,modulesl,banner,key_links,tele):
+def bitscript_family(url,modulesl,banner,key_links,tele,bal=None):
   host=urlparse(url).netloc
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner(host.upper())
@@ -3595,7 +3612,7 @@ def bitscript_family(url,services,modulesl,banner,key_links,tele):
   cookies, ugentmu = load_data(host)
   if not os.path.exists(f"data/{host}/{host}.json"):
     save_data(tele,host)
-    bitscript_family(url,services,modulesl,banner,key_links,tele)
+    bitscript_family(url,modulesl,banner,key_links,tele,bal)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -3609,90 +3626,57 @@ def bitscript_family(url,services,modulesl,banner,key_links,tele):
  # print(dahs.text)
   if 'Balance' not in dahs.text:
     save_data(tele,host)
-    bitscript_family(url,services,modulesl,banner,key_links,tele)
-  fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
-  print(hijau1+"> "+kuning1+"Account information")
-  print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
-  print(hijau1+'> '+fd[0].text.strip().splitlines()[4]+' : '+fd[0].text.strip().splitlines()[5])
+    bitscript_family(url,modulesl,banner,key_links,tele,bal)
+  if bal != None:
+    fd=bs(dahs.text,'html.parser').find_all('div',{'class':bal})
+    print(hijau1+"> "+kuning1+"Account information")
+    print(hijau1+'> '+fd[0].text.strip().splitlines()[1]+' : '+fd[0].text.strip().splitlines()[0])
+    print(hijau1+'> '+fd[1].text.strip().splitlines()[1]+' : '+fd[1].text.strip().splitlines()[0])
+
+  else:
+    fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
+    print(hijau1+"> "+kuning1+"Account information")
+    print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
+    print(hijau1+'> '+fd[0].text.strip().splitlines()[4]+' : '+fd[0].text.strip().splitlines()[5])
   link=curl.get(url+'shortlinks',headers=ua,cookies=cookies)
   gt=bs(link.text,'html.parser').find_all('div',{'class':'col-lg-4 mt-4'})
   print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  providers=services
+  #providers=services
   for i in gt:
     try:
       name = i.text.strip().splitlines()[0]
     #  print(i)
-      for provider in providers:
-          if provider in name:
-           #   print(name)
-              y=[i for i in i.text.strip().splitlines() if i][2]
-              if 'clicks remaining' in y:
-                y=y.split(' clicks remaining')[0].replace(' ','')
-              if 'click remaining' in y:
-                y=y.split(' click remaining')[0].replace(' ','')
-              link=i.find('a',{'class':key_links})['href']
-              for ulang in range(int(y)):
-                  get_links = curl.get(url+ link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
-                  print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
-                  answer = providers[provider](get_links)
-        #          print(reward.text)
-                  if 'failed to bypass' in answer:
-                      print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-                  else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies)
-                    if 'Congratulations.' in reward.text:
-                      _1 = reward.text.split("message: '")[1].split("'")[0]
-                      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
+
+      y=[i for i in i.text.strip().splitlines() if i][2]
+      if 'clicks remaining' in y:
+        y=y.split(' clicks remaining')[0].replace(' ','')
+      if 'click remaining' in y:
+        y=y.split(' click remaining')[0].replace(' ','')
+      link=i.find('a',{'class':key_links})['href']
+      for ulang in range(int(y)):
+          get_links = curl.get(url+ link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
+          print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end=end())
+          answer = bypass_link(get_links,modulesl)
+#          print(reward.text)
+          if answer==False:break
+          if 'failed to bypass' in answer:
+              print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+          else:
+            sleep(105)
+            reward = curl.get(answer, headers=ua, cookies=cookies)
+            if 'Congratulations.' in reward.text:
+              _1 = reward.text.split("message: '")[1].split("'")[0]
+              print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
     except Exception as e:
       pass
   exit()
+def cryptohits(modulesl,banner,tele=None):
+  bitscript_family("https://cryptohits.io/",modulesl,banner,"card shadow text-decoration-none",tele,"balance-left")
 def earnfree_cash(modulesl,banner,tele=None):
-  services={
-      'LinksFly': modulesl.linksfly,
-      'MegaURL': modulesl.megaurl,
-      'ShrinkEarn': modulesl.shrinkearn,
-      'Ctr.sh': modulesl.ctrsh,
-      'Ex-Foary': modulesl.ex_foary_com,
-      'illink': modulesl.illink_net,
-      'Usalink': modulesl.usalink,
-      "Clks":modulesl.clks_pro,
-      "Clk.sh":modulesl.clksh,
-     # 'Chl': None,
-      'BirdUrls': modulesl.birdurl,
-      'Adshort': modulesl.adshorti_co,
-      'OwlLink': modulesl.owlink,
-      'Fc.Lc': modulesl.fl_lc,
-      'Cuty': modulesl.cuty_io,
-     # 'Flyadvip': None,
-      'Exe': modulesl.exe_io,
-      'Mitly': modulesl.mitly,
-      'Shorti': modulesl.shorti_io
-  }
-  bitscript_family('https://earnfree.cash/',services,modulesl,banner,"card shadow text-decoration-none",tele)
+  bitscript_family('https://earnfree.cash/',modulesl,banner,"card shadow text-decoration-none",tele)
   exit()
 def paidbucks(modulesl,banner,tele=None):
-  services={
-      'Linksfly': modulesl.linksfly,
-      'MegaURL': modulesl.megaurl,
-      'ShrinkEarn': modulesl.shrinkearn,
-      'Ctr.sh': modulesl.ctrsh,
-      'Ex-Foary': modulesl.ex_foary_com,
-      'illink': modulesl.illink_net,
-      'Usalink': modulesl.usalink,
-     # 'Chl': None,
-      'BirdUrls': modulesl.birdurl,
-   #   'Adshort': None,
-      'OwlLink': modulesl.owlink,
-      'Fclc': modulesl.fl_lc,
-      'Cuty': modulesl.cuty_io,
-     # 'Flyadvip': None,
-      'Exe': modulesl.exe_io,
-      'Mitly': modulesl.mitly,
-      'Clksh': modulesl.clksh,
-      'Shorti': modulesl.shorti_io
-  }
-  bitscript_family('https://paidbucks.xyz/',services,modulesl,banner,"card shadow text-decoration-none",tele)
+  bitscript_family('https://paidbucks.xyz/',modulesl,banner,"card shadow text-decoration-none",tele)
 def clickscoin(modulesl,banner,tele=None):
   url="https://clickscoin.com/account"
   host=urlparse(url).netloc
@@ -3880,7 +3864,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
      try:
       name=ptc.find('h5',{'class':'card-title'}).text
       link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
-      print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+      print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(name),end='\r')
       visit=curl.get(link,headers=ua,cookies=cookies)
       sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
       bs4 = BeautifulSoup(visit.text, "html.parser")
@@ -3964,20 +3948,6 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
         gas=curl.post(f"https://{host}/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
         print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
   exit()
-def ua(host, user_agent, accept, content_type=None):
-    headers = {
-        'Host': host,
-        'User-Agent': user_agent,
-        'Accept': accept
-    }
-    if content_type:
-        headers['Content-Type'] = content_type
-    return headers
-def parser(text):
-    if len(text) <= 30:
-        return text
-    else:
-        return text[:30] + '.' * 3
 def cryptoscop(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://cryptoscoop.online/").netloc
@@ -3986,7 +3956,7 @@ def cryptoscop(modulesl,banner,tele=None):
   cookies, ugentmu = load_data(host)
   if not os.path.exists(f"data/{host}/{host}.json"):
     save_data(tele=None,name=host)
-    cryptoscop(modulesl,banner)
+    cryptoscop(modulesl,banner,tele)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -3994,6 +3964,9 @@ def cryptoscop(modulesl,banner,tele=None):
   ua_p=ua(host,ugentmu,"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","application/x-www-form-urlencoded")
   curl=requests.Session()
   dash=curl.get(f'https://cryptoscoop.online/dashboard',headers=hd,cookies=cookies)
+  if 'Coin Balance' not in dash.text:
+    save_data(tele=None,name=host)
+    cryptoscop(modulesl,banner,tele)
   info=bs(dash.text,"html.parser").find("div",{"class":"col-8 p-4"}).text.strip().splitlines()
   print(hijau1+"> "+kuning1+"Account information")
   print(hijau1+'> '+info[1]+' : '+info[0])
@@ -4031,6 +4004,8 @@ def cryptoscop(modulesl,banner,tele=None):
       answer=bypass_link(gt_links,modulesl)
       if answer==False:
         break
+      if 'failed to bypass' in answer:
+        pass
       else:
         sleep(105)
         reward=curl.get(answer,headers=hd,cookies=cookies)
@@ -4051,3 +4026,80 @@ def cryptoscop(modulesl,banner,tele=None):
       animasi(menit=5)
    except Exception as e:
      pass
+def earnrub_pw(modulesl,banner,tele=None):
+  vie_script(modulesl,banner,url="https://earnrub.pw/",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=True,short=True,faucet=True,auto=True)
+def instanfaucet_xyz(modulesl,banner,tele=None):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://insfaucet.xyz/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  cookies, ugentmu = load_data(host)
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(tele=None,name=host)
+    instanfaucet_xyz(modulesl,banner,tele)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  hd=ua(host,ugentmu,"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+  ua_p=ua(host,ugentmu,"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","application/x-www-form-urlencoded")
+  curl=requests.Session()
+  dash=curl.get("https://insfaucet.xyz/dashboard",headers=hd,cookies=cookies)
+  get_info=bs(dash.text,"html.parser").find_all('div',{"class":"col-sm-4 layout-spacing"})
+  print(hijau1+"> "+kuning1+"Account information")
+  for info in get_info:
+    print(hijau1+"> "+info.text.strip().replace("\n"," : "))
+  print(hijau1+"> "+kuning1+"Ptc")
+  ptc=curl.get(f'https://insfaucet.xyz/ptc',headers=hd,cookies=cookies)
+  ptc=bs(ptc.text,"html.parser").find_all("div",{"class":"col-sm-4 layout-spacing"})
+  for ptc in ptc:
+   try:
+   # print(ptc)
+    name=parser(ptc.find("p",{"class":"card-text"}).text)
+    url=ptc.find("button")["onclick"].split("window.location = '")[1].split("'")[0]
+    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end=' '*20+'\r')
+    view=curl.get(url,headers=hd,cookies=cookies)
+    animasi(detik=int(view.text.split("var timer = ")[1].split(";")[0]))
+    csrf=bs(view.text,"html.parser").find("input",{"name":"csrf_token_name"})["value"]
+    token=bs(view.text,"html.parser").find("input",{"name":"token"})["value"]
+    answer=modulesl.RecaptchaV2("6LdxTHkeAAAAALQHz9Z7IQHwKZxJrqts5NZN58rf",url)
+    data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
+    reward=curl.post(url.replace("view","verify"),headers=ua_p,data=data,cookies=cookies)
+    if 'Good job!' in reward.text:
+        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+   except Exception as e:
+     pass
+   # exit()
+  print(hijau1+"> "+kuning1+"Shortlinks")
+  sl=curl.get(f'https://insfaucet.xyz/links',headers=hd,cookies=cookies)
+  sl=bs(sl.text,"html.parser").find_all("div",{"class":"card card-body text-center"})
+  for sl in sl:
+   try:
+    url=sl.find("a")["href"]
+    jumlah=sl.find("span",{"class":"badge span-warning text-warning text-center"}).text.strip().split('/')[0]
+    name=sl.find("h4").text
+    for jumlah in range(int(jumlah)):
+      gt_links=curl.get(url,headers=hd,cookies=cookies,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+      answer=bypass_link(gt_links,modulesl)
+      if answer==False:
+        break
+      if 'failed to bypass' in answer:
+        pass
+      else:
+        sleep(105)
+        reward=curl.get(answer,headers=hd,cookies=cookies)
+        if 'Good job!' in reward.text:
+          print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+   except Exception as e:
+     pass
+  print(hijau1+"> "+kuning1+"Start auto faucet")
+  while True:
+     try:
+      get_=curl.get(f'https://{host}/auto',headers=hd,cookies=cookies)
+      token=bs(get_.text,"html.parser").find("input",{"name":"token"})["value"]
+      animasi(detik=int(get_.text.split('let timer = ')[1].split(',')[0]))
+      reward=curl.post(f'https://{host}/auto/verify',headers=ua_p,cookies=cookies,data="token="+token)
+      if 'Good job!' in reward.text:
+        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+     except Exception as e:
+       print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+       exit()
