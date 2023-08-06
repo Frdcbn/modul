@@ -10,14 +10,28 @@ import urllib.parse
 import requests
 from bs4 import BeautifulSoup as bs
 import concurrent.futures
+hijau1 = "\033[1;92m"#Terang
+kuning1 = "\033[1;93m"#Terang
+putih1 = "\033[1;97m"#Terang
+merah1 = "\033[1;91m"#Terang
+biru1 = "\033[1;94m"#Terang
 # -------------------------------------------
 # RecaptchaV2 BYPASS
-
+def end():
+  return ' '*20+'\r'
+def status_code(req):
+  print(putih1+"Response "+str(req.status_code)+' '+req.reason,end=end())
+  sleep(0.5)
+  print(' ',end=end())
 def get_res(api, key, url):
-    return requests.get(f'http://ocr.captchaai.com/in.php?key={api}&method=userrecaptcha&googlekey={key}&pageurl={url}').text
+     res=requests.get(f'http://ocr.captchaai.com/in.php?key={api}&method=userrecaptcha&googlekey={key}&pageurl={url}')
+     status_code(res)
+     return res.text
 
 def get_ans(api, id):
-    return requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}').text
+     res=requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}')
+     status_code(res)
+     return res.text
 
 def RecaptchaV2(key, url):
     with open('ckey.txt') as f:
@@ -26,7 +40,7 @@ def RecaptchaV2(key, url):
     while True:
         api = random.choice(api_list)
         get_res_text = get_res(api, key, url)
-
+        time.sleep
         if 'OK' in get_res_text:
             id = get_res_text.split('|')[1]
             start_time = time.time()
@@ -47,29 +61,6 @@ def RecaptchaV2(key, url):
                       return None
         else:
             print('Get ID', end='\r')
-
-# -------------------------------------------
-# Hcaptcha BYPASS
-def Hcaptcha(key,url):
-  api=random.choice(open('2key.txt').read().splitlines())
-  get_res=requests.get(f'https://2captcha.com/in.php?key={api}&method=hcaptcha&sitekey={key}&pageurl={url}').text
-  if 'OK' in get_res:
-    status=False
-    id=get_res.split('|')[1]
-    while(status==False):
-      try:
-        get_ans=requests.get(f'https://2captcha.com/res.php?key={api}&action=get&id={id}').text
-        sleep(20)
-        if 'CAPCHA_NOT_READY' in get_ans:
-          print(get_ans,end='                     \r')
-        if 'OK' in get_ans:
-          return get_ans.split('|')[1]
-          status =True
-      except Exception as e:
-        print(e)
-        pass
-  else:
-    print('Api Key is no longer available : '+ api,end='\r')
 # -------------------------------------------
 # RecaptchaV3 BYPASS
 def RecaptchaV3(ANCHOR_URL):
@@ -95,13 +86,15 @@ def RecaptchaV3(ANCHOR_URL):
 def one_method(curl,url,headers=None):
  try:
   host=urlparse(url).netloc
-  final = curl.get(url,headers=headers).text
+  final = curl.get(url,headers=headers)
+  status_code(final)
   sleep(15)
-  bs4 = BeautifulSoup(final, "html.parser")
+  bs4 = BeautifulSoup(final.text, "html.parser")
   inputs = bs4.find_all("input")
   data = urlencode({input.get("name"): input.get("value") for input in inputs})
-  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8',"user-agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"}, data=data).json()
-  if get_url['status'] == 'success':
+  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8',"user-agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"}, data=data)
+  status_code(get_url)
+  if get_url.json()['status'] == 'success':
       return get_url["url"]
   sesi = False
  except Exception as e:

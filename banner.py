@@ -1,7 +1,11 @@
 import subprocess
 import geocoder
 import platform
-
+from rich.columns import Columns
+from rich.panel import Panel
+from rich import print as cetak
+import platform
+from rich.console import Console
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
@@ -67,29 +71,39 @@ def get_uptime():
 def get_location_info():
     g = geocoder.ip('me')
     return g
-
 def banner(name):
-    print(putih1 + f' {name} '.center(56, "•"))
-    print(f"""
-{biru1}╔╦╗╦ ╦╦ ╔╦╗╦╔═╗╦  ╔═╗  ╔═╗╔═╗╦═╗╦╔═╗╔╦╗
-{hijau1}║║║║ ║║  ║ ║╠═╝║  ║╣   ╚═╗║  ╠╦╝║╠═╝ ║ 
-{merah1}╩ ╩╚═╝╩═╝╩ ╩╩  ╩═╝╚═╝  ╚═╝╚═╝╩╚═╩╩   ╩ 
-{merah1} {putih1}: {hijau1}MR.BADUT     {merah1} {putih1}: {hijau1}t.me/MRDEMONSCRIPT     {merah1} {putih1}: {hijau1}Python""")
-    print(putih1 + " Your information ".center(56, "•"))
     location_info = get_location_info()
     system_info = get_system_info()
     memory_info = get_memory_info()
     uptime = get_uptime()
-    print(merah1 + ""+hijau1+" IP " + putih1 + ":" + kuning1, location_info.ip)
-    print(merah1 + ""+hijau1+" COUNTRY " + putih1 + ":" + kuning1, location_info.country)
-    print(merah1 + ""+hijau1+" PROVINCE " + putih1 + ":" + kuning1, location_info.state)
-    print(merah1 + ""+hijau1+" CITY " + putih1 + ":" + kuning1, location_info.city)
-    print(merah1 + ""+hijau1+" COORDINATE " + putih1 + ":" + kuning1, location_info.latlng)
-    print(merah1 + ""+hijau1+" DEVICE OS " + putih1 + ":" + kuning1, system_info['OS'], system_info['OS Version'])
-    print(merah1 + ""+hijau1+" ARCHITECTURE " + putih1 + ":" + kuning1, system_info['Machine'])
-    print(merah1 + ""+hijau1+" VERSION " + putih1 + ":" + kuning1, platform.uname().release)
-    print(merah1 + ""+hijau1+" ACTIVE " + putih1 + ":" + kuning1, uptime)
-    print(merah1 + ""+hijau1+" RAM " + putih1 + ":" + kuning1, memory_info['Used Memory'], "/", memory_info['Total Memory'])
-    print(putih1 + "".center(56, "•"))
+    banner=("""              [green]╔╦╗╦ ╦╦ ╔╦╗╦╔═╗╦  ╔═╗  ╔═╗╔═╗╦═╗╦╔═╗╔╦╗
+              [yellow]║║║║ ║║  ║ ║╠═╝║  ║╣   ╚═╗║  ╠╦╝║╠═╝ ║
+              [blue]╩ ╩╚═╝╩═╝╩ ╩╩  ╩═╝╚═╝  ╚═╝╚═╝╩╚═╩╩   ╩
+"""
+"        [green] [white]: [yellow]MR.BADUT     [green] [white]: [yellow]t.me/MRDEMONSCRIPT     [green] [white]: [yellow]Python")
+    info_text = (
+        f"[green] IP[white] : [yellow]{location_info.ip}\n"
+        f"[green] COUNTRY[white] : [yellow]{location_info.country}\n"
+        f"[green] PROVINCE[white] : [yellow]{location_info.state}\n"
+        f"[green] CITY[white] : [yellow]{location_info.city}\n"
+        f"[green] COORDINATE[white] : [yellow]{location_info.latlng}\n"
+    )
+    info_text1 = (
+        f"[green] DEVICE OS[white] : [yellow]{system_info['OS']} {system_info['OS Version']}\n"
+        f"[green] ARCHITECTURE[white] : [yellow]{system_info['Machine']}\n"
+        f"[green] VERSION[white] : [yellow]{platform.uname().release}\n"
+        f"[green] ACTIVE[white] : [yellow]{uptime}\n"
+        f"[green] RAM[white] : [yellow]{memory_info['Used Memory']} / {memory_info['Total Memory']}"
+    )
+
+    banner_content = (
+        f"{info_text}"
+        f"\n{info_text1}"
+    )
+    # Print the MAIN MENU text in a larger font
+    #cetak(Panel(banner, width=90, title=f"[bold green]{name}", padding=(5, 2), style="white on black",))
+    
+    cetak(Panel(banner, width=80,title=f"[bold green]{name}", padding=(0, 4), style="bold white"))
+    cetak(Panel(banner_content, width=80,title=f"[bold green]Your Information", padding=(0, 4), style="bold white"))
 
 #banner("System Information")

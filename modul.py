@@ -18,8 +18,18 @@ import os
 import requests,queue,cloudscraper
 from PIL import Image, ImageDraw, ImageFont
 import socket
+from rich.tree import Tree
+from rich import print as rprint
 FONT_URL = "https://github.com/stamen/toner-carto/raw/master/fonts/Arial-Unicode-Bold.ttf"  # Ganti dengan URL font yang valid
 FONT_PATH = "Arial-Unicode-Bold.ttf"  # Path font yang diinginkan
+hijau1 = "\033[1;92m"#Terang
+kuning1 = "\033[1;93m"#Terang
+putih1 = "\033[1;97m"#Terang
+merah1 = "\033[1;91m"#Terang
+biru1 = "\033[1;94m"#Terang
+def keluar(error):
+  lis=["KeyboardInterrupt"]
+  if error in lis:exit()
 def ua(host, user_agent, accept, content_type=None):
     headers = {
         'Host': host,
@@ -38,8 +48,18 @@ def parser_list(lis):
   filtered_list = list(filter(lambda x: x.strip(), lis))
   return filtered_list
 def end():
-  return ' '*20+'\r'
-def bypass_link(url,modulesl):
+  return ' '*40+'\r'
+def status_code(req):
+  print(putih1+"Response "+str(req.status_code)+' '+req.reason,end=end())
+  sleep(1)
+  print(' ',end=end())
+def persen(detik):
+        for detik_proses in range(detik + 1):
+            persen = (detik_proses / detik) * 100
+            print(f"{persen:.2f}%", end=end())
+            time.sleep(1)
+        print(end())
+def bypass_link(url,modulesl,jumlah):
   dictnya={
   "1short.info":modulesl._1short_in,
   "adbitfly.com":modulesl.adbitfly,
@@ -56,7 +76,7 @@ def bypass_link(url,modulesl):
   #"":modulesl.coinparty,
   "ctr.sh":modulesl.ctrsh,
   "cuty.io":modulesl.cuty_io,
-  "clks.pro":modulesl.clks_pro,
+ # "clks.pro":modulesl.clks_pro,
   "droplink.co":modulesl.droplink,
   "ex-foary.com":modulesl.ex_foary_com,
   "exe.io":modulesl.exe_io,
@@ -97,7 +117,16 @@ def bypass_link(url,modulesl):
   "zuba.link":modulesl.zuba_link,
   }
   if urlparse(url).netloc in dictnya:
-    return dictnya[urlparse(url).netloc](url)
+    print(putih1+'├──'+'─'*56)
+    print(f"├── {putih1}[{kuning1}{jumlah[0]}/{jumlah[1]}{putih1}] {kuning1} Bypassing : {hijau1}{url}")
+    res=dictnya[urlparse(url).netloc](url)
+    if "failed to bypass" in res:
+      print(putih1+'├── '+kuning1+'Status : '+merah1+res)
+      print(putih1+'├──'+'─'*56)
+    else:
+      print(putih1+'├── '+kuning1+'Status : '+hijau1+"success")
+      print(putih1+'├──'+'─'*56)
+      return res
   else:
     return False
 def tiktok_downloader(url, output_name):
@@ -604,11 +633,6 @@ def bot_tele(modulesl,banner,menu_dict,thread_map,data_queue,fl):
   
       client.start()
       client.run_until_disconnected()
-hijau1 = "\033[1;92m"#Terang
-kuning1 = "\033[1;93m"#Terang
-putih1 = "\033[1;97m"#Terang
-merah1 = "\033[1;91m"#Terang
-biru1 = "\033[1;94m"#Terang
 def send_signal(port, message):
     send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     send_server_address = ('localhost', 2222)
@@ -742,8 +766,9 @@ def btccanyon(modulesl,banner,tele=None):
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
       }
-      gt_cp = requests.post('https://btccanyon.com/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light').text
-      hash = eval(gt_cp)
+      gt_cp = requests.post('https://btccanyon.com/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light')
+      status_code(gt_cp)
+      hash = eval(gt_cp.text)
       gt = {
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -756,6 +781,7 @@ def btccanyon(modulesl,banner,tele=None):
           file_name = f'{i}.jpg'
           file_names.append(file_name)
           gt_im = requests.get(f'https://btccanyon.com/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
+          status_code(gt_im)
           with open('cache/btccanyon/'+file_name, 'wb') as f:
               shutil.copyfileobj(gt_im.raw, f)
       ind = cek()
@@ -766,7 +792,8 @@ def btccanyon(modulesl,banner,tele=None):
           'x-requested-with': 'XMLHttpRequest',
           'user-agent': ugentmu
       }
-      ve = requests.post('https://btccanyon.com/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y).text
+      ve = requests.post('https://btccanyon.com/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y)
+      status_code(ve)
       return answer
   cookies, ugentmu = load_data('btccanyon')
   if not os.path.exists("data/btccanyon/btccanyon.json"):
@@ -777,25 +804,30 @@ def btccanyon(modulesl,banner,tele=None):
   cookies = {k: v.value for k, v in cookiek.items()}
   ua={
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   get_sl=curl.get('https://btccanyon.com/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   if 'Account Balance' not in get_sl.text:
     save_data(tele,'btccanyon')
     btccanyon(modulesl,banner,tele)
   try:
-    print(hijau1+"> "+kuning1+"Account information")
+    akun=Tree("[green] > [yellow]Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
-      print(hijau1+'> '+info.text.strip())
+      akun.add('[green]> [yellow]'+info.text.strip())
+    rprint(akun)
   except Exception as e:
     save_data(tele,'btccanyon')
     btccanyon(modulesl,banner,tele)
-  print(hijau1+"> "+kuning1+"Start working on ptc")
+  pct=Tree("[gree] > [yellow]Start working on ptc")
+  rprint(pct)
   get_ptc=curl.get('https://btccanyon.com/ptc.html',headers=ua,cookies=cookies)
+  status_code(get_ptc)
   def balance():
     get_sl=curl.get('https://btccanyon.com/ptc.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
     return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
   get_id=bs(get_ptc.text,'html.parser').find_all('button',{'class':'btn btn-success btn-sm w-100 mt-1'})
   del get_id[0]
@@ -806,25 +838,29 @@ def btccanyon(modulesl,banner,tele=None):
     _i=_id["onclick"].split("opensite('")[1].split("','")[0]
     key=get_ptc.text.split("var hash_key = '")[1].split("';")[0]
     get_reward=curl.get(f'https://btccanyon.com/surf.php?sid={_i}&key={key}',headers=ua,cookies=cookies)
+    status_code(get_reward)
     token1=get_reward.text.split("var token = '")[1].split("';")[0]
     secon=get_reward.text.split("var secs = ")[1].split(";")[0]
     for i in tqdm (range (int(secon)), leave=False,desc=hijau1+"visit > "+_id["onclick"].split("','")[1].split("');")[0]):
             time.sleep(1)
             pass
     answer=get_answer()
-    reward=json.loads(curl.post('https://btccanyon.com/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies).text)
-    if reward["status"] == 200:
-      gas=bs(reward["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-      print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-      print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+    reward=curl.post('https://btccanyon.com/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies)
+    status_code(reward)
+    if json.loads(reward.text)["status"] == 200:
+      gas=bs(json.loads(reward.text)["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
       sesi=True
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://btccanyon.com/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
   gt_s=bs(get_sl.text,'html.parser').find_all('tr')
   del gt_s[0]
   del gt_s[len(gt_s)-1]
-  print(hijau1+"> "+kuning1+"Start Bypassing Shortlinks")
+  sl=Tree("[green]> [yellow]Start Bypassing Shortlinks")
+  rprint(sl)
   for i in gt_s:
    try:
     name=i.find('td',{'class':'align-middle'}).text
@@ -832,270 +868,63 @@ def btccanyon(modulesl,banner,tele=None):
     if None == id:
       pass
     else:
-      providers = {
-        'clks.pro': modulesl.clks_pro,
-        'linksly.co': modulesl.linksly,
-        'shrinkearn.com': modulesl.shrinkearn,
-        'fc.lc': modulesl.fl_lc,
-        'clk.sh': modulesl.clksh,
-        'linksfly.me': modulesl.linksfly,
-        'shortsfly.me': modulesl.shortfly,
-        'chainfo.xyz': modulesl.chainfo,
-        'flyzu.icu': modulesl.flyzu,
-        'adshorti.xyz': modulesl.adshorti_xyz,
-        'usalink.io': modulesl.usalink,
-        'birdurls.com': modulesl.birdurl,
-        'owllink.net': modulesl.owlink,
-        'clickzu.icu': modulesl.clickzu_icu,
-        'shortzu.icu': modulesl.shortzu_icu,
-        'zuba.link': modulesl.zuba_link,
-        'mitly.us': modulesl.mitly,
-        'illink.net': modulesl.illink_net,
-        'exe.io': modulesl.exe_io,
-        'insfly.pw': modulesl.insfly,
-        'linkvor.pw': modulesl.linkvor_pw,
-        'linkjust.com': modulesl.linkjust,
-        'cashurl.win': modulesl.cashurl_win,
-        'shorti.io': modulesl.shorti_io,
-        'oii.io': modulesl.oii,
-        'ex-foary.com': modulesl.ex_foary_com,
-      }
-      if any(provider in name for provider in providers):
-        provider = next(provider for provider in providers if provider in name)
-        for i in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
-            get_sl = curl.get('https://btccanyon.com/shortlinks.html', headers=ua, cookies=cookies)
-            token = get_sl.text.split("var token = '")[1].split("';")[0]
-            status = True
-            while(status==True):
-                da = id["onclick"].split("goShortlink('")[1].split("');")[0]
-                get_lk = json.loads(curl.post('https://btccanyon.com/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
-                if get_lk["status"] == 200:
-                    answer = providers[provider](get_lk['shortlink'])
-                    if 'failed to bypass' in answer:
-                        print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"failed to bypass",end="\r")
-                    if answer:
-                        try:
-                            get_sl = curl.get(answer, headers=ua, cookies=cookies)
-                            sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
-                            print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+sukses)
-                            print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-                        except:
-                            print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
-                    break
-                if get_lk['status'] == 600:
-                    print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
-                else:
-                  print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
+      jumlah=int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])
+      re=jumlah
+      for i in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
+          get_sl = curl.get('https://btccanyon.com/shortlinks.html', headers=ua, cookies=cookies)
+          status_code(get_sl)
+          token = get_sl.text.split("var token = '")[1].split("';")[0]
+          status = True
+          while(status==True):
+              da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+              gt_lk = curl.post('https://btccanyon.com/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies)
+              status_code(gt_lk)
+              get_lk=json.loads(gt_lk.text)
+              if get_lk["status"] == 200:
+                  answer = bypass_link(get_lk['shortlink'],modulesl,jumlah=[str(re),str(jumlah)])
+                  if answer==False:break
+                  if 'failed to bypass' in answer:pass
+                  if answer:
+                      try:
+                          get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                          status_code(get_sl)
+                          sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                          print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+sukses)
+                          print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+                          re-=1
+                      except:
+                          print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"invalid keys")
                   break
-   except Exception as e:pass
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
-  print(hijau1+"> "+kuning1+"Bypass faucet")
+              if get_lk['status'] == 600:
+                  print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+              else:
+                print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
+                break
+   except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
+  faucet=Tree("[green] > [yellow]Bypass faucet")
+  rprint(faucet)
   while True:
     get_sl=curl.get('https://btccanyon.com/',headers=ua,cookies=cookies)
+    status_code(get_sl)
     if 'You can claim again in' in get_sl.text:
       tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
-      for i in tqdm (range (int(tim)), leave=False,desc="Please wait..."):
+      for i in tqdm (range (int(tim)), leave=False,desc="└── Please wait..."):
             time.sleep(1)
             pass
     token=get_sl.text.split("var token = '")[1].split("';")[0]
     answer=modulesl.RecaptchaV2('6LdzF6MlAAAAACcN9JGXW8tSs4dy1MjeKZKFJ11M',get_sl.url)
-    g=json.loads(curl.post('https://btccanyon.com/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies).text)
+    gt=curl.post('https://btccanyon.com/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies)
+    status_code(gt)
+    g=json.loads(gt.text)
     if g["status"] == 200:
       gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-      print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-      print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-      for i in tqdm (range (int(600)), leave=False,desc="Please wait..."):
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+      for i in tqdm (range (int(600)), leave=False,desc="└── Please wait..."):
             time.sleep(1)
-def faucetgigs(modulesl,banner,tele=None):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  banner.banner("FAUCETGIGS")
-  data_control('faucetgigs')
-  def cek():
-      file_sizes = []
-      for i in range(5):
-          file_size = os.path.getsize(f'cache/faucetgigs/{i}.jpg')
-          file_sizes.append(file_size)
-      while True:
-          for i in range(5):
-              if file_sizes[i] != file_sizes[0] and file_sizes[i] != file_sizes[i-1]:
-                  return i
-  def get_answer():
-      cache_control('faucetgigs')
-      us = {
-          'accept': 'application/json, text/javascript, */*; q=0.01',
-          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'x-requested-with': 'XMLHttpRequest',
-          'user-agent': ugentmu,
-          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-      }
-      gt_cp = requests.post('https://faucetgigs.com/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light').text
-      hash = eval(gt_cp)
-      gt = {
-          'user-agent': ugentmu,
-          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-          'sec-ch-ua-platform': '"Android"',
-          'accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-      }
-      
-      file_names = []
-      for i in range(5):
-          file_name = f'{i}.jpg'
-          file_names.append(file_name)
-          gt_im = requests.get(f'https://faucetgigs.com/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
-          with open('cache/faucetgigs/'+file_name, 'wb') as f:
-              shutil.copyfileobj(gt_im.raw, f)
-      ind = cek()
-      answer = hash[ind]
-      y = f'cID=0&pC={answer}&rT=2'
-      us = {
-          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'x-requested-with': 'XMLHttpRequest',
-          'user-agent': ugentmu
-      }
-      ve = requests.post('https://faucetgigs.com/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y).text
-      return answer
-  cookies, ugentmu = load_data('faucetgigs')
-  if not os.path.exists("data/faucetgigs/faucetgigs.json"):
-    save_data(tele,'faucetgigs')
-    faucetgigs(modulesl,banner,tele)
-  cookiek = SimpleCookie()
-  cookiek.load(cookies)
-  cookies = {k: v.value for k, v in cookiek.items()}
-  ua={
-    'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
-  }
-  curl=requests.Session()
-  get_sl=curl.get('https://faucetgigs.com/?page=shortlinks',headers=ua,cookies=cookies)
-  if 'Account Balance' not in get_sl.text:
-    save_data(tele,'faucetgigs')
-    faucetgigs(modulesl,banner,tele)
-  try:
-    print(hijau1+"> "+kuning1+"Account information")
-    get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
-    for info in get_inf:
-      print(hijau1+'> '+info.text.strip())
-  except Exception as e:
-    save_data(tele,'faucetgigs')
-    faucetgigs(modulesl,banner,tele)
-  print(hijau1+"> "+kuning1+"Start working on ptc")
-  get_ptc=curl.get('https://faucetgigs.com/?page=ptc',headers=ua,cookies=cookies)
-  def balance():
-    get_sl=curl.get('https://faucetgigs.com/?page=ptc',headers=ua,cookies=cookies)
-    return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
-  get_id=bs(get_ptc.text,'html.parser').find_all('button',{'class':'btn btn-success btn-sm w-100 mt-1'})
-  for _id in get_id:
-   if 'Reward' not in _id:
-     pass
-   else:
-     sesi=False
-     while(sesi==False):
-      _i=_id["onclick"].split("opensite('")[1].split("','")[0]
-      key=get_ptc.text.split("var hash_key = '")[1].split("';")[0]
-      get_reward=curl.get(f'https://btccanyon.com/surf.php?sid={_i}&key={key}',headers=ua,cookies=cookies)
-      token1=get_reward.text.split("var token = '")[1].split("';")[0]
-      secon=get_reward.text.split("var secs = ")[1].split(";")[0]
-      for i in tqdm (range (int(secon)), leave=False,desc=hijau1+"visit > "+_id["onclick"].split("','")[1].split("');")[0]):
-              time.sleep(1)
-              pass
-      answer=get_answer()
-      reward=json.loads(curl.post('https://btccanyon.com/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies).text)
-      if reward["status"] == 200:
-        gas=bs(reward["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-        print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-        print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-        sesi=True
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
-  get_sl=curl.get('https://faucetgigs.com/?page=shortlinks',headers=ua,cookies=cookies)
-  token=get_sl.text.split("var token = '")[1].split("';")[0]
-  gt_s=bs(get_sl.text,'html.parser').find_all('tr')
-  del gt_s[0]
-  print(hijau1+"> "+kuning1+"Start Bypassing Shortlinks")
-  for i in gt_s:
-     try:
-      name=i.find('td',{'class':'align-middle'}).text
-      id=i.find('button',{'class':'btn btn-success btn-sm'})
-     # print(name)
-      if None == id:
-        pass
-      else:
-        providers = {
-          'clks.pro': modulesl.clks_pro,
-          'linksly.co': modulesl.linksly,
-          'shrinkearn.com': modulesl.shrinkearn,
-          'fc.lc': modulesl.fl_lc,
-          'clk.sh': modulesl.clksh,
-          'linksfly.me': modulesl.linksfly,
-          'shortsfly.me': modulesl.shortfly,
-          'chainfo.xyz': modulesl.chainfo,
-          'flyzu.icu': modulesl.flyzu,
-          'adshorti.xyz': modulesl.adshorti_xyz,
-          'usalink.io': modulesl.usalink,
-          'birdurls.com': modulesl.birdurl,
-          'owllink.net': modulesl.owlink,
-          'clickzu.icu': modulesl.clickzu_icu,
-          'shortzu.icu': modulesl.shortzu_icu,
-          'zuba.link': modulesl.zuba_link,
-          'mitly.us': modulesl.mitly,
-          'illink.net': modulesl.illink_net,
-          'exe.io': modulesl.exe_io,
-          'insfly.pw': modulesl.insfly,
-          'linkvor.pw': modulesl.linkvor_pw,
-          'linkjust.com': modulesl.linkjust,
-          'cashurl.win': modulesl.cashurl_win,
-          'shorti.io': modulesl.shorti_io,
-          'oii.io': modulesl.oii,
-          'ex-foary.com': modulesl.ex_foary_com,
-        }
-        if any(provider in name for provider in providers):
-          provider = next(provider for provider in providers if provider in name)
-          for i in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
-              get_sl = curl.get('https://faucetgigs.com/?page=shortlinks', headers=ua, cookies=cookies)
-              token = get_sl.text.split("var token = '")[1].split("';")[0]
-              status = True
-              while(status==True):
-                  da = id["onclick"].split("goShortlink('")[1].split("');")[0]
-                  get_lk = json.loads(curl.post('https://faucetgigs.com/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
-                  if get_lk["status"] == 200:
-                      answer = providers[provider](get_lk['shortlink'])
-                      if 'failed to bypass' in answer:
-                          print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"failed to bypass",end="\r")
-                      if answer:
-                          try:
-                              get_sl = curl.get(answer, headers=ua, cookies=cookies)
-                              sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
-                              print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+sukses)
-                              print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-                          except:
-                              print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
-                      break
-                  if get_lk['status'] == 600:
-                      print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
-                  else:
-                    print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
-                    break
-     except Exception as e:pass
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
-  print(hijau1+"> "+kuning1+"Bypass faucet")
-  while True:
-   try:
-    get_sl=curl.get('https://faucetgigs.com/',headers=ua,cookies=cookies)
-    if 'You can claim again in' in get_sl.text:
-      tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
-      for i in tqdm (range (int(tim)), leave=False,desc="Please wait..."):
-            time.sleep(1)
-            pass
-    token=get_sl.text.split("var token = '")[1].split("';")[0]
-    y=get_answer()
-    g=json.loads(curl.post('https://faucetgigs.com/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&challenge=false&response=false",cookies=cookies).text)
-    if g["status"] == 200:
-      gas=bs(g["message"],"html.parser")
-      print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.text.strip())
-      print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-      for i in tqdm (range (int(300)), leave=False,desc="Please wait..."):
-            time.sleep(1)
-   except Exception as e:
-     pass
 def claimlite(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner("CLAIMLITE")
@@ -1118,8 +947,9 @@ def claimlite(modulesl,banner,tele=None):
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
       }
-      gt_cp = requests.post('https://claimlite.club/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light').text
-      hash = eval(gt_cp)
+      gt_cp = requests.post('https://claimlite.club/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light')
+      status_code(gt_cp)
+      hash = eval(gt_cp.text)
       gt = {
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -1132,6 +962,7 @@ def claimlite(modulesl,banner,tele=None):
           file_name = f'{i}.jpg'
           file_names.append(file_name)
           gt_im = requests.get(f'https://claimlite.club/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
+          status_code(gt_im)
           with open('cache/claimlite/'+file_name, 'wb') as f:
               shutil.copyfileobj(gt_im.raw, f)
       ind = cek()
@@ -1142,7 +973,8 @@ def claimlite(modulesl,banner,tele=None):
           'x-requested-with': 'XMLHttpRequest',
           'user-agent': ugentmu
       }
-      ve = requests.post('https://claimlite.club/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y).text
+      ve = requests.post('https://claimlite.club/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y)
+      status_code(ve)
       return answer
   cookies, ugentmu = load_data('claimlite')
   if not os.path.exists("data/claimlite/claimlite.json"):
@@ -1153,25 +985,30 @@ def claimlite(modulesl,banner,tele=None):
   cookies = {k: v.value for k, v in cookiek.items()}
   ua={
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   get_sl=curl.get('https://claimlite.club/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   if 'Account Balance' not in get_sl.text:
     save_data(tele,'claimlite')
     claimlite(modulesl,banner,tele)
   try:
-    print(hijau1+"> "+kuning1+"Account information")
+    akun=Tree("[green]> [yellow]Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
-      print(hijau1+'> '+info.text.strip())
+      akun.add('[green]> [yellow]'+info.text.strip())
+    rprint(akun)
   except Exception as e:
     save_data(tele,'claimlite')
     claimlite(modulesl,banner,tele)
-  print(hijau1+"> "+kuning1+"Start working on ptc")
+  ptc=Tree("[green]> [yellow]Start working on ptc")
+  rprint(ptc)
   get_ptc=curl.get('https://claimlite.club/ptc.html',headers=ua,cookies=cookies)
+  status_code(get_ptc)
   def balance():
     get_sl=curl.get('https://claimlite.club/ptc.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
     return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
   get_id=bs(get_ptc.text,'html.parser').find_all('button',{'class':'btn btn-success btn-sm w-100 mt-1'})
   del get_id[0]
@@ -1182,25 +1019,29 @@ def claimlite(modulesl,banner,tele=None):
     _i=_id["onclick"].split("opensite('")[1].split("','")[0]
     key=get_ptc.text.split("var hash_key = '")[1].split("';")[0]
     get_reward=curl.get(f'https://claimlite.club/surf.php?sid={_i}&key={key}',headers=ua,cookies=cookies)
+    status_code(get_reward)
     token1=get_reward.text.split("var token = '")[1].split("';")[0]
     secon=get_reward.text.split("var secs = ")[1].split(";")[0]
     for i in tqdm (range (int(secon)), leave=False,desc=hijau1+"visit > "+_id["onclick"].split("','")[1].split("');")[0]):
             time.sleep(1)
             pass
     answer=get_answer()
-    reward=json.loads(curl.post('https://claimlite.club/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies).text)
-    if reward["status"] == 200:
-      gas=bs(reward["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-      print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-      print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+    reward=curl.post('https://claimlite.club/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies)
+    status_code(reward)
+    if json.loads(reward.text)["status"] == 200:
+      gas=bs(json.loads(reward.text)["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
       sesi=True
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://claimlite.club/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
   gt_s=bs(get_sl.text,'html.parser').find_all('tr')
   del gt_s[0]
   del gt_s[len(gt_s)-1]
-  print(hijau1+"> "+kuning1+"Start Bypassing Shortlinks")
+  sl=Tree("[green]> [yellow]Start Bypassing Shortlinks")
+  rprint(sl)
   for i in gt_s:
    try:
     name=i.find('td',{'class':'align-middle'}).text
@@ -1208,52 +1049,48 @@ def claimlite(modulesl,banner,tele=None):
     if None == id:
       pass
     else:
-      providers = {
-        'clks': modulesl.clks_pro,
-        'adshort': modulesl.adshorti_xyz,
-        'ctr': modulesl.ctrsh,
-        'ez4short': modulesl.ez4short,
-        'usalink': modulesl.usalink,
-        'bitads': modulesl.bitads,
-        'shrinkme': modulesl.shrinkme,
-        'chainfo': modulesl.chainfo,
-        'cuty': modulesl.cuty_io,
-        'exe': modulesl.exe_io,
-        'oii': modulesl.oii,
-        'try2link': modulesl.try2,
-      }
-      if any(provider in name for provider in providers):
-        provider = next(provider for provider in providers if provider in name)
-        for i in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
-            get_sl = curl.get('https://claimlite.club/shortlinks.html', headers=ua, cookies=cookies)
-            token = get_sl.text.split("var token = '")[1].split("';")[0]
-            status = True
-            while(status==True):
-                da = id["onclick"].split("goShortlink('")[1].split("');")[0]
-                get_lk = json.loads(curl.post('https://claimlite.club/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
-                if get_lk["status"] == 200:
-                    answer = providers[provider](get_lk['shortlink'])
-                    if 'failed to bypass' in answer:
-                        print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"failed to bypass",end="\r")
-                    if answer:
-                        try:
-                            get_sl = curl.get(answer, headers=ua, cookies=cookies)
-                            sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
-                            print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+sukses)
-                            print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-                        except:
-                            print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
+      jumlah=int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])
+      re=jumlah
+      for i in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
+          get_sl = curl.get('https://claimlite.club/shortlinks.html', headers=ua, cookies=cookies)
+          status_code(get_sl)
+          token = get_sl.text.split("var token = '")[1].split("';")[0]
+          status = True
+          while(status==True):
+              da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+              get_lk = curl.post('https://claimlite.club/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies)
+              status_code(get_lk)
+              get_lk=json.loads(get_lk.text)
+              if get_lk["status"] == 200:
+                answer = bypass_link(get_lk['shortlink'], modulesl, jumlah=[str(re), str(jumlah)])
+                if answer == False:
                     break
-                if get_lk['status'] == 600:
-                    print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+                elif 'failed to bypass' in answer:
+                    pass
                 else:
-                  print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
-                  break
-   except Exception as e:pass
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
-  print(hijau1+"> "+kuning1+"Bypass faucet")
+                    try:
+                        get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                        status_code(get_sl)
+                        sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                        print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+sukses)
+                        print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+                        re-=1
+                    except:
+                        print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"invalid keys")
+                break
+              if get_lk['status'] == 600:
+                  print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+              else:
+                print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
+                break
+   except Exception as e:
+    keluar(str(e))
+    pass
+  print(putih1+'├──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
+  rprint(Tree("[green]> [yellow]Bypass faucet"))
   while True:
     get_sl=curl.get('https://claimlite.club/',headers=ua,cookies=cookies)
+    status_code(get_sl)
     if 'You can claim again in' in get_sl.text:
       tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
       for i in tqdm (range (int(tim)), leave=False,desc="Please wait..."):
@@ -1261,11 +1098,13 @@ def claimlite(modulesl,banner,tele=None):
             pass
     token=get_sl.text.split("var token = '")[1].split("';")[0]
     answer=modulesl.RecaptchaV2('6Leen-YUAAAAAFsd9t6qwRGyF8fLf6kixqicahQj',get_sl.url)
-    g=json.loads(curl.post('https://claimlite.club/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies).text)
+    g=curl.post('https://claimlite.club/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies)
+    status_code(g)
+    g=json.loads(g.text)
     if g["status"] == 200:
       gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-      print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-      print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
       for i in tqdm (range (int(300)), leave=False,desc="Please wait..."):
             time.sleep(1)
             pass
@@ -1291,8 +1130,9 @@ def rushbitcoin(modulesl,banner,tele=None):
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
       }
-      gt_cp = requests.post('https://rushbitcoin.com/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light').text
-      hash = eval(gt_cp)
+      gt_cp = requests.post('https://rushbitcoin.com/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light')
+      status_code(gt_cp)
+      hash = eval(gt_cp.text)
       gt = {
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -1305,6 +1145,7 @@ def rushbitcoin(modulesl,banner,tele=None):
           file_name = f'{i}.jpg'
           file_names.append(file_name)
           gt_im = requests.get(f'https://rushbitcoin.com/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
+          status_code(gt_im)
           with open('cache/rushbitcoin/'+file_name, 'wb') as f:
               shutil.copyfileobj(gt_im.raw, f)
       ind = cek()
@@ -1315,7 +1156,8 @@ def rushbitcoin(modulesl,banner,tele=None):
           'x-requested-with': 'XMLHttpRequest',
           'user-agent': ugentmu
       }
-      ve = requests.post('https://rushbitcoin.com/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y).text
+      ve = requests.post('https://rushbitcoin.com/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y)
+      status_code(ve)
       return answer
   cookies, ugentmu = load_data('rushbitcoin')
   if not os.path.exists("data/rushbitcoin/rushbitcoin.json"):
@@ -1326,25 +1168,29 @@ def rushbitcoin(modulesl,banner,tele=None):
   cookies = {k: v.value for k, v in cookiek.items()}
   ua={
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   get_sl=curl.get('https://rushbitcoin.com/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   if 'Account Balance' not in get_sl.text:
     save_data(tele,'rushbitcoin')
     rushbitcoin(modulesl,banner,tele)
   try:
-    print(hijau1+"> "+kuning1+"Account information")
+    akun=Tree("[green]> [yellow]Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
-      print(hijau1+'> '+info.text.strip())
+      akun.add('[green]> [yellow]'+info.text.strip())
+    rprint(akun)
   except Exception as e:
     save_data(tele,'rushbitcoin')
     rushbitcoin(modulesl,banner,tele)
-  print(hijau1+"> "+kuning1+"Start working on ptc")
+  rprint(Tree("[green]> [yellow]Start working on ptc"))
   get_ptc=curl.get('https://rushbitcoin.com/ptc.html',headers=ua,cookies=cookies)
+  status_code(get_ptc)
   def balance():
     get_sl=curl.get('https://rushbitcoin.com/ptc.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
     return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
   get_id=bs(get_ptc.text,'html.parser').find_all('button',{'class':'btn btn-success btn-sm w-100 mt-1'})
   del get_id[0]
@@ -1356,6 +1202,7 @@ def rushbitcoin(modulesl,banner,tele=None):
       _i=_id["onclick"].split("opensite('")[1].split("','")[0]
       key=get_ptc.text.split("var hash_key = '")[1].split("';")[0]
       get_reward=curl.get(f'https://rushbitcoin.com/surf.php?sid={_i}&key={key}',headers=ua,cookies=cookies)
+      status_code(get_reward)
       token1=get_reward.text.split("var token = '")[1].split("';")[0]
       secon=get_reward.text.split("var secs = ")[1].split(";")[0]
       for i in tqdm (range (int(secon)), leave=False,desc=hijau1+"visit > "+_id["onclick"].split("','")[1].split("');")[0]):
@@ -1365,29 +1212,22 @@ def rushbitcoin(modulesl,banner,tele=None):
       reward=json.loads(curl.post('https://rushbitcoin.com/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies).text)
       if reward["status"] == 200:
         gas=bs(reward["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-        print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-        print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+        print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+        print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
         sesi=True
    except Exception as e:
+     keluar(str(e))
      print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
      save_data(tele,'rushbitcoin')
      rushbitcoin(modulesl,banner,tele)
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://rushbitcoin.com/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
   gt_s=bs(get_sl.text,'html.parser').find_all('tr')
   del gt_s[0]
   del gt_s[len(gt_s)-1]
-  print(hijau1+"> "+kuning1+"Start Bypassing Shortlinks")
-  websites = {
-    'shrinkme.link': modulesl.shrinkme,
-    'Gainl': modulesl.gain_lk,
-    'exe.io': modulesl.exe_io,
-    'adshort.co': modulesl.adshorti_co,
-    'Clks': modulesl.clks_pro,
-    'Shrinlearn': modulesl.shrinkearn,
-    'Adshorti': modulesl.adshorti_xyz,
-  }
+  rprint(Tree("[green]> [yellow]Start Bypassing Shortlinks"))
   for i in gt_s:
     try:
         name = i.find('td', {'class': 'align-middle'}).text
@@ -1395,41 +1235,45 @@ def rushbitcoin(modulesl,banner,tele=None):
         if None == id:
             pass
         else:
-            if name in websites:
-                for j in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
-                    get_sl = curl.get('https://rushbitcoin.com/shortlinks.html', headers=ua, cookies=cookies)
-                    token = get_sl.text.split("var token = '")[1].split("';")[0]
-                    status = True
-                    while status == True:
-                        da = id["onclick"].split("goShortlink('")[1].split("');")[0]
-                        get_lk = json.loads(curl.post('https://rushbitcoin.com/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
-                        if get_lk["status"] == 200:
-                            answer = websites[name](get_lk["shortlink"])
-                            if "failed to bypass" == answer:
-                                print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"failed to bypass",end="\r")
-                            if "" == answer:
-                                pass
-                            else:
-                                time.sleep(10)
-                                get_sl = curl.get(answer, headers=ua, cookies=cookies)
-                                try:
-                                    sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
-                                    print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+sukses)
-                                    print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-                                except:
-                                    print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
-                                break
-                        if get_lk['status'] == 600:
-                          print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
-                        else:
-                          print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
+          jumlah=int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])
+          re=jumlah
+          for j in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
+              get_sl = curl.get('https://rushbitcoin.com/shortlinks.html', headers=ua, cookies=cookies)
+              status_code(get_sl)
+              token = get_sl.text.split("var token = '")[1].split("';")[0]
+              status = True
+              while status == True:
+                  da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+                  get_lk = json.loads(curl.post('https://rushbitcoin.com/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
+                  if get_lk["status"] == 200:
+                      answer = bypass_link(get_lk["shortlink"],modulesl,jumlah=[str(re),str(jumlah)])
+                      if answer == False:
                           break
-    except:
-        pass
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
-  print(hijau1+"> "+kuning1+"Bypass faucet")
+                      if "failed to bypass" == answer:pass
+                      else:
+                          time.sleep(10)
+                          get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                          status_code(get_sl)
+                          try:
+                              sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                              print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+sukses)
+                              print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+                          except:
+                              print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
+                          break
+                  if get_lk['status'] == 600:
+                    print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+                  else:
+                    print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
+                    break
+    except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
+  rprint(Tree("[green]> [yellow]Bypass faucet"))
   while True:
     get_sl=curl.get('https://rushbitcoin.com/',headers=ua,cookies=cookies)
+    status_code(get_sl)
     if 'You can claim again in' in get_sl.text:
       tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
       for i in tqdm (range (int(tim)), leave=False,desc="Please wait..."):
@@ -1437,11 +1281,13 @@ def rushbitcoin(modulesl,banner,tele=None):
             pass
     token=get_sl.text.split("var token = '")[1].split("';")[0]
     answer=modulesl.RecaptchaV2('6LfokMEUAAAAAEwBx23jh3mlghwTF7VJqbN9fERK',get_sl.url)
-    g=json.loads(curl.post('https://rushbitcoin.com/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies).text)
+    g=curl.post('https://rushbitcoin.com/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies)
+    status_code(g)
+    g=json.loads(g.text)
     if g["status"] == 200:
       gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-      print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-      print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
       for i in tqdm (range (int(420)), leave=False,desc="Please wait..."):
             time.sleep(1)
             pass
@@ -1510,8 +1356,9 @@ def claimbits(modulesl,banner,tele=None):
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
       }
-      gt_cp = requests.post('https://'+host+'/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light').text
-      hash = eval(gt_cp)
+      gt_cp = requests.post('https://'+host+'/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light')
+      status_code(gt_cp)
+      hash = eval(gt_cp.text)
       gt = {
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -1524,6 +1371,7 @@ def claimbits(modulesl,banner,tele=None):
           file_name = f'{i}.jpg'
           file_names.append(file_name)
           gt_im = requests.get(f'https://'+host+f'/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
+          status_code(gt_im)
           with open('cache/'+nama_host+'/'+file_name, 'wb') as f:
               shutil.copyfileobj(gt_im.raw, f)
       ind = cek()
@@ -1534,7 +1382,8 @@ def claimbits(modulesl,banner,tele=None):
           'x-requested-with': 'XMLHttpRequest',
           'user-agent': ugentmu
       }
-      ve = requests.post('https://'+host+'/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y).text
+      ve = requests.post('https://'+host+'/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y)
+      status_code(ve)
       return answer
   cookies, ugentmu = load_data(''+nama_host+'')
   if not os.path.exists('data/'+nama_host+'/'+nama_host+'.json'):
@@ -1545,25 +1394,28 @@ def claimbits(modulesl,banner,tele=None):
   cookies = {k: v.value for k, v in cookiek.items()}
   ua={
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   get_sl=curl.get('https://claimbits.net/faucet.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   try:
-    print(hijau1+"> "+kuning1+"Account information")
+    akun=Tree("[green]> [yellow]Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     if 'Balance' not in get_sl.text:
       save_data(tele,nama_host)
       claimbits(modulesl,banner,tele)
     for info in get_inf:
-      print(hijau1+'> '+info.text.strip())
+      akun.add('[green]> [yellow]'+info.text.strip())
+    rprint(akun)
   except Exception as e:
     save_data(tele,nama_host)
     claimbits(modulesl,banner,tele)
-  print(hijau1+"> "+kuning1+"Start working on ptc")
+  rprint(Tree("[green]> [yellow]Start working on ptc"))
   get_ptc=curl.get('https://'+host+'/ptc.html',headers=ua,cookies=cookies)
   def balance():
     get_sl=curl.get('https://'+host+'/ptc.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
     return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
   get_id=bs(get_ptc.text,'html.parser').find_all('button',{'class':'btn btn-success btn-sm w-100 mt-1'})
   del get_id[0]
@@ -1575,6 +1427,7 @@ def claimbits(modulesl,banner,tele=None):
       _i=_id["onclick"].split("opensite('")[1].split("','")[0]
       key=get_ptc.text.split("var hash_key = '")[1].split("';")[0]
       get_reward=curl.get(f'https://'+host+f'/surf.php?sid={_i}&key={key}',headers=ua,cookies=cookies)
+      status_code(get_reward)
       token1=get_reward.text.split("var token = '")[1].split("';")[0]
       secon=get_reward.text.split("var secs = ")[1].split(";")[0]
       for i in tqdm (range (int(secon)), leave=False,desc=hijau1+"visit > "+_id["onclick"].split("','")[1].split("');")[0]):
@@ -1584,77 +1437,68 @@ def claimbits(modulesl,banner,tele=None):
       reward=json.loads(curl.post('https://'+host+'/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies).text)
       if reward["status"] == 200:
         gas=bs(reward["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-        print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-        print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+        print(putih1+'├──'+hijau1+f' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+        print(putih1+'├──'+hijau1+f' [ '+kuning1+'+'+hijau1+' ] '+balance())
         sesi=True
    except Exception as e:
-     print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
+     keluar(str(e))
+     print(putih1+'└──'+hijau1+f' [ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
      save_data(tele,nama_host)
      claimbits(modulesl,banner,tele)
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
+  print(putih1+'└──'+hijau1+f' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://'+host+'/shortlinks.html',headers=ua,cookies=cookies)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
   gt_s=bs(get_sl.text,'html.parser').find_all('tr')
   del gt_s[0]
   del gt_s[len(gt_s)-1]
-  print(hijau1+"> "+kuning1+"Start Bypassing Shortlinks")
-  websites = {
-    'shrinkearn.com': modulesl.shrinkearn,
-    'linksfly.me': modulesl.linksfly,
-    'mitly.us': modulesl.mitly,
-    'url.namaidani.com': modulesl.url_namaidani,
-    'oii.io': modulesl.oii,
-    'FC.LC': modulesl.fl_lc,
-    'megaurl.in': modulesl.megaurl,
-    'ExE': modulesl.exe_io,
-    'ex-foary.com': modulesl.ex_foary_com,
-    'clks.pro': modulesl.clks_pro,
-    'adshort.co': modulesl.adshorti_co,
-    'cuty.io': modulesl.cuty_io,
-    'link1s.com': modulesl.links1s_com,
-  }
+  rprint(Tree("[green]> [yellow]Start Bypassing Shortlinks"))
   for i in gt_s:
     try:
-        name = i.find('td', {'class': 'align-middle'}).text
-        id = i.find('button', {'class': 'btn btn-success btn-sm'})
-        if None == id:
-            pass
-        else:
-            if name in websites:
-                for j in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
-                    get_sl = curl.get('https://'+host+'/shortlinks.html', headers=ua, cookies=cookies)
-                    token = get_sl.text.split("var token = '")[1].split("';")[0]
-                    status = True
-                    while status == True:
-                        da = id["onclick"].split("goShortlink('")[1].split("');")[0]
-                        get_lk = json.loads(curl.post('https://'+host+'/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
-                        if get_lk["status"] == 200:
-                            answer = websites[name](get_lk["shortlink"])
-                            if "failed to bypass" == answer:
-                                print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"failed to bypass",end="\r")
-                            if "" == answer:
-                                pass
-                            else:
-                                time.sleep(10)
-                                get_sl = curl.get(answer, headers=ua, cookies=cookies)
-                                try:
-                                    sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
-                                    print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+sukses)
-                                    print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-                                except:
-                                    print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
-                                break
-                        if get_lk['status'] == 600:
-                          print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
-                        else:
-                          print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
-                          break
-    except Exception as e:pass
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
-  print(hijau1+"> "+kuning1+"Bypass faucet")
+      name = i.find('td', {'class': 'align-middle'}).text
+      id = i.find('button', {'class': 'btn btn-success btn-sm'})
+      if None == id:
+          pass
+      else:
+        jumlah=(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0]))
+        re=jumlah
+        for j in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
+            get_sl = curl.get('https://'+host+'/shortlinks.html', headers=ua, cookies=cookies)
+            status_code(get_sl)
+            token = get_sl.text.split("var token = '")[1].split("';")[0]
+            status = True
+            while status == True:
+                da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+                get_lk = json.loads(curl.post('https://'+host+'/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
+                if get_lk["status"] == 200:
+                    answer = bypass_link(get_lk["shortlink"],modulesl,jumlah=[str(re),str(jumlah)])
+                    if answer==False:break
+                    if "failed to bypass" == answer:pass
+                    else:
+                        time.sleep(10)
+                        get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                        status_code(get_sl)
+                        try:
+                            sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                            print(putih1+'├──'+hijau1+f' [ '+kuning1+'>'+hijau1+' ] '+sukses)
+                            print(putih1+'├──'+hijau1+f' [ '+kuning1+'+'+hijau1+' ] '+balance())
+                            re-=1
+                        except:
+                            print(putih1+'├──'+hijau1+f' [ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
+                        break
+                if get_lk['status'] == 600:
+                  print(putih1+'├──'+hijau1+f' [ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+                else:
+                  print(putih1+'├──'+hijau1+f' [ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
+                  break
+    except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+f' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
+  rprint(Tree("[green]> [yellow]Bypass faucet"))
   while True:
    try:
     get_sl=curl.get('https://claimbits.net/faucet.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
     if 'You can claim again in' in get_sl.text:
       tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
       for i in tqdm (range (int(tim)), leave=False,desc="Please wait..."):
@@ -1665,13 +1509,14 @@ def claimbits(modulesl,banner,tele=None):
     g=json.loads(curl.post('https://'+host+'/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies).text)
     if g["status"] == 200:
       gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-      print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-      print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+      print(putih1+'├──'+hijau1+f' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'└──'+hijau1+f' [ '+kuning1+'+'+hijau1+' ] '+balance())
       for i in tqdm (range (int(300)), leave=False,desc="Please wait..."):
             time.sleep(1)
             pass
    except Exception as e:
      print('Cloudflare!!')
+     keluar(str(e))
      save_data(tele,nama_host)
      claimbits(modulesl,banner,tele)
 def ltchunt(modulesl,banner,tele=None):
@@ -1698,8 +1543,9 @@ def ltchunt(modulesl,banner,tele=None):
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
       }
-      gt_cp = requests.post('https://'+host+'/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light').text
-      hash = eval(gt_cp)
+      gt_cp = requests.post('https://'+host+'/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light')
+      status_code(gt_cp)
+      hash = eval(gt_cp.text)
       gt = {
           'user-agent': ugentmu,
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -1712,6 +1558,7 @@ def ltchunt(modulesl,banner,tele=None):
           file_name = f'{i}.jpg'
           file_names.append(file_name)
           gt_im = requests.get(f'https://'+host+f'/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
+          status_code(gt_im)
           with open('cache/'+nama_host+'/'+file_name, 'wb') as f:
               shutil.copyfileobj(gt_im.raw, f)
       ind = cek()
@@ -1722,7 +1569,8 @@ def ltchunt(modulesl,banner,tele=None):
           'x-requested-with': 'XMLHttpRequest',
           'user-agent': ugentmu
       }
-      ve = requests.post('https://'+host+'/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y).text
+      ve = requests.post('https://'+host+'/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y)
+      status_code(ve)
       return answer
   cookies, ugentmu = load_data(''+nama_host+'')
   if not os.path.exists('data/'+nama_host+'/'+nama_host+'.json'):
@@ -1733,25 +1581,29 @@ def ltchunt(modulesl,banner,tele=None):
   cookies = {k: v.value for k, v in cookiek.items()}
   ua={
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   get_sl=curl.get('https://'+host+'/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   if 'Account Balance' not in get_sl.text:
     save_data(tele,nama_host)
     ltchunt(modulesl,banner,tele)
   try:
-    print(hijau1+"> "+kuning1+"Account information")
+    akun=Tree("[green]> [yellow]Account information")
     get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
     for info in get_inf:
-      print(hijau1+'> '+info.text.strip())
+      akun.add('[green]> [yellow]'+info.text.strip())
+    rprint(akun)
   except Exception as e:
     save_data(tele,nama_host)
     ltchunt(modulesl,banner,tele)
-  print(hijau1+"> "+kuning1+"Start working on ptc")
+  rprint(Tree("[green]> [yellow]Start working on ptc"))
   get_ptc=curl.get('https://'+host+'/ptc.html',headers=ua,cookies=cookies)
+  status_code(get_ptc)
   def balance():
     get_sl=curl.get('https://'+host+'/ptc.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
     return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
   get_id=bs(get_ptc.text,'html.parser').find_all('button',{'class':'btn btn-success btn-sm w-100 mt-1'})
   del get_id[0]
@@ -1763,6 +1615,7 @@ def ltchunt(modulesl,banner,tele=None):
       _i=_id["onclick"].split("opensite('")[1].split("','")[0]
       key=get_ptc.text.split("var hash_key = '")[1].split("';")[0]
       get_reward=curl.get(f'https://'+host+f'/surf.php?sid={_i}&key={key}',headers=ua,cookies=cookies)
+      status_code(get_reward)
       token1=get_reward.text.split("var token = '")[1].split("';")[0]
       secon=get_reward.text.split("var secs = ")[1].split(";")[0]
       for i in tqdm (range (int(secon)), leave=False,desc=hijau1+"visit > "+_id["onclick"].split("','")[1].split("');")[0]):
@@ -1772,93 +1625,67 @@ def ltchunt(modulesl,banner,tele=None):
       reward=json.loads(curl.post('https://'+host+'/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies).text)
       if reward["status"] == 200:
         gas=bs(reward["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-        print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-        print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+        print(putih1+'├──'+hijau1+f' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+        print(putih1+'├──'+hijau1+f' [ '+kuning1+'+'+hijau1+' ] '+balance())
         sesi=True
    except Exception as e:
-     print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
+     print(putih1+'└──'+hijau1+f' [ '+merah1+'x'+hijau1+' ] '+"session expired log out dan login ulang")
      save_data(tele,nama_host)
      ltchunt(modulesl,banner,tele)
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
+  print(putih1+'└──'+hijau1+f' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
   get_sl=curl.get('https://'+host+'/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
   token=get_sl.text.split("var token = '")[1].split("';")[0]
   gt_s=bs(get_sl.text,'html.parser').find_all('tr')
   del gt_s[0]
   del gt_s[len(gt_s)-1]
-  print(hijau1+"> "+kuning1+"Start Bypassing Shortlinks")
-  websites = {
-    'shortsfly.me': modulesl.shortfly,
-    'flyzu.icu': modulesl.flyzu,
-    'linksfly.me': modulesl.linksfly,
-    'usalink.io': modulesl.usalink,
-    'shortzu.icu': modulesl.shortzu_icu,
-    'zuba.link': modulesl.zuba_link,
-    'shorti.io': modulesl.shorti_io,
-    'clk.sh': modulesl.clksh,
-    'clickzu.icu': modulesl.clickzu_icu,
-    'kiw.app': modulesl.kiw_app,
-    'shrinkearn.com': modulesl.shrinkearn,
-    'clks.pro': modulesl.clks_pro,
-    'fc.lc': modulesl.fl_lc,
-    'exe.io': modulesl.exe_io,
-    'illink.net': modulesl.illink_net,
-    'birdurls.com': modulesl.birdurl,
-    'adshorti.xyz': modulesl.adshorti_xyz,
-    'owllink.net': modulesl.owlink,
-    'linksly.co': modulesl.linksly,
-    'chainfo.xyz': modulesl.chainfo,
-    'linkjust.com': modulesl.linkjust,
-    'link1s.com': modulesl.links1s_com,
-    'megaurl.io': modulesl.megaurl,
-    'mitly.us': modulesl.mitly,
-    'cashurl.win': modulesl.cashurl_win,
-    'megafly.in': modulesl.megafly,
-    'oii.io': modulesl.oii,
-    'ex-foary.com': modulesl.ex_foary_com,
-    'linkvor.pw': modulesl.linkvor_pw,
-    'insfly.pw': modulesl.insfly,
-  }
+  rprint(Tree("[green]> [yellow]Start Bypassing Shortlinks"))
   for i in gt_s:
     try:
-        name = i.find('td', {'class': 'align-middle'}).text
-        id = i.find('button', {'class': 'btn btn-success btn-sm'})
-        if None == id:
-            pass
-        else:
-            if name in websites:
-                for j in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
-                    get_sl = curl.get('https://'+host+'/shortlinks.html', headers=ua, cookies=cookies)
-                    token = get_sl.text.split("var token = '")[1].split("';")[0]
-                    status = True
-                    while status == True:
-                        da = id["onclick"].split("goShortlink('")[1].split("');")[0]
-                        get_lk = json.loads(curl.post('https://'+host+'/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
-                        if get_lk["status"] == 200:
-                            answer = websites[name](get_lk["shortlink"])
-                            if "failed to bypass" == answer:
-                                print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"failed to bypass",end="\r")
-                            if "" == answer:
-                                pass
-                            else:
-                                time.sleep(10)
-                                get_sl = curl.get(answer, headers=ua, cookies=cookies)
-                                try:
-                                    sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
-                                    print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+sukses)
-                                    print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
-                                except:
-                                    print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
-                                break
-                        if get_lk['status'] == 600:
-                          print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
-                        else:
-                          print(hijau1+'[ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
-                          break
-    except Exception as e:pass
-  print(hijau1+'[ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
-  print(hijau1+"> "+kuning1+"Bypass faucet")
+      name = i.find('td', {'class': 'align-middle'}).text
+      id = i.find('button', {'class': 'btn btn-success btn-sm'})
+      if None == id:
+          pass
+      else:
+        jumlah=int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])
+        re=jumlah
+        for j in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
+            get_sl = curl.get('https://'+host+'/shortlinks.html', headers=ua, cookies=cookies)
+            status_code(get_sl)
+            token = get_sl.text.split("var token = '")[1].split("';")[0]
+            status = True
+            while status == True:
+                da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+                get_lk = json.loads(curl.post('https://'+host+'/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies).text)
+                if get_lk["status"] == 200:
+                    answer = bypass_link(get_lk["shortlink"],modulesl,jumlah=[str(re),str(jumlah)])
+                    if answer==False:break
+                    if "failed to bypass" == answer:pass
+                    else:
+                        time.sleep(10)
+                        get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                        status_code(get_sl)
+                        try:
+                            sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                            print(putih1+'├──'+hijau1+f' [ '+kuning1+'>'+hijau1+' ] '+sukses)
+                            print(putih1+'├──'+hijau1+f' [ '+kuning1+'+'+hijau1+' ] '+balance())
+                            re-=1
+                        except:
+                            print(putih1+'├──'+hijau1+f' [ '+merah1+'x'+hijau1+' ] '+"invalid keys",end="\r")
+                        break
+                if get_lk['status'] == 600:
+                  print(putih1+'├──'+hijau1+f' [ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+                else:
+                  print(putih1+'├──'+hijau1+f' [ '+merah1+'x'+hijau1+' ] '+"There seems to be something wrong with the link")
+                  break
+    except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+f' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
+  rprint(Tree("[green]> [yellow]Bypass faucet"))
   while True:
     get_sl=curl.get('https://'+host+'/',headers=ua,cookies=cookies)
+    status_code(get_sl)
     if 'You can claim again in' in get_sl.text:
       tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
       for i in tqdm (range (int(tim)), leave=False,desc="Please wait..."):
@@ -1869,11 +1696,12 @@ def ltchunt(modulesl,banner,tele=None):
     g=json.loads(curl.post('https://'+host+'/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies).text)
     if g["status"] == 200:
       gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
-      print(hijau1+'[ '+kuning1+'>'+hijau1+' ] '+gas.strip())
-      print(hijau1+'[ '+kuning1+'+'+hijau1+' ] '+balance())
+      print(putih1+'├──'+hijau1+f' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+f' [ '+kuning1+'+'+hijau1+' ] '+balance())
       for i in tqdm (range (int(300)), leave=False,desc="Please wait..."):
             time.sleep(1)
             pass
+#offf
 def coinzask(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   nama_host="coinzask"
@@ -1933,7 +1761,7 @@ def coinzask(modulesl,banner,tele=None):
   cookies = {k: v.value for k, v in cookiek.items()}
   ua={
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   get_sl=curl.get('https://'+host+'/',headers=ua,cookies=cookies)
@@ -2070,105 +1898,86 @@ def claimsatoshi(modulesl,banner,tele=None):
   ua={
     "Host":"claimsatoshi.xyz",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get('https://claimsatoshi.xyz/dashboard',headers=ua,cookies=cookies)
+  status_code(dash)
   if 'Current Balance' not in dash.text:
     save_data(tele,'claimsatoshi')
     claimsatoshi(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'col-xl-3 col-sm-6'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[green]> [yellow]Account information")
   for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[1]+' : '+info.text.strip().splitlines()[0])
-  print(hijau1+"> "+kuning1+"Start ptc")
+    akun.add('[green]> [yellow]'+info.text.strip().splitlines()[1]+' [white]:[yellow] '+info.text.strip().splitlines()[0])
+  rprint(akun)
+  rprint(Tree("[green]> [yellow]Start ptc"))
   ptc=curl.get('https://claimsatoshi.xyz/ptc',headers=ua,cookies=cookies)
+  status_code(ptc)
   surf=bs(ptc.text,'html.parser').find_all('div',{'class':'col-12 col-lg-4 mb-3 mb-lg-0'})
   if 'Website Available' not in ptc.text:
     save_data(tele,'claimsatoshi')
     claimsatoshi(modulesl,banner,tele)
   for surf in surf:
+   try:
     url=surf.find('button',{'class':'btn btn-one bg-dark btn-block'})['onclick'].split("window.location = '")[1].split("'")[0]
     name=surf.find('h2',{'class':'card-title'}).text.strip()
-    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+    print(putih1+'├──'+hijau1+f' [{kuning1} ~ {putih1}] {kuning1}View : '+parser(name),end='\r')
     surf1=curl.get(url,headers=ua,cookies=cookies)
-    sleep(int(surf1.text.split('var timer = ')[1].split(';')[0]))
+    status_code(surf1)
+    animasi(detik=int(surf1.text.split('var timer = ')[1].split(';')[0]))
     csrf=bs(surf1.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
     answer=modulesl.RecaptchaV2('6LduER0gAAAAAN1zeqcxdU3FxDAwgOI7PhMGUzR0',url)
     data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}"
     verify=curl.post(url.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
-    print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-  print(hijau1+"> "+kuning1+"Start shortlinks")
+    status_code(verify)
+    print(putih1+'├──'+hijau1+f' [{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except Exception as e:
+     keluar(str(e))
+     pass
+  rprint(Tree("[green]> [yellow]Start shortlinks"))
   gt_link = curl.get('https://claimsatoshi.xyz/links', headers=ua, cookies=cookies)
   gtf = bs(gt_link.text, 'html.parser')
   gt_info = gtf.find_all('div', {'class': 'col-12 col-lg-4 mb-3 mb-lg-0'})
-  def process_link(link, bypass_function,sl=None):
+  for link in gt_info:
     try:
       lik = link.find('a')["href"]
       get_info = [i for i in link.text.strip().splitlines() if i]
       #print(get_info)
+      jumlah=int(get_info[4].split('/')[0].split('Claim ')[1])
+      re=jumlah
       for i in range(int(get_info[4].split('/')[0].split('Claim ')[1])):
-        get_lik = curl.get(lik, headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-        print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_lik,end='\r')
-        answer = bypass_function(get_lik)
+        get_lik = curl.get(lik, headers=ua, cookies=cookies, allow_redirects=False)
+        status_code(get_lik)
+        get_lik=get_lik.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+        print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_lik,end='\r')
+        answer = bypass_link(get_lik,modulesl,jumlah=[str(re),str(jumlah)])
+        if answer==False:
+           break
         if 'failed to bypass' in answer:
-          print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+          pass
         else:
-          sleep(105)
+          animasi(detik=105)
           reward = curl.get(answer, headers=ua, cookies=cookies).text
-          #print(reward)
           if 'Good job!' in reward:
-            print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+            print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+            re-=1
           else:
-            print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
+            print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
     except Exception as e:
+      keluar(str(e))
       pass
-  for link in gt_info:
-    if 'cbshort[Easy]' in link.text:
-      process_link(link, modulesl.cbshort)
-    elif 'Ez4short' in link.text:
-      process_link(link, modulesl.ez4short)
-    elif 'linksfly' in link.text:
-      process_link(link, modulesl.linksfly)
-    elif 'shortfly' in link.text:
-      process_link(link, modulesl.shortfly)
-    elif 'usalink' in link.text:
-      process_link(link, modulesl.usalink)
-    elif 'link1s' in link.text:
-      process_link(link, modulesl.links1s_com)
-    elif 'Shareus' in link.text:
-      process_link(link, modulesl.shareus)
-    elif 'Cuttyio' in link.text:
-      process_link(link, modulesl.cuty_io)
-    elif 'flyzu' in link.text:
-      process_link(link, modulesl.flyzu)
-    elif 'Shrinkearn' in link.text:
-      process_link(link, modulesl.shrinkearn)
-    elif 'droplink' in link.text:
-      process_link(link, modulesl.droplink)
-    elif 'Clksh' in link.text:
-      process_link(link, modulesl.clksh)
-    elif 'Hrshort' in link.text:
-      process_link(link, modulesl.hrshort)
-    elif 'Birdurls' in link.text:
-      process_link(link, modulesl.birdurl)
-    elif 'Owlink' in link.text:
-      process_link(link, modulesl.owlink)
-    elif 'Megaurl' in link.text:
-      process_link(link, modulesl.megaurl)
-    elif 'Mitly' in link.text:
-      process_link(link, modulesl.mitly)
-    elif 'link1snet' in link.text:
-      process_link(link, modulesl.link1s_net,sl=5)
-  print(hijau1+"> "+kuning1+"Start auto faucet")
+  rprint("[green]> [yellow]Start auto faucet")
   while True:
    try:
     get_=curl.get('https://claimsatoshi.xyz/auto',headers=ua,cookies=cookies)
+    status_code(get_)
     token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(15)
+    animasi(detik=15)
     reward=curl.post('https://claimsatoshi.xyz/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    status_code(reward)
     if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
       break
       pass
@@ -2187,11 +1996,12 @@ def coinfola(modulesl,banner,tele=None):
   ua={
     "Host":"coinfola.com",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   try:
     dahs=curl.get('https://coinfola.com/account',headers=ua,cookies=cookies)
+    status_code(dahs)
   except Exception as e:
     save_data(tele,'coinfola')
     coinfola(modulesl,banner,tele)
@@ -2199,12 +2009,15 @@ def coinfola(modulesl,banner,tele=None):
       save_data(tele,'coinfola')
       coinfola(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-hover table-striped'})
-  print(hijau1+"> "+kuning1+"Account information")
-  print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
-  print(hijau1+'> '+fd[0].text.strip().splitlines()[4]+' : '+fd[0].text.strip().splitlines()[5])
+  akun=Tree("[green]> [yellow]Account information")
+  akun.add('[green]> [yellow]'+fd[0].text.strip().splitlines()[0]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[1])
+  akun.add('[green]> [yellow]'+fd[0].text.strip().splitlines()[4]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[5])
+  akun.add('[green]> [yellow]'+fd[0].text.strip().splitlines()[8]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[9])
+  rprint(akun)
   link=curl.get('https://coinfola.com/shortlinks',headers=ua,cookies=cookies)
+  status_code(link)
   gt=bs(link.text,'html.parser').find_all('div',{'class':'col-lg-4 mt-3'})
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
+  rprint(Tree("[green]> [yellow]Start bypass shortlinks"))
   for i in gt:
     try:
       name = i.text.strip().splitlines()[0]
@@ -2216,22 +2029,26 @@ def coinfola(modulesl,banner,tele=None):
         y=y.split(' click remaining')[0].replace(' ','')
       link=i.find('a',{'class':'card shadow text-decoration-none'})['href']
       #answer = bypass_link(url)
+      re=int(y)
       for ulang in range(int(y)):
           get_links = curl.get('https://coinfola.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
-          print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
-          answer = bypass_link(get_links,modulesl)
+          print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end=end())
+          answer = bypass_link(get_links,modulesl,jumlah=[str(re),y])
           if answer==False:
                 break
-          sleep(105)
-          reward = curl.get(answer, headers=ua, cookies=cookies)
           if 'failed to bypass' in answer:
-              print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-          elif 'Congratulations.' in reward.text:
-              _1 = reward.text.split("message: 'You")[1].split("tickets.'")[0]
-              _2 = reward.text.split("message: 'Congratulations.")[1].split("credited.'")[0]
-              print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+'Congratulations. ' + _2 + ' credited. & You ' + _1 + ' tickets.')
+              pass
+          else:
+            animasi(detik=105)
+            reward = curl.get(answer, headers=ua, cookies=cookies)
+            if 'Congratulations.' in reward.text:
+                _1 = reward.text.split("message: 'You")[1].split("tickets.'")[0]
+                _2 = reward.text.split("message: 'Congratulations.")[1].split("credited.'")[0]
+                print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+'Congratulations. ' + _2 + ' credited. & You ' + _1 + ' tickets.')
     except Exception as e:
+      keluar(str(e))
       pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
   exit()
 def adhives(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -2247,11 +2064,12 @@ def adhives(modulesl,banner,tele=None):
   ua={
     "Host":"adhives.com",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   try:
     dahs=curl.get('https://adhives.com/account',headers=ua,cookies=cookies)
+    status_code(dahs)
   except Exception as e:
     save_data(tele,'adhives')
     adhives(modulesl,banner,tele)
@@ -2259,21 +2077,15 @@ def adhives(modulesl,banner,tele=None):
       save_data(tele,'adhives')
       adhives(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
-  print(hijau1+"> "+kuning1+"Account information")
-  print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
-  print(hijau1+'> '+fd[0].text.strip().splitlines()[4]+' : '+fd[0].text.strip().splitlines()[5])
+  akun = Tree("[green]> [yellow]Account information")
+  akun.add('[green]> [yellow]'+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
+  akun.add('[green]> [yellow]'+fd[0].text.strip().splitlines()[4]+' : '+fd[0].text.strip().splitlines()[5])
+  rprint(akun)
   link=curl.get('https://adhives.com/shortlinks',headers=ua,cookies=cookies)
+  status_code(link)
   gt=bs(link.text,'html.parser').find_all('div',{'class':'col-lg-6 mt-4'})
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  providers = {
-    "Linksfly":modulesl.linksfly,
-    "Shortsfly":modulesl.shortfly,
-    "Shrinkearn":modulesl.shrinkearn,
-    "Clks":modulesl.clks_pro,
-    "Fc":modulesl.fl_lc,
-    "Cuty":modulesl.cuty_io,
-    "Oii":modulesl.oii,
-  }
+  sl = Tree("[green]> [yellow]Start bypass shortlinks")
+  rprint(sl)
   for i in gt:
     try:
       name = i.text.strip().splitlines()[0]
@@ -2283,21 +2095,27 @@ def adhives(modulesl,banner,tele=None):
       if 'click remaining' in y:
         y=y.split(' click remaining')[0].replace(' ','')
       link=i.find('a',{'class':'card shadow text-decoration-none'})['href']
+      re=int(y)
       for ulang in range(int(y)):
-          get_links = curl.get('https://adhives.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
+          get_links = curl.get('https://adhives.com' + link, headers=ua, cookies=cookies, allow_redirects=False)
+          status_code(get_links)
+          get_links=get_links.headers['Location']
           print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
-          answer = bypass_link(get_links,modulesl)
+          answer = bypass_link(get_links,modulesl,jumlah=[str(re),y])
           if answer == False:
             break
+          if 'failed to bypass' in answer:pass
           else:
-            sleep(105)
+            animasi(detik=105)
             reward = curl.get(answer, headers=ua, cookies=cookies)
-            if 'failed to bypass' in answer:
-                print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-            elif 'Congratulations.' in reward.text:
-                print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split("message: '")[1].split("'")[0])
+            status_code(reward)
+            if 'Congratulations.' in reward.text:
+                print(putih1+'├──'+hijau1+f'{hijau1} ✓ '+reward.text.split("message: '")[1].split("'")[0])
+                re-=1
     except Exception as e:
+      keluar(str(e))
       pass
+  print(f'└──{merah1} ! {putih1} {hijau1}'+'No more shortlinks!')
   exit()
 def earnsolana(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -2313,19 +2131,22 @@ def earnsolana(modulesl,banner,tele=None):
   ua={
     "Host":"earnsolana.xyz",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get('https://earnsolana.xyz/dashboard',headers=ua,cookies=cookies)
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele,'earnsolana')
     earnsolana(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[gree] > [yellow]Account information")
   for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start ptc")
+    akun.add('[green]> [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start ptc"))
   ptc=curl.get('https://earnsolana.xyz/ptc',headers=ua,cookies=cookies)
+  status_code(ptc)
   if 'ads available' not in ptc.text:
     save_data(tele,'earnsolana')
     earnsolana(modulesl,banner,tele)
@@ -2334,65 +2155,68 @@ def earnsolana(modulesl,banner,tele=None):
    try:
     name=ptc.find('h5',{'class':'card-title'}).text
     link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
-    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end=end())
     visit=curl.get(link,headers=ua,cookies=cookies)
-    sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
+    status_code(visit)
+    animasi(detik=int(visit.text.split('var timer = ')[1].split(';')[0]))
     csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
     answer=modulesl.RecaptchaV2('6Lem2pIjAAAAAESScDYn7ChChD9JS7pqa0d7TUUL',link)
     data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}"
     verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+    status_code(verify)
     if 'Good job!' in verify.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-   except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://earnsolana.xyz/links',headers=ua,cookies=cookies).text
-  if 'links available' not in get_links:
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
+  get_links=curl.get('https://earnsolana.xyz/links',headers=ua,cookies=cookies)
+  if 'links available' not in get_links.text:
     save_data(tele,'earnsolana')
     earnsolana(modulesl,banner,tele)
-  fd=bs(get_links,'html.parser')
+  fd=bs(get_links.text,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
     try:
         name = i.find('h4').text
         jumlah = int(i.find('span').text.split('/')[0])
-        
-        services = {
-            'ShrinkEarn': modulesl.shrinkearn,
-            'ShrinkMe': modulesl.shrinkme,
-            'Ez4Short': modulesl.ez4short,
-            'LinksFly': modulesl.linksfly,
-            'ShortsFly.me': modulesl.shortfly,
-            'Usalink': modulesl.usalink,
-            'LinksLy': modulesl.linksly,
-            'Clk': modulesl.clksh,
-            'Clks.pro': modulesl.clks_pro,
-        }
-        
-        if name in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+        re=jumlah
+        for ulang in range(jumlah):
+            url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+            status_code(url)
+            url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+            answer = bypass_link(url,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer==False:break
+            if 'failed to bypass' in answer:
+                pass
+            else:
+                animasi(detik=105)
+                reward = curl.get(answer, headers=ua, cookies=cookies)
+                status_code(reward)
+                reward=reward.text
+                if 'Good job!' in reward:
+                    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    re-=1
                 else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
+                    print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+    except Exception as e:
+        keluar(str(e))
+        pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  rprint(Tree("[gree] > [yellow]Start auto faucet"))
   while True:
    try:
     get_=curl.get('https://earnsolana.xyz/auto',headers=ua,cookies=cookies)
+    status_code(get_)
     token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(30)
+    animasi(detik=30)
     reward=curl.post('https://earnsolana.xyz/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    status_code(reward)
     if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
-     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      exit()
   exit()
 def coinpay_faucet(modulesl,banner,tele=None):
@@ -2409,181 +2233,68 @@ def coinpay_faucet(modulesl,banner,tele=None):
   ua={
     "Host":"coinpay-faucet.com",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get('https://coinpay-faucet.com/dashboard',headers=ua,cookies=cookies)
-  if 'firewall' in dash.url:
-      info=bs(faucet.text,'html.parser')
-      csrf=info.find('input',{'name':'csrf_token_name'})['value']
-      answer=modulesl.RecaptchaV2('6LdtJxUiAAAAAC8KYAgOUIqTwCee5g2r-YpeeU6D',faucet.url)
-      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
-      gas=curl.post("https://coinpay-faucet.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele,'coinpay-faucet')
     coinpay_faucet(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[green]> [yellow]Account information")
   for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://coinpay-faucet.com/links',headers=ua,cookies=cookies).text
-  if 'links available' not in get_links:
+    akun.add('[green]> [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
+  get_links=curl.get('https://coinpay-faucet.com/links',headers=ua,cookies=cookies)
+  if 'links available' not in get_links.text:
     save_data(tele,'coinpay-faucet')
     coinpay_faucet(modulesl,banner,tele)
-  fd=bs(get_links,'html.parser')
+  fd=bs(get_links.text,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
     try:
         name = i.find('h4').text
         jumlah = int(i.find('span').text.split('/')[0])
-        services = {
-        'HOT- shortsfly.me': modulesl.shortfly,
-        'HOT- linksfly.me': modulesl.linksfly,
-        'exe.io': modulesl.exe_io,
-        'shorti.io': modulesl.shorti_io,
-        'cuty.io': modulesl.cuty_io,
-        'usalink.io': modulesl.usalink,
-        'owllink.net': modulesl.owlink,
-        'birdurls.com': modulesl.birdurl,
-        'illink.net': modulesl.illink_net,
-        'clks.pro': modulesl.clks_pro,
-        'ex-foary.com': modulesl.ex_foary_com,
-        'shrinkme.link': modulesl.shrinkme,
-        'INSFLY': modulesl.insfly,
-        }
-        if name in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-                else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
+        re=jumlah
+        for ulang in range(jumlah):
+          url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+          status_code(url)
+          url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+          answer = bypass_link(url,modulesl,jumlah=[str(re),str(jumlah)])
+          if answer==False:break
+          if 'failed to bypass' in answer:
+              pass
+          else:
+              animasi(detik=105)
+              reward = curl.get(answer, headers=ua, cookies=cookies)
+              status_code(reward)
+              reward=reward.text
+              if 'Good job!' in reward:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                  re-=1
+              else:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+    except Exception as e:
+        keluar(str(e))
+        pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  rprint(Tree("[gree] > [yellow]Start auto faucet"))
   while True:
    try:
     get_=curl.get('https://coinpay-faucet.com/auto',headers=ua,cookies=cookies)
+    status_code(get_)
     token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(60)
+    animasi(detik=60)
     reward=curl.post('https://coinpay-faucet.com/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    status_code(reward)
     if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
-     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
-def james_trussy(modulesl,banner,tele=None):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  data_control('james-trussy')
-  banner.banner('JAMES-TRUSSY')
-  cookies, ugentmu = load_data('james-trussy')
-  if not os.path.exists("data/james-trussy/james-trussy.json"):
-    save_data(tele,'james-trussy')
-    james_trussy(modulesl,banner,tele)
-  cookiek = SimpleCookie()
-  cookiek.load(cookies)
-  cookies = {k: v.value for k, v in cookiek.items()}
-  ua={
-    "Host":"james-trussy.com",
-    'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
-  }
-  curl=requests.Session()
-  faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
-  if 'firewall' in faucet.url:
-      info=bs(faucet.text,'html.parser')
-      csrf=info.find('input',{'name':'csrf_token_name'})['value']
-      answer=modulesl.RecaptchaV2('6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO',faucet.url)
-      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
-      gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
-  dash=curl.get('https://james-trussy.com/dashboard',headers=ua,cookies=cookies)
-  if 'Balance' not in dash.text:
-    save_data(tele,'james-trussy')
-    james_trussy(modulesl,banner,tele)
-  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
-  print(hijau1+"> "+kuning1+"Account information")
-  for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://james-trussy.com/links',headers=ua,cookies=cookies).text
-  if 'links available' not in get_links:
-    save_data(tele,'james-trussy')
-    james_trussy(modulesl,banner,tele)
-  fd=bs(get_links,'html.parser')
-  link=fd.find_all('div',{'class':'col-lg-3'})
-  for i in link:
-    try:
-        name = i.find('h4').text
-        jumlah = int(i.find('span').text.split('/')[0])
-        for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = bypass_link(url,modulesl)
-                if answer==False:
-                  break
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-                else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                  #  print(reward)
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
-  while True:
-   try:
-    faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
-    if 'firewall' in faucet.url:
-      info=bs(faucet.text,'html.parser')
-      csrf=info.find('input',{'name':'csrf_token_name'})['value']
-      answer=modulesl.RecaptchaV2('6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO',faucet.url)
-      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
-      gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
-    get_=curl.get('https://james-trussy.com/auto',headers=ua,cookies=cookies)
-    token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(60)
-    reward=curl.post('https://james-trussy.com/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
-    if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-   except Exception as e:
-     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
-     break
-   #  exit()
-  print(hijau1+"> "+kuning1+"Start faucet")
-  faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
-  jumlah=bs(faucet.text,'html.parser').find_all('p',{'class':'lh-1 mb-1 font-weight-bold'})
-  jum=int(jumlah[len(jumlah)-1].text.split('/')[0])
-  for i in range(jum):
-    faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
-    info=bs(faucet.text,'html.parser')
-    csrf=info.find('input',{'name':'csrf_token_name'})['value']
-    token=info.find('input',{'name':'token'})['value']
-    answer=modulesl.RecaptchaV2('6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO','https://james-trussy.com/faucet')
-    data=f"csrf_token_name={csrf}&token={token}&captcha=recaptchav2&recaptchav3=&g-recaptcha-response={answer}"
-    faucet=curl.post('https://james-trussy.com/faucet/verify',data=data,headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},cookies=cookies)
-    if 'Good job!' in faucet.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+faucet.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-    animasi(menit=1)
-    faucet=curl.get('https://james-trussy.com/faucet',headers=ua,cookies=cookies)
-    if 'firewall' in faucet.url:
-      info=bs(faucet.text,'html.parser')
-      csrf=info.find('input',{'name':'csrf_token_name'})['value']
-      answer=modulesl.RecaptchaV2('6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO',faucet.url)
-      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
-      gas=curl.post("https://james-trussy.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
 def freeclaimfaucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('freeclaimfaucet')
@@ -2598,26 +2309,21 @@ def freeclaimfaucet(modulesl,banner,tele=None):
   ua={
     "Host":"freeclaimfaucet.com",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
-  faucet=curl.get('https://freeclaimfaucet.com/faucet',headers=ua,cookies=cookies)
-  if 'firewall' in faucet.url:
-      info=bs(faucet.text,'html.parser')
-      csrf=info.find('input',{'name':'csrf_token_name'})['value']
-      answer=modulesl.RecaptchaV2('6LcTwH0dAAAAADeD8cRAHIRmwKrS3JNbSh30QWFx',faucet.url)
-      data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
-      gas=curl.post("https://freeclaimfaucet.com/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
   dash=curl.get('https://freeclaimfaucet.com/dashboard',headers=ua,cookies=cookies)
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele,'freeclaimfaucet')
     freeclaimfaucet(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find('div',{'class':'mt-3 text-3xl font-semibold text-white'})
-  print(hijau1+"> "+kuning1+"Account information")
-  print(hijau1+'> Your Balance : '+info.text.strip())
-  print(hijau1+"> "+kuning1+"Start bypass ptc")
+  akun=Tree("[green]> [yellow]Account information")
+  akun.add('[green]> [yellow]Your Balance [white]: [yellow]'+info.text.strip())
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start bypass ptc"))
   ptc=curl.get('https://freeclaimfaucet.com/ptc',headers=ua,cookies=cookies)
+  status_code(ptc)
   if 'ads available' not in ptc.text:
     save_data(tele,'freeclaimfaucet')
     freeclaimfaucet(modulesl,banner,tele)
@@ -2626,146 +2332,55 @@ def freeclaimfaucet(modulesl,banner,tele=None):
    try:
     name=ptc.find('h5',{'class':'card-title'}).text
     link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
-    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
     visit=curl.get(link,headers=ua,cookies=cookies)
-    sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
+    status_code(visit)
+    animasi(detik=int(visit.text.split('var timer = ')[1].split(';')[0]))
     csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
     answer=modulesl.RecaptchaV2('6LcTwH0dAAAAADeD8cRAHIRmwKrS3JNbSh30QWFx',link)
     data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}"
     verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+    status_code(verify)
     if 'Good job!' in verify.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-   except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://freeclaimfaucet.com/links',headers=ua,cookies=cookies).text
-  if 'links available' not in get_links:
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
+  get_links=curl.get('https://freeclaimfaucet.com/links',headers=ua,cookies=cookies)
+  status_code(get_links)
+  if 'links available' not in get_links.text:
     save_data(tele,'freeclaimfaucet')
     freeclaimfaucet(modulesl,banner,tele)
-  fd=bs(get_links,'html.parser')
+  fd=bs(get_links.text,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
   for i in link:
     try:
         name = i.find('h4').text
         jumlah = int(i.find('span').text.split('/')[0])
-        services = {
-    'ctr.sh': modulesl.ctrsh,
-    'fc.lc': modulesl.fl_lc,
-    'shrinkearn': modulesl.shrinkearn,
-    'owlink': modulesl.owlink,
-    'clk.sh': modulesl.clksh,
-    'clks.pro': modulesl.clks_pro,
-    'linksfly': modulesl.linksfly,
-    'shortsfly': modulesl.shortfly,
-      }
-        if name in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+        re=jumlah
+        for ulang in range(jumlah):
+            url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+            status_code(url)
+            url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+            answer = bypass_link(url,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer==False:break
+            if 'failed to bypass' in answer:
+                pass
+            else:
+                reward = curl.get(answer, headers=ua, cookies=cookies)
+                status_code(reward)
+                reward=reward.text
+                if 'Good job!' in reward:
+                    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    re-=1
                 else:
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                  #  print(reward)
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-def eurofaucet_de(modulesl,banner,tele=None):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  data_control('eurofaucet.de')
-  banner.banner('EUROFAUCET.DE')
-  cookies, ugentmu = load_data('eurofaucet.de')
-  if not os.path.exists("data/eurofaucet.de/eurofaucet.de.json"):
-    save_data(tele,'eurofaucet.de')
-    eurofaucet_de(modulesl,banner,tele)
-  cookiek = SimpleCookie()
-  cookiek.load(cookies)
-  cookies = {k: v.value for k, v in cookiek.items()}
-  ua={
-    "Host":"eurofaucet.de",
-    'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
-  }
-  curl=requests.Session()
-  dash=curl.get('https://eurofaucet.de/dashboard',headers=ua,cookies=cookies)
-  if 'Balance' not in dash.text:
-    save_data(tele,'eurofaucet.de')
-    eurofaucet_de(modulesl,banner,tele)
-  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
-  print(hijau1+"> "+kuning1+"Account information")
-  for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start ptc")
-  ptc=curl.get('https://eurofaucet.de/ptc',headers=ua,cookies=cookies)
-  if 'ads available' not in ptc.text:
-    save_data(tele,'eurofaucet.de')
-    eurofaucet_de(modulesl,banner,tele)
-  ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
-  for ptc in ptc:
-   try:
-    name=ptc.find('h5',{'class':'card-title'}).text
-    link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
-    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
-    visit=curl.get(link,headers=ua,cookies=cookies)
-    sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
-    csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-    answer=modulesl.RecaptchaV2('6Lcza1QmAAAAAInStIpZuJYEOm-89v4zKNzglgU9',link)
-    data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}"
-    verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
-    if 'Good job!' in verify.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-   except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://eurofaucet.de/links',headers=ua,cookies=cookies).text
-  if 'links available' not in get_links:
-    save_data(tele,'eurofaucet.de')
-    eurofaucet_de(modulesl,banner,tele)
-  fd=bs(get_links,'html.parser')
-  link=fd.find_all('div',{'class':'col-lg-3'})
-  for i in link:
-    try:
-     #   print(i)
-        name = i.find('h4').text
-        jumlah = int(i.find('span').text.split('/')[0])
-        services = {
-        'shorti': modulesl.adshorti_xyz,
-        'try2': modulesl.try2,
-        'linksfly': modulesl.linksfly,
-        'shortsfly': modulesl.shortfly,
-        'owl': modulesl.owlink,
-        'illink': modulesl.illink_net,
-        'chain': modulesl.chainfo,
-        }
-
-        if name in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-                else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                  #  print(reward)
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
-  while True:
-   try:
-    get_=curl.get('https://eurofaucet.de/auto',headers=ua,cookies=cookies)
-    token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(60)
-    reward=curl.post('https://eurofaucet.de/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
-    if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-   except Exception as e:
-     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
-     break
-  exit()
+                    print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+    except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 def tefaucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('tefaucet.online')
@@ -2780,20 +2395,22 @@ def tefaucet(modulesl,banner,tele=None):
   ua={
     "Host":"tefaucet.online",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get('http://tefaucet.online/dashboard',headers=ua,cookies=cookies)
-  #print(dash.text)
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele,'tefaucet.online')
     tefaucet(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[gree] > [yellow]Account information")
   for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start bypass ptc")
+    akun.add('[gree] > [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start bypass ptc"))
   ptc=curl.get('http://tefaucet.online/ptc',headers=ua,cookies=cookies)
+  status_code(ptc)
   if 'ads available' not in ptc.text:
     save_data(tele,'tefaucet.online')
     tefaucet(modulesl,banner,tele)
@@ -2802,19 +2419,25 @@ def tefaucet(modulesl,banner,tele=None):
    try:
     name=ptc.find('h5',{'class':'card-title'}).text
     link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
-    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
     visit=curl.get(link,headers=ua,cookies=cookies)
-    sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
+    status_code(visit)
+    animasi(detik=int(visit.text.split('var timer = ')[1].split(';')[0]))
     csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
     answer=modulesl.RecaptchaV2('6LfO_NgkAAAAALPup3qKwQtj3hQ1wUDP53ELBYxe',link)
     data=f"captcha=recaptchav2&recaptchav3=&g-recaptcha-response={answer}&csrf_token_name={csrf}"
     verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+    status_code(verify)
     if 'Good job!' in verify.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-   except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('http://tefaucet.online/links',headers=ua,cookies=cookies).text
-  if 'links available' not in get_links:
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+   except Exception as e:
+    keluar(str(e))
+    pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
+  get_links=curl.get('http://tefaucet.online/links',headers=ua,cookies=cookies)
+  status_code(get_links)
+  if 'links available' not in get_links.text:
     save_data(tele,'tefaucet.online')
     tefaucet(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
@@ -2825,55 +2448,43 @@ def tefaucet(modulesl,banner,tele=None):
         name = i.find('h4').text
       #  print(name)
         jumlah = int(i.find('span').text.split('/')[0])
-        services = {
-    'clks.pro': modulesl.clks_pro,
-    'shortsfly.me': modulesl.shortfly,
-    'linksfly.me': modulesl.linksfly,
-    'ctr.sh': modulesl.ctrsh,
-    'insfly.pw': modulesl.insfly,
-    'ez4short': modulesl.ez4short,
-    'owllink': modulesl.owlink,
-    'fc.lc': modulesl.fl_lc,
-    'linksly': modulesl.linksly,
-    'clk.sh': modulesl.clksh,
-    'shrinkme.io': modulesl.shrinkme,
-    'ex-foary.com': modulesl.ex_foary_com,
-    'megaurl.in': modulesl.megaurl,
-    'birdurl': modulesl.birdurl,
-    'illink': modulesl.illink_net,
-    'exe.io': modulesl.exe_io,
-    'usalink': modulesl.usalink,
-    'oii.io': modulesl.oii,
-    'cuty.io': modulesl.cuty_io,
-    'chainfo': modulesl.chainfo,
-    'link1s': modulesl.links1s_com,
-    }
-        if name.lower()in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name.lower()](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+        re=jumlah
+        for ulang in range(jumlah):
+            url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+            status_code(url)
+            url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+            answer = bypass_link(url,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer==False:break
+            if 'failed to bypass' in answer:
+                pass
+            else:
+                animasi(detik=105)
+                reward = curl.get(answer, headers=ua, cookies=cookies)
+                status_code(reward)
+                reward=reward.text
+                if 'Good job!' in reward:
+                    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    re-=1
                 else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                  #  print(reward)
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
+                    print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+    except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  rprint(Tree("[gree] > [yellow]Start auto faucet"))
   while True:
    try:
     get_=curl.get('http://tefaucet.online/auto',headers=ua,cookies=cookies)
+    status_code(get_)
     token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(60)
+    animasi(detik=60)
     reward=curl.post('http://tefaucet.online/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    status_code(reward)
     if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
-     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     keluar(str(e))
+     print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
 def faucetcrypto_net(modulesl,banner,tele=None):
@@ -2890,19 +2501,22 @@ def faucetcrypto_net(modulesl,banner,tele=None):
   ua={
     "Host":"faucetcrypto.net",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get('https://faucetcrypto.net/dashboard',headers=ua,cookies=cookies)
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele,'faucetcrypto_net')
     faucetcrypto_net(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'d-flex d-lg-flex d-md-block align-items-center'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[gree] > [yellow]Account information")
   for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start ptc")
+    akun.add('[gree] > [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start ptc"))
   ptc=curl.get('https://faucetcrypto.net/ptc',headers=ua,cookies=cookies)
+  status_code(ptc)
   if 'ads available' not in ptc.text:
     save_data(tele,'faucetcrypto_net')
     faucetcrypto_net(modulesl,banner,tele)
@@ -2911,25 +2525,31 @@ def faucetcrypto_net(modulesl,banner,tele=None):
    try:
     name=ptc.find('h5',{'class':'card-title'}).text
     link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
-    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
     visit=curl.get(link,headers=ua,cookies=cookies)
-    sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
+    status_code(visit)
+    animasi(detik=int(visit.text.split('var timer = ')[1].split(';')[0]))
     csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
     token=bs(visit.text,'html.parser').find('input',{'name':'token'})['value']
     answer=modulesl.RecaptchaV2('6LfY3WQhAAAAAJ4gw6l_9zKOw50G0har2R8pVt0_',link)
     data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
     verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+    status_code(verify)
     if 'ads available' not in verify.text:
       save_data(tele,'faucetcrypto_net')
       faucetcrypto_net(modulesl,banner,tele)
     if 'Good job!' in verify.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
+        keluar(str(e))
         save_data(tele,'faucetcrypto_net')
         faucetcrypto_net(modulesl,banner,tele)
         pass
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://faucetcrypto.net/links',headers=ua,cookies=cookies).text
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
+  get_links=curl.get('https://faucetcrypto.net/links',headers=ua,cookies=cookies)
+  status_code(get_links)
+  get_links=get_links.text
   if 'links available' not in get_links:
     save_data(tele,'faucetcrypto_net')
     faucetcrypto_net(modulesl,banner,tele)
@@ -2939,66 +2559,44 @@ def faucetcrypto_net(modulesl,banner,tele=None):
     try:
         name = i.find('h4').text
         jumlah = int(i.find('span').text.split('/')[0])
-        
-        services = {
-    'ShrinkEarn': modulesl.shrinkearn,
-    'Shrinkme': modulesl.shrinkme,
-    'Linksfly': modulesl.linksfly,
-    'Shortsfly': modulesl.shortfly,
-    'Try2link': modulesl.try2,
-    'OwlLink': modulesl.owlink,
-    'IlLink': modulesl.illink_net,
-    'BirdURLs': modulesl.birdurl,
-    'Link1s': modulesl.links1s_com,
-    'Link1s.net': modulesl.link1s_net,
-    'Droplink': modulesl.droplink,
-    'Ez4short': modulesl.ez4short,
-    'ExFoary': modulesl.ex_foary_com,
-    'ExeIO': modulesl.exe_io,
-    'Clk.sh': modulesl.clksh,
-    'ChaINfo': modulesl.chainfo,
-    'Usalink': modulesl.usalink,
-    'Mitly': modulesl.mitly,
-    'MegaUrl': modulesl.megaurl,
-    'Web1sTraffic2': modulesl.web1s_info,
-    'Web1s': modulesl.web1s_info,
-    'Web1sNormal2': modulesl.web1s_info,
-    'Web1sNormal3': modulesl.web1s_info,
-    'Freeltc': modulesl.freeltc_top,
-    'Shortzu': modulesl.shortzu_icu,
-    'Clickzu': modulesl.clickzu_icu,
-    'Shorti': modulesl.shorti_io,
-    'Linksly': modulesl.linksly,
-    }
-        
-        if name in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+        re=int(jumlah)
+        for ulang in range(jumlah):
+            ur = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+            status_code(ur)
+            url=ur.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+            answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah])
+            if answer==False:break
+            if 'failed to bypass' in answer:pass
+            else:
+                animasi(detik=105)
+                reward = curl.get(answer, headers=ua, cookies=cookies)
+                status_code(reward)
+                reward=reward.text
+                if 'links available' not in reward:
+                  save_data(tele,'faucetcrypto_net')
+                  faucetcrypto_net(modulesl,banner,tele)
+                if 'Good job!' in reward:
+                    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    re-=1
                 else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                    if 'links available' not in reward:
-                      save_data(tele,'faucetcrypto_net')
-                      faucetcrypto_net(modulesl,banner,tele)
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
+                    print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+    except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  rprint(Tree("[gree] > [yellow]Start auto faucet"))
   while True:
    try:
     get_=curl.get('https://faucetcrypto.net/auto',headers=ua,cookies=cookies)
+    status_code(get_)
     token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(60)
+    animasi(detik=60)
     reward=curl.post('https://faucetcrypto.net/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    status_code(reward)
     if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except:
-     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
 def faucetspeedbtc(modulesl,banner,tele=None):
@@ -3015,85 +2613,68 @@ def faucetspeedbtc(modulesl,banner,tele=None):
   ua={
     "Host":"faucetspeedbtc.com",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get('https://faucetspeedbtc.com/dashboard',headers=ua,cookies=cookies)
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele,'faucetspeedbtc')
     faucetspeedbtc(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'media-body'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[gree] > [yellow]Account information")
   for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://faucetspeedbtc.com/links',headers=ua,cookies=cookies).text
-  fd=bs(get_links,'html.parser')
-  if 'Links' not in get_links:
+    akun.add('[gree] > [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
+  get_links=curl.get('https://faucetspeedbtc.com/links',headers=ua,cookies=cookies)
+  status_code(get_links)
+  fd=bs(get_links.text,'html.parser')
+  if 'Links' not in get_links.text:
     save_data(tele,'faucetspeedbtc')
     faucetspeedbtc(modulesl,banner,tele)
   link=fd.find_all('div',{'class':'col-md-6 col-xl-4'})
   for i in link:
     try:
-        name = i.find('h5').text
-        jumlah = int(i.find('span').text.split('/')[0])
-        
-        services = {
-    'Shrinkearn': modulesl.shrinkearn,
-    '1Short': modulesl._1short_in,
-    'Shrinkme': modulesl.shrinkme,
-    'Linksfly': modulesl.linksfly,
-    'Shortsfly': modulesl.shortfly,
-    'Try2link': modulesl.try2,
-    'OwlLink': modulesl.owlink,
-    'IlLink': modulesl.illink_net,
-    'BirdURLs': modulesl.birdurl,
-    'Link1s': modulesl.links1s_com,
-    'Link1s.net': modulesl.link1s_net,
-    'Droplink': modulesl.droplink,
-    'Ez4short': modulesl.ez4short,
-    'ExFoary': modulesl.ex_foary_com,
-    'ExeIO': modulesl.exe_io,
-    'Clk.sh': modulesl.clksh,
-    'ChaINfo': modulesl.chainfo,
-    'Usalink': modulesl.usalink,
-    'Mitly': modulesl.mitly,
-    'MegaUrl': modulesl.megaurl,
-    'Web1sTraffic2': modulesl.web1s_info,
-    'Web1s': modulesl.web1s_info,
-    'Web1sNormal2': modulesl.web1s_info,
-    'Web1sNormal3': modulesl.web1s_info,
-    'Freeltc': modulesl.freeltc_top,
-    'Shortzu': modulesl.shortzu_icu,
-    'Clickzu': modulesl.clickzu_icu,
-    'Shorti': modulesl.shorti_io,
-    'Linksly': modulesl.linksly,
-    }
-        
-        if name in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-                else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
+        if 'h5' not in str(i):pass
+        else:
+          name = i.find('h5').text
+          jumlah = int(i.find('span').text.split('/')[0])
+          re=jumlah
+          for ulang in range(jumlah):
+              ur = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+              status_code(ur)
+              url=ur.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+              answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah])
+              if answer==False:break
+              if 'failed to bypass' in answer:pass
+              else:
+                  animasi(detik=105)
+                  reward = curl.get(answer, headers=ua, cookies=cookies)
+                  status_code(reward)
+                  reward=reward.text
+                  if 'Good job!' in reward:
+                      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                      re-=1
+                  else:
+                      print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+    except Exception as e:
+      keluar(str(e))
+      pass
+    
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  rprint(Tree("[gree] > [yellow]Start auto faucet"))
   while True:
    try:
     get_=curl.get('https://faucetspeedbtc.com/auto',headers=ua,cookies=cookies)
+    status_code(get_)
     token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(60)
+    animasi(detik=60)
     reward=curl.post('https://faucetspeedbtc.com/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
-    print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! 8 tokens has been added to your balance success')
+    status_code(reward)
+    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! 8 tokens has been added to your balance success')
    except:
-     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
 def tikiearn(modulesl,banner,tele=None):
@@ -3110,21 +2691,21 @@ def tikiearn(modulesl,banner,tele=None):
   ua={
     "Host":"tikiearn.com",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get('https://tikiearn.com/dashboard',headers=ua,cookies=cookies)
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele,'tikiearn')
     tikiearn(modulesl,banner,tele)
-  info=bs(dash.text,'html.parser').find_all('div',{'class':'media-body'})
-  print(hijau1+"> "+kuning1+"Account information")
-  del info[0]
-  for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start ptc")
+  info=bs(dash.text,'html.parser').find_all('h5',{'class':'text-muted mb-0 font-size-15'})
+  akun=Tree("[gree] > [yellow]Account information")
+  akun.add('[gree] > [yellow]Balance [white]: [yellow]'+info[1].text.strip())
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start ptc"))
   ptc=curl.get('https://tikiearn.com/ptc',headers=ua,cookies=cookies)
-  #print(ptc.text)
+  status_code(ptc)
   if 'ads available' not in ptc.text:
     save_data(tele,'tikiearn')
     tikiearn(modulesl,banner,tele)
@@ -3133,60 +2714,55 @@ def tikiearn(modulesl,banner,tele=None):
    try:
       name=ptc.find('h4').text.strip()
       link=ptc.find('button')["onclick"].split("window.location = '")[1].split("'")[0]
-      print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+      print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
       visit=curl.get(link,headers=ua,cookies=cookies)
-      sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
+      status_code(visit)
+      animasi(detik=int(visit.text.split('var timer = ')[1].split(';')[0]))
       answer=modulesl.RecaptchaV2('6LcpH6omAAAAAPgjFK9i2npoqAvZLh-_L9M9t8Ds',link)
       csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
       token=bs(visit.text,'html.parser').find('input',{'name':'token'})['value']
       data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
       verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+      status_code(verify)
       if 'Good job!' in verify.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
    except Exception as e:
+        keluar(str(e))
         save_data(tele,'tikiearn')
         tikiearn(modulesl,banner,tele)
         pass
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://tikiearn.com/links',headers=ua,cookies=cookies).text
-  fd=bs(get_links,'html.parser')
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
+  get_links=curl.get('https://tikiearn.com/links',headers=ua,cookies=cookies)
+  status_code(get_links)
+  fd=bs(get_links.text,'html.parser')
   link=fd.find_all('div',{'class':'col-lg-3'})
- # print(link)
   for i in link:
     try:
         name = i.find('h4').text.strip()
         jumlah = int(i.find('span',{'class':'badge badge-info'}).text.split('/')[0])
-        
-        services = {
-    'ShrinkEarn': modulesl.shrinkearn,
-    'Myra': modulesl.myra,
-    'Try2Link': modulesl.try2,
-    'Linksfly': modulesl.linksfly,
-    'Cuty.io': modulesl.cuty_io,
-    'FcLc': modulesl.fl_lc,
-    'Clk.sh': modulesl.clksh,
-    'CbShort': modulesl.cbshort,
-    'HrShort': modulesl.hrshort,
-    'BirdUrl': modulesl.birdurl,
-    'Exe.io': modulesl.exe_io,
-    'MegaUrl': modulesl.megaurl,
-    'Oii.io': modulesl.oii,
-    }
-        
-        if name in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+        re=int(jumlah)
+        for ulang in range(jumlah):
+            url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+            status_code(url)
+            url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+            answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah])
+            if answer==False:break
+            if 'failed to bypass' in answer:pass
+            else:
+                animasi(detik=105)
+                reward = curl.get(answer, headers=ua, cookies=cookies)
+                status_code(reward)
+                reward=reward.text
+                if 'Good job!' in reward:
+                    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    re-=1
                 else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
+                    print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+    except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
   exit()
 def allfaucet(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -3202,98 +2778,102 @@ def allfaucet(modulesl,banner,tele=None):
   ua={
     "Host":"allfaucet.xyz",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get('https://allfaucet.xyz/dashboard',headers=ua,cookies=cookies)
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele,'allfaucet')
     allfaucet(modulesl,banner,tele)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'invoice-box'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[green]> [yellow]Account information")
   for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
+    akun.add('[green]> [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
  # exit()
-  print(hijau1+"> "+kuning1+"Start ptc")
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start ptc"))
   ptc=curl.get('https://allfaucet.xyz/ptc',headers=ua,cookies=cookies)
+  status_code(ptc)
   if 'Ads Available' not in ptc.text:
     save_data(tele,'allfaucet')
     allfaucet(modulesl,banner,tele)
   ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
   for ptc in ptc:
    try:
-    #  print(ptc)
       name=ptc.find('h5',{'class':'card-title'}).text.strip()
       link=ptc.find('button')["onclick"].split("window.location = '")[1].split("'")[0]
-      print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
+      print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
       visit=curl.get(link,headers=ua,cookies=cookies)
-      sleep(int(visit.text.split('let timer = ')[1].split(';')[0]))
+      status_code(visit)
+      animasi(detik=int(visit.text.split('let timer = ')[1].split(';')[0]))
       csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
       token=bs(visit.text,'html.parser').find('input',{'name':'token'})['value']
       answer=modulesl.RecaptchaV2('6Lcb3bkfAAAAAC1ZGV7QlVQyE7iyVr2jq6nvmvcN',link)
       data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
       verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+      status_code(verify)
       if 'Good job!' in verify.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! '+verify.text.split("text: '")[1].split("',")[0])
+        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! '+verify.text.split("text: '")[1].split("',")[0])
    except Exception as e:
+        keluar(str(e))
         save_data(tele,'allfaucet')
         allfaucet(modulesl,banner,tele)
         pass
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://allfaucet.xyz/links',headers=ua,cookies=cookies).text
-  if 'Links available' not in get_links:
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
+  get_links=curl.get('https://allfaucet.xyz/links',headers=ua,cookies=cookies)
+  status_code(get_links)
+  if 'Links available' not in get_links.text:
     save_data(tele,'allfaucet')
     allfaucet(modulesl,banner,tele)
   fd=bs(get_links,'html.parser')
   link=fd.find_all('div',{'class':'link-block'})
- # print(link)
-  services = {
-    'Shrinkearn': modulesl.shrinkearn,
-    'Shrinkme': modulesl.shrinkme,
-    'Exe': modulesl.exe_io,
-    'Clk': modulesl.clksh,
-    'Megaurl': modulesl.megaurl,
-    'Usalink': modulesl.usalink,
-    'Linkfly': modulesl.linksfly,
-    'Shortfly': modulesl.shortfly,
-    'Shortsfly1': modulesl.shortfly,
-    }
   for i in link:
     try:
         name = i.find('span',{'class':'link-name'}).text.strip()
         jumlah = int(i.find('span',{'class':'link-rmn'}).text.split('/')[0])
-        if name in services:
-            shortlink_func = services[name]
-            for _ in range(jumlah):
-                csrf=fd.find('input',{'name':'csrf_token_name'})['value']
-                token=fd.find('input',{'name':'token'})['value']
-                data=f"csrf_token_name={csrf}&token={token}"
-                url = curl.post(i.find('form')["action"], headers={'content-type':'application/x-www-form-urlencoded'}, data=data,cookies=cookies, allow_redirects=False).text.split('location.href = "')[1].split('"; </script>')[0]
-                answer = shortlink_func(url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+        re=int(jumlah)
+        for _ in range(jumlah):
+            csrf=fd.find('input',{'name':'csrf_token_name'})['value']
+            token=fd.find('input',{'name':'token'})['value']
+            data=f"csrf_token_name={csrf}&token={token}"
+            url = curl.post(i.find('form')["action"], headers={'content-type':'application/x-www-form-urlencoded'}, data=data,cookies=cookies, allow_redirects=False)
+            status_code(url)
+            url=url.text.split('location.href = "')[1].split('"; </script>')[0]
+            answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah])
+            if answer==False:break
+            if 'failed to bypass' in answer:pass
+            else:
+                animasi(detik=105)
+                reward = curl.get(answer, headers=ua, cookies=cookies)
+                status_code(reward)
+                reward=reward.text
+                if 'Good job!' in reward:
+                    reward_msg = reward.split("text: '")[1].split("',")[0]
+                    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! '+reward_msg)
+                    re-=1
                 else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                    if 'Good job!' in reward:
-                        reward_msg = reward.split("text: '")[1].split("',")[0]
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! '+reward_msg)
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-                get_links=curl.get('https://allfaucet.xyz/links',headers=ua,cookies=cookies).text
-                fd=bs(get_links,'html.parser')
-    except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
+                    print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+            get_links=curl.get('https://allfaucet.xyz/links',headers=ua,cookies=cookies)
+            status_code(get_links)
+            fd=bs(get_links.text,'html.parser')
+    except Exception as e:
+      keluar(str(e))
+      pass
+  rprint(Tree("[gree] > [yellow]Start auto faucet"))
   while True:
    try:
     get_=curl.get('https://allfaucet.xyz/auto',headers=ua,cookies=cookies)
+    status_code(get_)
     token=bs(get_.text,'html.parser').find('input',{'name':'token'})['value']
-    sleep(10)
+    animasi(detik=10)
     reward=curl.post('https://allfaucet.xyz/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data="token="+token)
+    status_code(reward)
     if 'Good job!' in reward.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! '+reward.text.split("text: '")[1].split("',")[0])
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+'Good job! '+reward.text.split("text: '")[1].split("',")[0])
    except Exception as e:
-     print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+     keluar(str(e))
+     print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
      break
   exit()
 def btcadspace(modulesl,banner,tele=None):
@@ -3310,12 +2890,12 @@ def btcadspace(modulesl,banner,tele=None):
   ua={
     "Host":"btcadspace.com",
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   try:
     dash=curl.get('https://btcadspace.com/account',headers=ua,cookies=cookies)
-  #  print(dash.text)
+    status_code(dash)
     if 'Main Balance' not in dash.text:
       save_data(tele,'btcadspace')
       btcadspace(modulesl,banner,tele)
@@ -3323,42 +2903,37 @@ def btcadspace(modulesl,banner,tele=None):
     save_data(tele,'btcadspace')
     btcadspace(modulesl,banner,tele)
   fd=bs(dash.text,'html.parser').find_all('div',{'class':'col-md-4 stretch-card grid-margin mt-3'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[green]> [yellow]Account information")
   for i in fd:
-    print(hijau1+'> '+i.text.strip().replace('    ','').splitlines()[0]+' : '+i.text.strip().replace('    ','').splitlines()[1])
-  print(hijau1+"> "+kuning1+"Bypass shortlinks")
+    akun.add('[green]> [yellow]'+i.text.strip().replace('    ','').splitlines()[0]+' [white]: [yellow]'+i.text.strip().replace('    ','').splitlines()[1])
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Bypass shortlinks"))
   get_links=curl.get('https://btcadspace.com/shortlinks',headers=ua, cookies=cookies)
+  status_code(get_links)
   gas=bs(get_links.text,'html.parser').find_all('div',{'class':'col-lg-4 mt-4'})
-  methods = {
-    'Linksfly': modulesl.linksfly,
-    'Shortsfly': modulesl.shortfly,
-    'Ctr': modulesl.ctrsh,
-    'Usalink': modulesl.usalink,
-    'Cuty': modulesl.cuty_io,
-    'Clks': modulesl.clks_pro,
-    'Shrinkearn': modulesl.shrinkearn,
-    'Bitads': modulesl.bitads,
-    'Ex foary': modulesl.ex_foary_com,
-    'Exe.io': modulesl.exe_io,
-    'Web1s': modulesl.web1s_info,
-  }
   for i in gas:
       info = [i for i in i.text.strip().replace('            ', '').splitlines() if i]
       jumlah = info[2].split(' clicks remaining')[0]
-      for method, bypass_func in methods.items():
+      re=int(jumlah)
+      for jun in range(int(jumlah)):
         try:
-          if method in info[0]:
-              for jun in range(int(jumlah)):
-                  url = curl.get('https://btcadspace.com' + i.find('a', {'class': 'card shadow text-decoration-none'})['href'], headers=ua, cookies=cookies, allow_redirects=False).headers['location']
-                  answer = bypass_func(url)
-                  if 'failed to bypass' in answer:
-                      print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-                  else:
-                      sleep(105)
-                      get_reward = curl.get(answer, headers=ua, cookies=cookies)
-                      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("message: '")[1].split("'")[0])
+          url = curl.get('https://btcadspace.com' + i.find('a', {'class': 'card shadow text-decoration-none'})['href'], headers=ua, cookies=cookies, allow_redirects=False)
+          status_code(url)
+          url=url.headers['location']
+          answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah])
+          if answer==False:break
+          if 'failed to bypass' in answer:pass
+          else:
+              animasi(detik=105)
+              get_reward = curl.get(answer, headers=ua, cookies=cookies)
+              status_code(get_reward)
+              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("message: '")[1].split("'")[0])
+              re-=1
         except Exception as e:
+          keluar(str(e))
           pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+#fix dulu coy
 def nokofaucet(modulesl,banner,tele=None):
   def save_datan(tele,name):
       if tele == True:
@@ -3396,15 +2971,15 @@ def nokofaucet(modulesl,banner,tele=None):
   "authorization":auth
   }
   try:
-    print(hijau1+"> "+kuning1+"Account information")
+    akun=Tree("[green]> [yellow]Account information")
     get_user=json.loads(curl.get('https://api.nokofaucet.com/api/auth/me',headers=ua).text)
     _id1=get_user["_id"]
-    print(hijau1+'> '+"Username : "+get_user["username"]+' | Email : '+get_user["email"])
-    print(hijau1+'> '+"Balance : "+str(get_user["balance"])+' | Energy : '+str(get_user["energy"]))
+    akun.add("[green]> [yellow]Username [white]: [yellow]"+get_user["username"]+' [white]| [yellow]Email [white]: [yellow]'+get_user["email"])
+    akun.add("[green]]> [yellow]]Balance [white]: [yellow]"+str(get_user["balance"])+' [white]| [yellow]Energy [white]: [yellow]'+str(get_user["energy"]))
   except Exception as e:
     save_datan(tele,'nokofaucet')
     nokofaucet(modulesl,banner,tele)
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
   sl=curl.get('https://api.nokofaucet.com/api/shortlink/getPagnigation?keyword=&page=1&perPage=50&sortDate=undefined&sortBy=undefined&paginationVersion=2',headers=ua)
   methods = {
     '1Short.io': modulesl.shorti_io,
@@ -3440,54 +3015,53 @@ def nokofaucet(modulesl,banner,tele=None):
                     sleep(15)
                     key=answer.split('https://nokofaucet.com/user/short-link/')[1]
                     reward=curl.post("https://api.nokofaucet.com/api/shortlink/verify-shortlink",headers=ua,data={"key":key})
-                    print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+json.loads(reward.text)["message"]+'               ')
-        except Exception as e:pass
-  print(hijau1+"> "+kuning1+"Start bypass faucet")
-  for i in range(int(get_user["remain_claim"])):
-    reward=curl.patch('https://api.nokofaucet.com/api/user/claim/'+_id1,headers=ua).json()
-    print(reward)
-    if 'successfully' in reward['message']:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward['message'])
-      animasi(menit=5)
-    else:
-      animasi(menit=5)
+                    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+json.loads(reward.text)["message"]+'               ')
+        except Exception as e:
+            keluar(str(e))
+            pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlink!')
   exit()
-def paid_family(url,sitkey,email,services,modulesl,tele):
+def paid_family(url,sitkey,email,modulesl,tele):
   curl=requests.Session()
-  login=curl.get(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
+  login=curl.get(url,headers={"Host":urlparse(url).netloc,"User-Agent":"XYZ/3.0"})
+  status_code(login)
   frc=bs(login.text,'html.parser').find('input',{'name':'frsc'})['value']
   answer=modulesl.RecaptchaV2(key=sitkey,url=url)
   data=f"frsc={frc}&guest_email={email}&captcha=recaptchaV2&g-recaptcha-response={answer}&Guest_Login=Guest_Login"
-  login=curl.post(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","content-type":"application/x-www-form-urlencoded"},data=data)
+  login=curl.post(url,headers={"Host":urlparse(url).netloc,"User-Agent":"XYZ/3.0","content-type":"application/x-www-form-urlencoded"},data=data)
+  status_code(login)
+  host=urlparse(url).netloc
   if 'user' in login.url:
-    print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Login Success!!                                  ')
+    rprint(Tree(f'[green] > [white][ [green]√ [white]][green] Login Success!!                                  '))
     link=bs(login.text,'html.parser').find_all('tr')
     del link[0]
     for links in link:
+     try:
       li=links.find('a')['href']
       lis= [element.strip() for element in links.text.strip().splitlines()]
       name=lis[0]
       jumlah=int(lis[9].split('/')[0])
-      if name in services:
-        for ulang in range(jumlah):
-       #   while True:
-            url = curl.get(li,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"},allow_redirects=False).text.split('<script>location.href = "')[1].split('";</script>')[0]
-            answer = services[name](url)
-            if 'failed to bypass' in answer:
-                print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+      re=jumlah
+      for ulang in range(jumlah):
+            url = curl.get(li,headers={"Host":host,"User-Agent":"XYZ/3.0"},allow_redirects=False).text.split('<script>location.href = "')[1].split('";</script>')[0]
+            answer = bypass_link(url,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer==False:break
+            if 'failed to bypass' in answer:pass
             else:
-                sleep(105)
-                reward = curl.get(answer,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
+                animasi(detik=105)
+                reward = curl.get(answer,headers={"Host":host,"User-Agent":"XYZ/3.0"})
                 if 'Well done :)' in reward.text:
                   sukses=bs(reward.text,'html.parser').find('div',{'class':'alert alert-success d-flex'}).text
-                  print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+sukses)
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+sukses)
+                  re-=1
                 if 'Error!!' in reward.text:
                   sukses=bs(reward.text,'html.parser').find('div',{'class':'alert alert-danger d-flex'}).text
-                 # if 'Error!! Shortlink Failed!' in sukses:
-                  #  print(f'{putih1}[{merah1} x {putih1}] {merah1}'+sukses,end='\r')
-               #   else:
-                 #   print(f'{putih1}[{merah1} x {putih1}] {merah1}'+sukses)
-                  #  break
+                  print(putih1+'├──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+sukses)
+                  re-=1
+     except Exception as e:
+       keluar(str(e))
+       pass
+#fix dulu coy
 def all_in_one(modulesl,banner,tele=None):
   def save_data(tele,name):
     try:
@@ -3554,56 +3128,13 @@ def all_in_one(modulesl,banner,tele=None):
   if not os.path.exists("data/all_in_one/all_in_one.json"):
     save_data(tele,'all_in_one')
     all_in_one(modulesl,banner,tele)
-  service = {
-      'Try2link.com': modulesl.try2,
-      'Shrinkearn.com': modulesl.shrinkearn,
-      'Usalink.io': modulesl.usalink,
-      'Clk.sh': modulesl.clksh,
-      'Linksfly.me': modulesl.linksfly,
-      'Shortsfly.me': modulesl.shortfly,
-      'Shorti.io': modulesl.shorti_io,
-      'Oii.io': modulesl.oii,
-      'Illink.net': modulesl.illink_net,
-      'Owllink.net': modulesl.owlink,
-      'Birdurls.com': modulesl.birdurl,
-      'Fc.lc': modulesl.fl_lc,
-      'Exe.io': modulesl.exe_io
-  }
   print(hijau1+"> "+kuning1+"Start bypass liteearn.com")
-  paid_family('https://liteearn.com/',"6Lejju8UAAAAAMCxObwhQJliWyTUXwEcUc43KOiQ",cookies,service,modulesl,tele)
-  service = {
-      'Try2link.com': modulesl.try2,
-      'Shrinkearn.com': modulesl.shrinkearn,
-      'Clk.sh': modulesl.clksh,
-      'Linksfly.me': modulesl.linksfly,
-      'Shortsfly.me': modulesl.shortfly,
-      'Shorti.io': modulesl.shorti_io,
-      'Oii.io': modulesl.oii,
-      'Illink.net': modulesl.illink_net,
-      'Owllink.net': modulesl.owlink,
-      'Birdurls.com': modulesl.birdurl,
-      'Fc.lc': modulesl.fl_lc,
-      'Exe.io': modulesl.exe_io
-  }
+  paid_family('https://liteearn.com/',"6Lejju8UAAAAAMCxObwhQJliWyTUXwEcUc43KOiQ",cookies,modulesl,tele)
   print(hijau1+"> "+kuning1+"Start bypass paidtomoney.com")
-  paid_family('https://paidtomoney.com/',"6LfZswEVAAAAAHXORtki0EFzDZZIV02Wo0krcxRo",cookies,service,modulesl,tele)
-  service = {
-      'Try2link.com': modulesl.try2,
-      'Shrinkearn.com': modulesl.shrinkearn,
-      'Usalink.io': modulesl.usalink,
-      'Clk.sh': modulesl.clksh,
-      'Linksfly.me': modulesl.linksfly,
-      'Shortsfly.me': modulesl.shortfly,
-      'Shorti.io': modulesl.shorti_io,
-      'Oii.io': modulesl.oii,
-      'Illink.net': modulesl.illink_net,
-      'Owllink.net': modulesl.owlink,
-      'Birdurls.com': modulesl.birdurl,
-      'Fc.lc': modulesl.fl_lc,
-      'Exe.io': modulesl.exe_io
-  }
+  paid_family('https://paidtomoney.com/',"6LfZswEVAAAAAHXORtki0EFzDZZIV02Wo0krcxRo",cookies,modulesl,tele)
   print(hijau1+"> "+kuning1+"Start bypass cryptosfaucet.top")
-  paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,service,modulesl,tele)
+  paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,modulesl,tele)
+#--------------
 def bitscript_family(url,modulesl,banner,key_links,tele,bal=None):
   host=urlparse(url).netloc
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -3619,56 +3150,59 @@ def bitscript_family(url,modulesl,banner,key_links,tele,bal=None):
   ua={
     "Host":host,
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dahs=curl.get(url+'account',headers=ua,cookies=cookies)
- # print(dahs.text)
+  status_code(dahs)
   if 'Balance' not in dahs.text:
     save_data(tele,host)
     bitscript_family(url,modulesl,banner,key_links,tele,bal)
   if bal != None:
     fd=bs(dahs.text,'html.parser').find_all('div',{'class':bal})
-    print(hijau1+"> "+kuning1+"Account information")
-    print(hijau1+'> '+fd[0].text.strip().splitlines()[1]+' : '+fd[0].text.strip().splitlines()[0])
-    print(hijau1+'> '+fd[1].text.strip().splitlines()[1]+' : '+fd[1].text.strip().splitlines()[0])
-
+    akun=Tree("[green]> [yellow]Account information")
+    akun.add(hijau1+'[green]> [yellow]'+fd[0].text.strip().splitlines()[1]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[0])
+    akun.add(hijau1+'[green]> [yellow]'+fd[1].text.strip().splitlines()[1]+' [white]: [yellow]'+fd[1].text.strip().splitlines()[0])
   else:
     fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-striped'})
-    print(hijau1+"> "+kuning1+"Account information")
-    print(hijau1+'> '+fd[0].text.strip().splitlines()[0]+' : '+fd[0].text.strip().splitlines()[1])
-    print(hijau1+'> '+fd[0].text.strip().splitlines()[4]+' : '+fd[0].text.strip().splitlines()[5])
+    akun=Tree("[green]> [yellow]Account information")
+    akun.add(hijau1+'[green]> [yellow]'+fd[0].text.strip().splitlines()[0]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[1])
+    akun.add(hijau1+'[green]> [yellow]'+fd[0].text.strip().splitlines()[4]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[5])
+  rprint(akun)
   link=curl.get(url+'shortlinks',headers=ua,cookies=cookies)
+  status_code(link)
   gt=bs(link.text,'html.parser').find_all('div',{'class':'col-lg-4 mt-4'})
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  #providers=services
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
   for i in gt:
     try:
       name = i.text.strip().splitlines()[0]
-    #  print(i)
-
       y=[i for i in i.text.strip().splitlines() if i][2]
       if 'clicks remaining' in y:
         y=y.split(' clicks remaining')[0].replace(' ','')
       if 'click remaining' in y:
         y=y.split(' click remaining')[0].replace(' ','')
       link=i.find('a',{'class':key_links})['href']
+      re=int(y)
       for ulang in range(int(y)):
-          get_links = curl.get(url+ link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
-          print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end=end())
-          answer = bypass_link(get_links,modulesl)
-#          print(reward.text)
+          get_links = curl.get(url+ link, headers=ua, cookies=cookies, allow_redirects=False)
+          status_code(get_links)
+          get_links=get_links.headers['Location']
+          print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end=end())
+          answer = bypass_link(get_links,modulesl,jumlah=[str(re),str(y)])
           if answer==False:break
-          if 'failed to bypass' in answer:
-              print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
+          if 'failed to bypass' in answer:pass
           else:
-            sleep(105)
+            animasi(detik=105)
             reward = curl.get(answer, headers=ua, cookies=cookies)
+            status_code(reward)
             if 'Congratulations.' in reward.text:
               _1 = reward.text.split("message: '")[1].split("'")[0]
-              print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
+              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
+              re-=1
     except Exception as e:
+      keluar(str(e))
       pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
   exit()
 def cryptohits(modulesl,banner,tele=None):
   bitscript_family("https://cryptohits.io/",modulesl,banner,"card shadow text-decoration-none",tele,"balance-left")
@@ -3693,11 +3227,12 @@ def clickscoin(modulesl,banner,tele=None):
   ua={
     "Host":host,
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   try:
     dahs=curl.get(url+'/account',headers=ua,cookies=cookies)
+    status_code(dahs)
     if 'Balance' not in dahs.text:
       save_data(tele,host)
       clickscoin(modulesl,banner,tele)
@@ -3705,128 +3240,40 @@ def clickscoin(modulesl,banner,tele=None):
       save_data(tele,host)
       clickscoin(modulesl,banner,tele)
   fd=bs(dahs.text,'html.parser').find_all('div',{'class':'info-area'})
-  print(hijau1+"> "+kuning1+"Account information")
-  print(hijau1+'> '+fd[0].text.strip().splitlines()[2]+' : '+fd[0].text.strip().splitlines()[0])
+  akun=Tree("[gree] > [yellow]Account information")
+  akun.add('[gree] > [yellow]'+fd[0].text.strip().splitlines()[2]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[0])
   link=curl.get("https://clickscoin.com/shortlinks",headers=ua,cookies=cookies)
+  status_code(link)
  # print(link.text)
   gt=bs(link.text,'html.parser').find_all('div',{'class':'col-xl-3 col-md-6'})
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  providers={
-    'TRAFFIC1S': modulesl.trafic1s,
-  #  'EARNNOW': None,
-    'SHORTSFLY': modulesl.shortfly,
-    'CLK.SH': modulesl.clksh,
-    'LINKS FLY.INC': modulesl.linksfly,
- #   'CLICKSFLY': None,
-    'SHRINKEARN': modulesl.shrinkearn,
-    'EZ4SHORT': modulesl.ez4short,
-  #  'ADLINKCLICK': None,
-    'COINSPARTY': modulesl.coinparty,
-    'LINK1SCOM': modulesl.links1s_com,
-    'DROPLINK': modulesl.droplink,
-    'FCLC': modulesl.fl_lc,
-    'MEGAURL': modulesl.megaurl,
-    'LINKSLY': modulesl.linksly,
-  #  'SHORTANO': None,
-    'LINK1SNET': modulesl.link1s_net,
-    'ADSHORT': modulesl.adshorti_co,
-   # 'TMEARN': None,
-   # 'CLICKSCOIN': None,
-  #  'PROMO-VISITS': None,
-    '1SHORT': modulesl._1short_in,
- #   'DASH-FREE': None,
- #   'RAINURL': None,
-    'OWLLINK': modulesl.owlink,
-    'EXFOARY': modulesl.ex_foary_com,
-    'MITLY': modulesl.mitly,
-    'MEGAFLY': modulesl.megafly,
- #   'FIRE-LINK': None,
-    'ILLINK': modulesl.illink_net,
- #   'LINKFLY': None,
- #   'GTLINK': None,
-    'BIRDURLS': modulesl.birdurl,
-    'TRY2LINK': modulesl.try2,
-  #  'SNOWURL': None,
-   # 'SHORTIT': None
-  }
-
+  rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
   for i in gt:
     try:
       name = i.text.strip().splitlines()[0]
-   #   print([i for i in i.text.strip().splitlines() if i])
-      for provider in providers:
-          if provider in name:
-           #   print(name)
-              y=[i for i in i.text.strip().splitlines() if i]
-              link=i.find('a')['href']
-            #  print(link)
-              for ulang in range(int(y[3])):
-                  get_links = curl.get("https://clickscoin.com"+ link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
-                  print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end='\r')
-                  answer = providers[provider](get_links)
-        #          print(reward.text)
-                  if 'failed to bypass' in answer:
-                      print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-                  else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies)
-                    if 'Congratulations.' in reward.text:
-                      _1 = reward.text.split("message: '")[1].split("'")[0]
-                      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
+      y=[i for i in i.text.strip().splitlines() if i]
+      link=i.find('a')['href']
+      re=int(y[3])
+      for ulang in range(int(y[3])):
+          get_links = curl.get("https://clickscoin.com"+ link, headers=ua, cookies=cookies, allow_redirects=False)
+          status_code(get_links)
+          get_links=get_links.headers['Location']
+          answer = bypass_link(get_links,modulesl,jumlah=[str(re),y[3]])
+          if answer == False:
+            break
+          if 'failed to bypass' in answer:
+              pass
+          else:
+            animasi(detik=105)
+            reward = curl.get(answer, headers=ua, cookies=cookies)
+            status_code(reward)
+            if 'Congratulations.' in reward.text:
+              _1 = reward.text.split("message: '")[1].split("'")[0]
+              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+_1)
+              re-=1
     except Exception as e:
+      keluar(str(e))
       pass
-def faucetpayz(modulesl,banner,tele=None):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  data_control('faucetpayz')
-  banner.banner('FAUCETPAYZ')
-  cookies, ugentmu = load_data('faucetpayz')
-  if not os.path.exists("data/faucetpayz/faucetpayz.json"):
-    save_data(tele,'faucetpayz')
-    faucetpayz(modulesl,banner,tele)
-  cookiek = SimpleCookie()
-  cookiek.load(cookies)
-  cookies = {k: v.value for k, v in cookiek.items()}
-  ua={
-    "Host":"faucetpayz.com",
-    'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
-  }
-  curl=requests.Session()
-  dash=curl.get('https://faucetpayz.com/dashboard',headers=ua,cookies=cookies)
-  if 'Balance' not in dash.text:
-    save_data(tele,'faucetpayz')
-    faucetpayz(modulesl,banner,tele)
-  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
-  print(hijau1+"> "+kuning1+"Account information")
-  for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
-  print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-  get_links=curl.get('https://faucetpayz.com/links',headers=ua,cookies=cookies).text
-  fd=bs(get_links,'html.parser')
-  link=fd.find_all('div',{'class':'col-lg-3'})
-  for i in link:
-    try:
-        name = i.find('h4').text
-        jumlah = int(i.find('span').text.split('/')[0])
-        services = {
-          "Shortsfly":modulesl.shortfly,
-          "Linksfly":modulesl.linksfly,
-    }
-        if name in services:
-            for ulang in range(jumlah):
-                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = services[name](url)
-                if 'failed to bypass' in answer:
-                    print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-                else:
-                    sleep(105)
-                    reward = curl.get(answer, headers=ua, cookies=cookies).text
-                    if 'Good job!' in reward:
-                        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-    except Exception as e:pass
-  exit()
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,auto=False):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse(url).netloc
@@ -3842,20 +3289,23 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
   ua={
     "Host":host,
     'User-Agent': ugentmu,
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    
   }
   curl=requests.Session()
   dash=curl.get(f'https://{host}/dashboard',headers=ua,cookies=cookies)
+  status_code(dash)
   if 'Balance' not in dash.text:
     save_data(tele=None,name=host)
     vie_script(modulesl,banner,url,key_re,ptc, short,faucet,auto)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[green]> [yellow]Account information")
   for info in info:
-    print(hijau1+'> '+info.text.strip().splitlines()[0]+' : '+info.text.strip().splitlines()[1])
+    akun.add('[green]> [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
+  rprint(akun)
   if ptc == True:
-    print(hijau1+"> "+kuning1+"Start ptc")
+    rprint(Tree("[green]> [yellow]Start ptc"))
     ptc=curl.get(f'https://{host}/ptc',headers=ua,cookies=cookies)
+    status_code(ptc)
     if 'ads available' not in ptc.text:
       save_data(tele=None,name=host)
       vie_script(modulesl,banner,url,key_re,ptc, short,faucet,auto)
@@ -3864,89 +3314,114 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
      try:
       name=ptc.find('h5',{'class':'card-title'}).text
       link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
-      print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(name),end='\r')
       visit=curl.get(link,headers=ua,cookies=cookies)
-      sleep(int(visit.text.split('var timer = ')[1].split(';')[0]))
+      status_code(visit)
+      print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(name),end=end())
+      animasi(detik=int(visit.text.split('var timer = ')[1].split(';')[0]))
       bs4 = BeautifulSoup(visit.text, "html.parser")
       inputs = bs4.find_all("input")
       data = {input.get("name"): input.get("value") for input in inputs}
       data["captcha"]="recaptchav2"
       data["g-recaptcha-response"]=modulesl.RecaptchaV2(key_re,visit.url)
       verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+      status_code(verify)
       if 'Good job!' in verify.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-     except Exception as e:pass
+        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+     except Exception as e:
+        keluar(str(e))
+        pass
+    print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
   if short == True:
-    print(hijau1+"> "+kuning1+"Start bypass shortlinks")
-    get_links=curl.get(f'https://{host}/links',headers=ua,cookies=cookies).text
-    if 'links available' not in get_links:
+    rprint(Tree("[green]> [yellow]Start bypass shortlinks"))
+    get_links=curl.get(f'https://{host}/links',headers=ua,cookies=cookies)
+    status_code(get_links)
+    if 'links available' not in get_links.text:
       save_data(tele=None,name=host)
       vie_script(modulesl,banner,url,key_re,ptc, short,faucet,auto)
-    if 'pre_verify' in get_links:
-      print(f'{putih1}[{merah1} x {putih1}] {hijau1}maaf shortlinks memiliki anti bot saat ini belum ada metode bypass untuk anti bot')
-    fd=bs(get_links,'html.parser')
-    link=fd.find_all('div',{'class':'col-lg-3'})
-    for i in link:
-      try:
-          name = i.find('h4').text
-          jumlah = int(i.find('span').text.split('/')[0])
-          for ulang in range(jumlah):
-              url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-              answer = bypass_link(url,modulesl)
-              if answer==False:
-                break
-              if 'failed to bypass' in answer:
-                  print(f'{putih1}[{merah1} x {putih1}] {hijau1}failed to bypass',end='\r')
-              else:
-                  sleep(105)
-                  reward = curl.get(answer, headers=ua, cookies=cookies).text
-                  if 'Good job!' in reward:
-                      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                  else:
-                      print(f'{putih1}[{merah1} x {putih1}] {hijau1}invalid keys',end='\r')
-      except Exception as e:pass
+    if 'pre_verify' in get_links.url:
+      print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}maaf shortlinks memiliki anti bot saat ini belum ada metode bypass untuk anti bot')
+    else:
+      fd=bs(get_links.text,'html.parser')
+      link=fd.find_all('div',{'class':'col-lg-3'})
+      for i in link:
+        try:
+            name = i.find('h4').text
+            jumlah = i.find('span').text.split('/')
+            re=int(jumlah[0])
+            for ulang in range(int(jumlah[0])):
+                url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+                status_code(url)
+                url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+                answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah[1]])
+                if answer==False:
+                  break
+                if 'failed to bypass' in answer:
+                    pass
+                else:
+                    animasi(detik=105)
+                    reward = curl.get(answer, headers=ua, cookies=cookies)
+                    status_code(reward)
+                    if 'Good job!' in reward.text:
+                        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    else:
+                        print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+                re-=1
+        except Exception as e:
+            keluar(str(e))
+            pass
+      print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
   if auto == True:
-    print(hijau1+"> "+kuning1+"Start auto faucet")
+    rprint(Tree("[green]> [yellow]Start auto faucet"))
     while True:
      try:
       get_=curl.get(f'https://{host}/auto',headers=ua,cookies=cookies)
+      status_code(get_)
       bs4 = BeautifulSoup(get_.text, "html.parser")
       inputs = bs4.find_all("input")
       data = {input.get("name"): input.get("value") for input in inputs}
-      sleep(int(get_.text.split('let timer = ')[1].split(',')[0]))
+      animasi(detik=int(get_.text.split('let timer = ')[1].split(',')[0]))
       reward=curl.post(f'https://{host}/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies,data=data)
+      status_code(reward)
       if 'Good job!' in reward.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
      except Exception as e:
-       print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
-       exit()
+       print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy!')
+       break
+       #exit()
   if faucet == True:
-    print(hijau1+"> "+kuning1+"Start faucet")
+    rprint(Tree("[green]> [yellow]Start faucet"))
     faucet=curl.get(f'https://{host}/faucet',headers=ua,cookies=cookies)
+    status_code(faucet)
     jumlah=bs(faucet.text,'html.parser').find_all('p',{'class':'lh-1 mb-1 font-weight-bold'})
     if 'Please click on the Anti-Bot links in the following order' in faucet.text:
-      print(f'{putih1}[{merah1} x {putih1}] {hijau1}maaf faucet memiliki anti bot saat ini belum ada metode bypass untuk anti bot')
+      print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}maaf faucet memiliki anti bot saat ini belum ada metode bypass untuk anti bot')
       exit()
-    jum=int(jumlah[len(jumlah)-1].text.split('/')[0])
-    for i in range(jum):
+    jum=jumlah[len(jumlah)-1].text.split('/')
+    re=int(jum[0])
+    for i in range(int(jum[0])):
       faucet=curl.get(f'https://{host}/faucet',headers=ua,cookies=cookies)
+      status_code(faucet)
       bs4 = BeautifulSoup(faucet.text, "html.parser")
       inputs = bs4.find_all("input")
       data = {input.get("name"): input.get("value") for input in inputs}
       data["captcha"]="recaptchav2"
       data["g-recaptcha-response"]=modulesl.RecaptchaV2(key_re,faucet.url)
       faucet=curl.post(f'https://{host}/faucet/verify',data=data,headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},cookies=cookies)
+      status_code(faucet)
       if 'Good job!' in faucet.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+faucet.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+        print(putih1+'├──'+hijau1+f' {putih1}[{str(re)}/{jum[1]}{hijau1} √ {putih1}] {hijau1}'+faucet.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+      re-=1
       animasi(menit=int(jumlah[0].text))
       faucet=curl.get(f'https://{host}/faucet',headers=ua,cookies=cookies)
+      status_code(faucet)
       if 'firewall' in faucet.url:
         info=bs(faucet.text,'html.parser')
         csrf=info.find('input',{'name':'csrf_token_name'})['value']
         answer=modulesl.RecaptchaV2(key_re,faucet.url)
         data=f"g-recaptcha-response={answer}&captchaType=recaptchav2&csrf_token_name={csrf}"
         gas=curl.post(f"https://{host}/firewall/verify",headers={"content-type":"application/x-www-form-urlencoded","User-Agent":ugentmu},data=data,cookies=cookies)
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
+        status_code(gas)
+        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}Sukses bypass firewall')
   exit()
 def cryptoscop(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -3964,68 +3439,91 @@ def cryptoscop(modulesl,banner,tele=None):
   ua_p=ua(host,ugentmu,"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","application/x-www-form-urlencoded")
   curl=requests.Session()
   dash=curl.get(f'https://cryptoscoop.online/dashboard',headers=hd,cookies=cookies)
+  status_code(dash)
   if 'Coin Balance' not in dash.text:
     save_data(tele=None,name=host)
     cryptoscop(modulesl,banner,tele)
   info=bs(dash.text,"html.parser").find("div",{"class":"col-8 p-4"}).text.strip().splitlines()
-  print(hijau1+"> "+kuning1+"Account information")
-  print(hijau1+'> '+info[1]+' : '+info[0])
-  print(hijau1+"> "+kuning1+"Ptc")
+  akun=Tree("[gree] > [yellow]Account information")
+  akun.add("[gree] > [yellow]"+info[1]+' [white]: [yellow]'+info[0])
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Ptc"))
   ptc=curl.get(f'https://cryptoscoop.online/ptc',headers=hd,cookies=cookies)
+  status_code(ptc)
   ptc=bs(ptc.text,"html.parser").find_all("div",{"class":"col-12 col-lg-3 col-xl-3"})
   for ptc in ptc:
+   try:
     name=parser(ptc.find("p",{"class":"mb-4 text-dark font-size-14"}).text)
     url=ptc.find("a")["onclick"].split("window.location = '")[1].split("'")[0]
-    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end=' '*20+'\r')
     view=curl.get(url,headers=hd,cookies=cookies)
+    status_code(view)
+    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end=' '*20+'\r')
     animasi(detik=int(view.text.split("var timer = ")[1].split(";")[0]))
     csrf=bs(view.text,"html.parser").find("input",{"name":"csrf_token_name"})["value"]
     answer=modulesl.RecaptchaV2("6LcwWM8mAAAAAG477PUv-DUINczEel-bejrD2iYH",url)
     data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}"
     reward=curl.post(url.replace("view","verify"),headers=ua_p,data=data,cookies=cookies)
+    status_code(reward)
     if 'Good job!' in reward.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+   except Exception as e:
+     keluar(str(e))
+     pass
    # exit()
-  print(hijau1+"> "+kuning1+"Shortlinks")
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
+  rprint(Tree("[gree] > [yellow]Shortlinks"))
   sl=curl.get(f'https://cryptoscoop.online/links',headers=hd,cookies=cookies)
+  status_code(sl)
   sl=bs(sl.text,"html.parser").find_all("div",{"class":"card-body"})
   del sl[:7]
   for sl in sl:
    try:
     url=sl.find("a")["href"]
-    jumlah=sl.find("h5").text.strip().split('/')[0]
+    jumlah=sl.find("h5").text.strip().split('/')
     name=sl.find("h4").text
-    for jumlah in range(int(jumlah)):
+    re=int(jumlah[0])
+    for juml in range(int(jumlah[0])):
       verify=curl.get(url,headers=hd,cookies=cookies)
+      status_code(verify)
       csrf=bs(verify.text,"html.parser").find("input",{"name":"csrf_token_name"})["value"]
       answer=modulesl.RecaptchaV2("6LcwWM8mAAAAAG477PUv-DUINczEel-bejrD2iYH",url)
       data=f"csrf_token_name={csrf}&captcha=recaptchav2&g-recaptcha-response={answer}"
-      gt_links=curl.post(url.replace("pre_verify","go"),headers=ua_p,cookies=cookies,data=data,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-      answer=bypass_link(gt_links,modulesl)
+      gt_links=curl.post(url.replace("pre_verify","go"),headers=ua_p,cookies=cookies,data=data,allow_redirects=False)
+      status_code(gt_links)
+      gt_links=gt_links.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+      answer=bypass_link(gt_links,modulesl,jumlah=[str(re),jumlah[0]])
       if answer==False:
         break
       if 'failed to bypass' in answer:
         pass
       else:
-        sleep(105)
+        animasi(detik=105)
         reward=curl.get(answer,headers=hd,cookies=cookies)
+        status_code(reward)
         if 'Good job!' in reward.text:
-          print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+          print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+      re-=1
    except Exception as e:
+     keluar(str(e))
      pass
-  print(hijau1+"> "+kuning1+"Faucet")
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  rprint(Tree("[gree] > [yellow]Faucet"))
   while True:
    try:
     faucet=curl.get(f'https://cryptoscoop.online/bonusclaim',headers=hd,cookies=cookies)
+    status_code(faucet)
     csrf=bs(faucet.text,"html.parser").find("input",{"name":"csrf_token_name"})["value"]
     answer=modulesl.RecaptchaV2("6LcwWM8mAAAAAG477PUv-DUINczEel-bejrD2iYH",faucet.url)
     data=f"csrf_token_name={csrf}&captcha=recaptchav2&g-recaptcha-response={answer}"
     faucet=curl.post(f'https://cryptoscoop.online/bonusclaim/verify',headers=ua_p,cookies=cookies,data=data)
+    status_code(faucet)
     if 'Good job!' in faucet.text:
-      print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+faucet.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+faucet.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
       animasi(menit=5)
    except Exception as e:
+     keluar(str(e))
      pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more energy!')
 def earnrub_pw(modulesl,banner,tele=None):
   vie_script(modulesl,banner,url="https://earnrub.pw/",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=True,short=True,faucet=True,auto=True)
 def instanfaucet_xyz(modulesl,banner,tele=None):
@@ -4044,62 +3542,85 @@ def instanfaucet_xyz(modulesl,banner,tele=None):
   ua_p=ua(host,ugentmu,"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","application/x-www-form-urlencoded")
   curl=requests.Session()
   dash=curl.get("https://insfaucet.xyz/dashboard",headers=hd,cookies=cookies)
+  status_code(dash)
+  if 'Balance' not in dash.text:
+    save_data(tele=None,name=host)
+    instanfaucet_xyz(modulesl,banner,tele)
   get_info=bs(dash.text,"html.parser").find_all('div',{"class":"col-sm-4 layout-spacing"})
-  print(hijau1+"> "+kuning1+"Account information")
+  akun=Tree("[green]> [yellow]Account information")
   for info in get_info:
-    print(hijau1+"> "+info.text.strip().replace("\n"," : "))
-  print(hijau1+"> "+kuning1+"Ptc")
+    akun.add("[green]> [yellow]"+info.text.strip().replace("\n"," : "))
+  rprint(akun)
+  rprint(Tree("[green]> [yellow]Ptc"))
   ptc=curl.get(f'https://insfaucet.xyz/ptc',headers=hd,cookies=cookies)
+  status_code(ptc)
   ptc=bs(ptc.text,"html.parser").find_all("div",{"class":"col-sm-4 layout-spacing"})
   for ptc in ptc:
    try:
-   # print(ptc)
     name=parser(ptc.find("p",{"class":"card-text"}).text)
     url=ptc.find("button")["onclick"].split("window.location = '")[1].split("'")[0]
-    print(f'{putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end=' '*20+'\r')
+    print(putih1+'├──'+hijau1+f' [{kuning1} ~ {putih1}] {kuning1}View : '+name,end=' '*20+'\r')
     view=curl.get(url,headers=hd,cookies=cookies)
+    status_code(view)
     animasi(detik=int(view.text.split("var timer = ")[1].split(";")[0]))
     csrf=bs(view.text,"html.parser").find("input",{"name":"csrf_token_name"})["value"]
     token=bs(view.text,"html.parser").find("input",{"name":"token"})["value"]
     answer=modulesl.RecaptchaV2("6LdxTHkeAAAAALQHz9Z7IQHwKZxJrqts5NZN58rf",url)
     data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
     reward=curl.post(url.replace("view","verify"),headers=ua_p,data=data,cookies=cookies)
+    status_code(reward)
     if 'Good job!' in reward.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+        print(putih1+'├──'+hijau1+f' [{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
    except Exception as e:
+     keluar(str(e))
      pass
    # exit()
-  print(hijau1+"> "+kuning1+"Shortlinks")
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
+  rprint(Tree("[green]> [yellow]Shortlinks"))
   sl=curl.get(f'https://insfaucet.xyz/links',headers=hd,cookies=cookies)
+  status_code(sl)
   sl=bs(sl.text,"html.parser").find_all("div",{"class":"card card-body text-center"})
   for sl in sl:
    try:
     url=sl.find("a")["href"]
-    jumlah=sl.find("span",{"class":"badge span-warning text-warning text-center"}).text.strip().split('/')[0]
+    jumlah=sl.find("span",{"class":"badge span-warning text-warning text-center"}).text.strip().split('/')
+    re=int(jumlah[0])
     name=sl.find("h4").text
-    for jumlah in range(int(jumlah)):
-      gt_links=curl.get(url,headers=hd,cookies=cookies,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
-      answer=bypass_link(gt_links,modulesl)
+    for juml in range(int(jumlah[0])):
+      gt_links=curl.get(url,headers=hd,cookies=cookies,allow_redirects=False)
+      status_code(gt_links)
+      gt_links=gt_links.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+      answer=bypass_link(gt_links,modulesl,jumlah=[str(re),jumlah[1]])
       if answer==False:
         break
       if 'failed to bypass' in answer:
         pass
       else:
-        sleep(105)
+        animasi(detik=105)
         reward=curl.get(answer,headers=hd,cookies=cookies)
+        status_code(reward)
         if 'Good job!' in reward.text:
-          print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+          print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+          re-=1
    except Exception as e:
+     keluar(str(e))
      pass
-  print(hijau1+"> "+kuning1+"Start auto faucet")
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  rprint(Tree("[green]> [yellow]Start auto faucet"))
   while True:
      try:
       get_=curl.get(f'https://{host}/auto',headers=hd,cookies=cookies)
+      status_code(get_)
       token=bs(get_.text,"html.parser").find("input",{"name":"token"})["value"]
       animasi(detik=int(get_.text.split('let timer = ')[1].split(',')[0]))
       reward=curl.post(f'https://{host}/auto/verify',headers=ua_p,cookies=cookies,data="token="+token)
+      status_code(reward)
       if 'Good job!' in reward.text:
-        print(f'{putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
      except Exception as e:
-       print(f'{putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
+       print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
        exit()
+def eurofaucet_de(modulesl,banner,tele=None):
+  vie_script(modulesl,banner,url="https://eurofaucet.de/",key_re="6Lcza1QmAAAAAInStIpZuJYEOm-89v4zKNzglgU9",ptc=True,short=True,faucet=True,auto=True)
+def james_trussy(modulesl,banner,tele=None):
+  vie_script(modulesl,banner,"https://james-trussy.com/","6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO",ptc=False,short=True,faucet=False,auto=True)

@@ -4,6 +4,8 @@ import os
 import time
 import datetime
 import json,sys,queue
+from rich.panel import Panel
+from rich import print as cetak
 def menu(banner,modul,modulesl):
     hijau1 = "\033[1;92m"  # Terang
     kuning1 = "\033[1;93m"  # Terang
@@ -23,12 +25,11 @@ def menu(banner,modul,modulesl):
 "clickscoin":modul.clickscoin,
 "coinfola":modul.coinfola,
 "coinpay_faucet":modul.coinpay_faucet,
-"coinzask":modul.coinzask,
+#"coinzask":modul.coinzask,
 "earnfree_cash":modul.earnfree_cash,
 "earnsolana":modul.earnsolana,
 "eurofaucet_de":modul.eurofaucet_de,
 "faucetcrypto_net":modul.faucetcrypto_net,
-"faucetpayz":modul.faucetpayz,
 "faucetspeedbtc":modul.faucetspeedbtc,
 "freeclaimfaucet":modul.freeclaimfaucet,
 "james_trussy":modul.james_trussy,
@@ -39,7 +40,6 @@ def menu(banner,modul,modulesl):
 "rushbitcoin":modul.rushbitcoin,
 "tefaucet":modul.tefaucet,
 "tikiearn":modul.tikiearn,
-"faucetgigs":modul.faucetgigs,
 "cryptoscoop_online":modul.cryptoscop,
 "earnrub_pw":modul.earnrub_pw,
 "cryptohits":modul.cryptohits,
@@ -63,8 +63,18 @@ def menu(banner,modul,modulesl):
       
       
       # Cetak daftar menu
-      for index, (name, _) in enumerate(menu_dict):
-          print(f"{putih1}[{hijau1}{str(index)}{putih1}]{kuning1}.{name.upper()} {putih1}")
+      menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(thread_map.keys())]
+
+# If the number of menu items is odd, add an empty string to make it even
+      if len(menu_items) % 2 != 0:
+          menu_items.append("")
+      
+      # Create two columns for the menu
+      menu_content = "\n".join([f"{menu_items[i]:<60}{menu_items[i + 1]}" for i in range(0, len(menu_items), 2)])
+      
+      # Display the menu panel
+      cetak(Panel(menu_content, width=80, title="[bold green]Menu Bot", padding=(0, 4), style="bold white"))
+
           #time.sleep(0.1)
   
       # Meminta input pengguna
