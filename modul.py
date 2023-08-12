@@ -115,6 +115,8 @@ def bypass_link(url,modulesl,jumlah):
   "go.urlcash.site":modulesl.urlcash,
   "link.usalink.io":modulesl.usalink,
   "zuba.link":modulesl.zuba_link,
+  "sl-2.askpaccosi.com":modulesl.sl_ask,
+  "panylink.com":modulesl.panylink,
   }
   if urlparse(url).netloc in dictnya:
     print(putih1+'├──'+'─'*56)
@@ -2032,7 +2034,7 @@ def coinfola(modulesl,banner,tele=None):
       re=int(y)
       for ulang in range(int(y)):
           get_links = curl.get('https://coinfola.com' + link, headers=ua, cookies=cookies, allow_redirects=False).headers['Location']
-          print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end=end())
+          #print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end=end())
           answer = bypass_link(get_links,modulesl,jumlah=[str(re),y])
           if answer==False:
                 break
@@ -2139,7 +2141,7 @@ def earnsolana(modulesl,banner,tele=None):
   if 'Balance' not in dash.text:
     save_data(tele,'earnsolana')
     earnsolana(modulesl,banner,tele)
-  info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'col-sm-3'})
   akun=Tree("[gree] > [yellow]Account information")
   for info in info:
     akun.add('[green]> [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
@@ -2150,11 +2152,11 @@ def earnsolana(modulesl,banner,tele=None):
   if 'ads available' not in ptc.text:
     save_data(tele,'earnsolana')
     earnsolana(modulesl,banner,tele)
-  ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
+  ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'card-body'})
   for ptc in ptc:
    try:
     name=ptc.find('h5',{'class':'card-title'}).text
-    link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
+    link=ptc.find('button')["onclick"].split("window.location = '")[1].split("'")[0]
     print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end=end())
     visit=curl.get(link,headers=ua,cookies=cookies)
     status_code(visit)
@@ -2172,15 +2174,16 @@ def earnsolana(modulesl,banner,tele=None):
   print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
   rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
   get_links=curl.get('https://earnsolana.xyz/links',headers=ua,cookies=cookies)
+  #print(get_links.text)
   if 'links available' not in get_links.text:
     save_data(tele,'earnsolana')
     earnsolana(modulesl,banner,tele)
   fd=bs(get_links.text,'html.parser')
-  link=fd.find_all('div',{'class':'col-lg-3'})
+  link=fd.find_all('div',{'class':'card card-body text-center'})
   for i in link:
     try:
         name = i.find('h4').text
-        jumlah = int(i.find('span').text.split('/')[0])
+        jumlah = int(i.find('span',{'class':"badge badge-info"}).text.split('/')[0])
         re=jumlah
         for ulang in range(jumlah):
             url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
@@ -2719,10 +2722,11 @@ def tikiearn(modulesl,banner,tele=None):
       status_code(visit)
       animasi(detik=int(visit.text.split('var timer = ')[1].split(';')[0]))
       answer=modulesl.RecaptchaV2('6LcpH6omAAAAAPgjFK9i2npoqAvZLh-_L9M9t8Ds',link)
+      answer1=modulesl.RecaptchaV3('https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LcdeZwkAAAAABfgNLd6v3Ew8Ak6Py1kVwZsJ5A_&co=aHR0cHM6Ly90aWtpZWFybi5jb206NDQz&hl=id&v=pCoGBhjs9s8EhFOHJFe8cqis&size=invisible&cb=dkc97yvnj2gs')
       csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
       token=bs(visit.text,'html.parser').find('input',{'name':'token'})['value']
-      data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
-      verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
+      data=f"captcha=recaptchav2&recaptchav3={answer1}&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
+      verify=curl.post(link.replace('view','verify'),data=data,headers={"Host":"tikiearn.com","User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
       status_code(verify)
       if 'Good job!' in verify.text:
         print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
@@ -2752,6 +2756,8 @@ def tikiearn(modulesl,banner,tele=None):
             else:
                 animasi(detik=105)
                 reward = curl.get(answer, headers=ua, cookies=cookies)
+                print(reward.url)
+                print(reward.headers)
                 status_code(reward)
                 reward=reward.text
                 if 'Good job!' in reward:
@@ -2823,10 +2829,10 @@ def allfaucet(modulesl,banner,tele=None):
   rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
   get_links=curl.get('https://allfaucet.xyz/links',headers=ua,cookies=cookies)
   status_code(get_links)
-  if 'Links available' not in get_links.text:
+  if 'Links Available' not in get_links.text:
     save_data(tele,'allfaucet')
     allfaucet(modulesl,banner,tele)
-  fd=bs(get_links,'html.parser')
+  fd=bs(get_links.text,'html.parser')
   link=fd.find_all('div',{'class':'link-block'})
   for i in link:
     try:
@@ -3132,8 +3138,6 @@ def all_in_one(modulesl,banner,tele=None):
   paid_family('https://liteearn.com/',"6Lejju8UAAAAAMCxObwhQJliWyTUXwEcUc43KOiQ",cookies,modulesl,tele)
   print(hijau1+"> "+kuning1+"Start bypass paidtomoney.com")
   paid_family('https://paidtomoney.com/',"6LfZswEVAAAAAHXORtki0EFzDZZIV02Wo0krcxRo",cookies,modulesl,tele)
-  print(hijau1+"> "+kuning1+"Start bypass cryptosfaucet.top")
-  paid_family('https://cryptosfaucet.top/',"6Lea9VImAAAAADHt5Lp2LqCt0vOHfab86HnThbl8",cookies,modulesl,tele)
 #--------------
 def bitscript_family(url,modulesl,banner,key_links,tele,bal=None):
   host=urlparse(url).netloc

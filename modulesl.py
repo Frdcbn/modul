@@ -24,12 +24,19 @@ def status_code(req):
   sleep(0.5)
   print(' ',end=end())
 def get_res(api, key, url):
-     res=requests.get(f'http://ocr.captchaai.com/in.php?key={api}&method=userrecaptcha&googlekey={key}&pageurl={url}')
+     ua = {
+            "host": "ocr.captchaai.com",
+            "content-type": "application/json/x-www-form-urlencoded"
+        }
+     res=requests.get(f'http://ocr.captchaai.com/in.php?key={api}&method=userrecaptcha&googlekey={key}&pageurl={url}',headers=ua)
      status_code(res)
      return res.text
-
 def get_ans(api, id):
-     res=requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}')
+     ua = {
+            "host": "ocr.captchaai.com",
+            "content-type": "application/json/x-www-form-urlencoded"
+        }
+     res=requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}',headers=ua)
      status_code(res)
      return res.text
 
@@ -95,8 +102,8 @@ def one_method(curl,url,headers=None):
   get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8',"user-agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"}, data=data)
   status_code(get_url)
   if get_url.json()['status'] == 'success':
-      return get_url["url"]
-  sesi = False
+      return get_url.json()["url"]
+  #sesi = False
  except Exception as e:
    return 'failed to bypass'
 def ctrsh(url):
@@ -513,7 +520,7 @@ def ez4short(url):
     return 'failed to bypass'
 def linksly(url):
   curl=requests.Session()
-  res= one_method(curl=curl,url='https://go.linksly.co'+urlparse(url).path,headers={"referer":"https://themezon.net/5-best-lookbook-wordpress-themes-for-fashion-and-creative-projects/"})
+  res= one_method(curl=curl,url='https://go.linksly.co'+urlparse(url).path,headers={"referer":"https://en.themezon.net/everything-about-cloud-servers-and-cloud-hosting/"})
   sleep(15)
   return res
 def adbitfly(url):
@@ -1032,47 +1039,10 @@ def clickzu_icu(url):
   except Exception as e:
     return 'failed to bypass'
 def chainfo(url):
-  try:
-    curl=requests.Session()
-    curl.headers.update({'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36'})
-    step1=curl.get(url).text
-    fl=bs(step1,'html.parser')
-    step2=curl.post(fl.find('form',{'id':'landing'})["action"],data=f'go='+fl.find('input',{'name':'go'})["value"],headers={'content-type':'application/x-www-form-urlencoded'}).text
-    verif=bs(step2,'html.parser')
-    url_post=verif.find('form',{'id':'landing'})["action"]
-    id=verif.find('input',{"name":"humanverification"})["value"]
-    tok=verif.find('input',{"name":"newwpsafelink"})["value"]
-    data=f'humanverification={id}&newwpsafelink={tok}'
-    step3=curl.post(url_post,data=data,headers={'content-type':'application/x-www-form-urlencoded'})
-    kd=tok + "="*divmod(len(tok),4)[1]
-    isi=json.loads(base64.urlsafe_b64decode(kd).decode())["linkr"]
-    step4=curl.get(isi).text
-    fl=bs(step4,'html.parser')
-    step5=curl.post(fl.find('form',{'id':'landing'})["action"],data=f'go='+fl.find('input',{'name':'go'})["value"],headers={'content-type':'application/x-www-form-urlencoded'}).text
-    verif=bs(step5,'html.parser')
-    url_post=verif.find('form',{'id':'landing'})["action"]
-    id=verif.find('input',{"name":"humanverification"})["value"]
-    tok=verif.find('input',{"name":"newwpsafelink"})["value"]
-    data=f'humanverification={id}&newwpsafelink={tok}'
-    step6=curl.post(url_post,data=data,headers={'content-type':'application/x-www-form-urlencoded'})
-    kd=tok + "="*divmod(len(tok),4)[1]
-    isi=json.loads(base64.urlsafe_b64decode(kd).decode())["linkr"]
-    step7=curl.get(isi,allow_redirects=False).headers
-    step8=curl.get(step7["location"],headers={"referer":urlparse(isi).scheme+'://'+urlparse(isi).hostname}).text
-    sleep(6)
-    verif_final=bs(step8,'html.parser')
-    lin=verif_final.find('form',{'id':'go-link'})["action"]
-    csrf=verif_final.find('input',{'name':'_csrfToken'})["value"]
-    afd=urllib.parse.quote_plus(verif_final.find('input',{'name':'ad_form_data'})["value"])
-    tkf=urllib.parse.quote_plus(verif_final.find('input',{'name':'_Token[fields]'})["value"])
-    tku=urllib.parse.quote_plus(verif_final.find('input',{'name':'_Token[unlocked]'})["value"])
-    data=f'_method=POST&_csrfToken={csrf}&ad_form_data={afd}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-    final=curl.post(urlparse(step7["location"]).scheme+'://'+urlparse(step7["location"]).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
-    if json.loads(final.text)["status"] == "success":
-        sleep(15)
-        return json.loads(final.text)["url"]
-  except Exception as e:
-    return "failed to bypass"
+  url="https://go.bitcosite.com"+urlparse(url).path
+  curl=requests.Session()
+  res=one_method(curl,url,headers={"referer":"https://bitzite.com/the-benefits-of-working-with-a-single-agency-in-real-estate/"})
+  return res
 def cbshort(url):
  try:
   curl=requests.Session()
@@ -1156,7 +1126,6 @@ def megaurl(url):
 
     except Exception as e:
         return "failed to bypass"
-
 def link1s_net(url):
   curl=requests.Session()
   res=one_method(curl,url,headers={"referer":"https://nguyenvanbao.com/danh-cho-nguoi-moi-vao-nghe-make-money-online/"})
@@ -1476,4 +1445,21 @@ def sl_ask(url):
       if get_url['status'] == 'success':
           return get_url["url"]
       break
-#print(sl_ask('https://sl-2.askpaccosi.com/XfzBSj'))
+def panylink(url):
+ try:
+  curl=requests.Session()
+  url="https://panylink.com/"+urlparse(url).path
+  host=urlparse(url).netloc
+  final = curl.get(url,headers={"referer":"https://btcpany.com/?p=20%20.%20%27?session=3%27"})
+  status_code(final)
+  sleep(15)
+  bs4 = BeautifulSoup(final.text, "html.parser")
+  inputs = bs4.find_all("input")
+  data = urlencode({input.get("name"): input.get("value") for input in inputs})
+  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8',"referer":url}, data=data)
+  status_code(get_url)
+  if get_url.json()['status'] == 'success':
+      return get_url.json()["url"]
+  #sesi = False
+ except Exception as e:
+   return 'failed to bypass'

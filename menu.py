@@ -114,6 +114,4 @@ def menu(banner,modul,modulesl):
                 selected_index = int(select)
                 if 0 <= selected_index < len(menu_dict):
                   _, selected_function = menu_dict[selected_index]
-                  thread = threading.Thread(target=selected_function, args=(modulesl, banner,tele))
-                  thread.start()
-                  thread.join()
+                  selected_function(modulesl, banner, tele)
