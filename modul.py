@@ -29,6 +29,7 @@ merah1 = "\033[1;91m"#Terang
 biru1 = "\033[1;94m"#Terang
 def keluar(error):
   lis=["KeyboardInterrupt"]
+  error=str(error)
   if error in lis:exit()
 def ua(host, user_agent, accept, content_type=None):
     headers = {
@@ -51,7 +52,7 @@ def end():
   return ' '*40+'\r'
 def status_code(req):
   print(putih1+"Response "+str(req.status_code)+' '+req.reason,end=end())
-  sleep(1)
+  sleep(0.7)
   print(' ',end=end())
 def persen(detik):
         for detik_proses in range(detik + 1):
@@ -94,6 +95,7 @@ def bypass_link(url,modulesl,jumlah):
   "linkjust.com":modulesl.linkjust,
   "link1s.com":modulesl.links1s_com,
   "linksfly.me":modulesl.linksfly,
+  "urlsfly.me":modulesl.urlsfly,
   "linksly.co":modulesl.linksly,
   "link4.pw":modulesl.linkvor_pw,
   "go.megafly.in":modulesl.megafly,
@@ -103,11 +105,12 @@ def bypass_link(url,modulesl,jumlah):
   "go.owllink.net":modulesl.owlink,
   "go.sigmalinks.in":modulesl.shareus,
   "shortsfly.me":modulesl.shortfly,
+  "wefly.me":modulesl.wefly,
   "link.shorti.io":modulesl.shorti_io,
   #"":modulesl.shortzu_icu,
   "tii.la":modulesl.shrinkearn,
   "shrinke.me":modulesl.shrinkme,
-  #"":modulesl.softindex_website,
+  "go.softindex.website":modulesl.softindex_website,
   "traffic1s.com":modulesl.trafic1s,
   "try2link.com":modulesl.try2,
   "url.namaidani.net":modulesl.url_namaidani,
@@ -700,7 +703,6 @@ def save_data(tele,name):
             data = json.load(file)
             cookies = data.get('cookies')
             user_agent = data.get('user_agent')
-            print(tele)
             if tele == True:
               send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
               mes=receive_signal(1111)
@@ -2517,38 +2519,6 @@ def faucetcrypto_net(modulesl,banner,tele=None):
   for info in info:
     akun.add('[gree] > [yellow]'+info.text.strip().splitlines()[0]+' [white]: [yellow]'+info.text.strip().splitlines()[1])
   rprint(akun)
-  rprint(Tree("[gree] > [yellow]Start ptc"))
-  ptc=curl.get('https://faucetcrypto.net/ptc',headers=ua,cookies=cookies)
-  status_code(ptc)
-  if 'ads available' not in ptc.text:
-    save_data(tele,'faucetcrypto_net')
-    faucetcrypto_net(modulesl,banner,tele)
-  ptc=bs(ptc.text,'html.parser').find_all('div',{'class':'col-sm-6'})
-  for ptc in ptc:
-   try:
-    name=ptc.find('h5',{'class':'card-title'}).text
-    link=ptc.find('button',{'class':'btn btn-primary btn-block'})["onclick"].split("window.location = '")[1].split("'")[0]
-    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end='\r')
-    visit=curl.get(link,headers=ua,cookies=cookies)
-    status_code(visit)
-    animasi(detik=int(visit.text.split('var timer = ')[1].split(';')[0]))
-    csrf=bs(visit.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-    token=bs(visit.text,'html.parser').find('input',{'name':'token'})['value']
-    answer=modulesl.RecaptchaV2('6LfY3WQhAAAAAJ4gw6l_9zKOw50G0har2R8pVt0_',link)
-    data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
-    verify=curl.post(link.replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},cookies=cookies)
-    status_code(verify)
-    if 'ads available' not in verify.text:
-      save_data(tele,'faucetcrypto_net')
-      faucetcrypto_net(modulesl,banner,tele)
-    if 'Good job!' in verify.text:
-      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-   except Exception as e:
-        keluar(str(e))
-        save_data(tele,'faucetcrypto_net')
-        faucetcrypto_net(modulesl,banner,tele)
-        pass
-  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
   rprint(Tree("[gree] > [yellow]Start bypass shortlinks"))
   get_links=curl.get('https://faucetcrypto.net/links',headers=ua,cookies=cookies)
   status_code(get_links)
@@ -3555,31 +3525,6 @@ def instanfaucet_xyz(modulesl,banner,tele=None):
   for info in get_info:
     akun.add("[green]> [yellow]"+info.text.strip().replace("\n"," : "))
   rprint(akun)
-  rprint(Tree("[green]> [yellow]Ptc"))
-  ptc=curl.get(f'https://insfaucet.xyz/ptc',headers=hd,cookies=cookies)
-  status_code(ptc)
-  ptc=bs(ptc.text,"html.parser").find_all("div",{"class":"col-sm-4 layout-spacing"})
-  for ptc in ptc:
-   try:
-    name=parser(ptc.find("p",{"class":"card-text"}).text)
-    url=ptc.find("button")["onclick"].split("window.location = '")[1].split("'")[0]
-    print(putih1+'├──'+hijau1+f' [{kuning1} ~ {putih1}] {kuning1}View : '+name,end=' '*20+'\r')
-    view=curl.get(url,headers=hd,cookies=cookies)
-    status_code(view)
-    animasi(detik=int(view.text.split("var timer = ")[1].split(";")[0]))
-    csrf=bs(view.text,"html.parser").find("input",{"name":"csrf_token_name"})["value"]
-    token=bs(view.text,"html.parser").find("input",{"name":"token"})["value"]
-    answer=modulesl.RecaptchaV2("6LdxTHkeAAAAALQHz9Z7IQHwKZxJrqts5NZN58rf",url)
-    data=f"captcha=recaptchav2&g-recaptcha-response={answer}&csrf_token_name={csrf}&token={token}"
-    reward=curl.post(url.replace("view","verify"),headers=ua_p,data=data,cookies=cookies)
-    status_code(reward)
-    if 'Good job!' in reward.text:
-        print(putih1+'├──'+hijau1+f' [{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-   except Exception as e:
-     keluar(str(e))
-     pass
-   # exit()
-  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
   rprint(Tree("[green]> [yellow]Shortlinks"))
   sl=curl.get(f'https://insfaucet.xyz/links',headers=hd,cookies=cookies)
   status_code(sl)
@@ -3628,3 +3573,739 @@ def eurofaucet_de(modulesl,banner,tele=None):
   vie_script(modulesl,banner,url="https://eurofaucet.de/",key_re="6Lcza1QmAAAAAInStIpZuJYEOm-89v4zKNzglgU9",ptc=True,short=True,faucet=True,auto=True)
 def james_trussy(modulesl,banner,tele=None):
   vie_script(modulesl,banner,"https://james-trussy.com/","6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO",ptc=False,short=True,faucet=False,auto=True)
+def coinsmash(modulesl,banner,tele=None):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner("COINSMASH")
+  data_control('coinsmash')
+  def cek():
+      file_sizes = []
+      for i in range(5):
+          file_size = os.path.getsize(f'cache/coinsmash/{i}.jpg')
+          file_sizes.append(file_size)
+      while True:
+          for i in range(5):
+              if file_sizes[i] != file_sizes[0] and file_sizes[i] != file_sizes[i-1]:
+                  return i
+  def get_answer():
+      cache_control('coinsmash')
+      us = {
+          'accept': 'application/json, text/javascript, */*; q=0.01',
+          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'x-requested-with': 'XMLHttpRequest',
+          'user-agent': ugentmu,
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+      }
+      gt_cp = requests.post('https://coinsmash.xyz/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light')
+      status_code(gt_cp)
+      hash = eval(gt_cp.text)
+      gt = {
+          'user-agent': ugentmu,
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+          'sec-ch-ua-platform': '"Android"',
+          'accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      }
+      
+      file_names = []
+      for i in range(5):
+          file_name = f'{i}.jpg'
+          file_names.append(file_name)
+          gt_im = requests.get(f'https://coinsmash.xyz/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
+          status_code(gt_im)
+          with open('cache/coinsmash/'+file_name, 'wb') as f:
+              shutil.copyfileobj(gt_im.raw, f)
+      ind = cek()
+      answer = hash[ind]
+      y = f'cID=0&pC={answer}&rT=2'
+      us = {
+          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'x-requested-with': 'XMLHttpRequest',
+          'user-agent': ugentmu
+      }
+      ve = requests.post('https://coinsmash.xyz/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y)
+      status_code(ve)
+      return answer
+  cookies, ugentmu = load_data('coinsmash')
+  if not os.path.exists("data/coinsmash/coinsmash.json"):
+    save_data(tele,'coinsmash')
+    coinsmash(modulesl,banner,tele)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    'User-Agent': ugentmu,
+    
+  }
+  curl=requests.Session()
+  get_sl=curl.get('https://coinsmash.xyz/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
+  if 'Account Balance' not in get_sl.text:
+    save_data(tele,'coinsmash')
+    coinsmash(modulesl,banner,tele)
+  try:
+    akun=Tree("[green] > [yellow]Account information")
+    get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
+    for info in get_inf:
+      akun.add('[green]> [yellow]'+info.text.strip())
+    rprint(akun)
+  except Exception as e:
+    save_data(tele,'coinsmash')
+    coinsmash(modulesl,banner,tele)
+  def balance():
+    get_sl=curl.get('https://coinsmash.xyz/ptc.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
+    return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
+  get_sl=curl.get('https://coinsmash.xyz/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
+  token=get_sl.text.split("var token = '")[1].split("';")[0]
+  gt_s=bs(get_sl.text,'html.parser').find_all('tr')
+  del gt_s[0]
+  del gt_s[len(gt_s)-1]
+  sl=Tree("[green]> [yellow]Start Bypassing Shortlinks")
+  rprint(sl)
+  for i in gt_s:
+   try:
+    name=i.find('td',{'class':'align-middle'}).text
+    id=i.find('button',{'class':'btn btn-success btn-sm'})
+    if None == id:
+      pass
+    else:
+      jumlah=int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])
+      re=jumlah
+      for i in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
+          get_sl = curl.get('https://coinsmash.xyz/shortlinks.html', headers=ua, cookies=cookies)
+          status_code(get_sl)
+          token = get_sl.text.split("var token = '")[1].split("';")[0]
+          status = True
+          while(status==True):
+              da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+              gt_lk = curl.post('https://coinsmash.xyz/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies)
+              status_code(gt_lk)
+              get_lk=json.loads(gt_lk.text)
+              if get_lk["status"] == 200:
+                  answer = bypass_link(get_lk['shortlink'],modulesl,jumlah=[str(re),str(jumlah)])
+                  if answer==False:break
+                  elif 'failed to bypass' in answer:pass
+                  else:
+                      try:
+                          get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                          status_code(get_sl)
+                          sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                          print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+sukses)
+                          print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+                          re-=1
+                      except:
+                          print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"invalid keys")
+                  break
+              elif get_lk['status'] == 600:
+                  print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+              else:
+                mes=bs(get_lk["message"],'html.parser').text
+                print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+mes)
+                break
+   except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
+  faucet=Tree("[green] > [yellow]Bypass faucet")
+  rprint(faucet)
+  while True:
+    get_sl=curl.get('https://coinsmash.xyz/',headers=ua,cookies=cookies)
+    status_code(get_sl)
+    if 'You can claim again in' in get_sl.text:
+      tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
+      for i in tqdm (range (int(tim)), leave=False,desc="└── Please wait..."):
+            time.sleep(1)
+            pass
+    token=get_sl.text.split("var token = '")[1].split("';")[0]
+    answer=modulesl.RecaptchaV2('6LcqrGcjAAAAABdweI_Bxc7sHIJq5qGrgGKP78Hb',get_sl.url)
+    gt=curl.post('https://coinsmash.xyz/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies)
+    status_code(gt)
+    g=json.loads(gt.text)
+    if g["status"] == 200:
+      gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+      for i in tqdm (range (int(600)), leave=False,desc="└── Please wait..."):
+            time.sleep(1)
+def earn_crypto(modulesl,banner,tele=None):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner("EARN_CRYPTO")
+  data_control('earn_crypto')
+  def cek():
+      file_sizes = []
+      for i in range(5):
+          file_size = os.path.getsize(f'cache/earn_crypto/{i}.jpg')
+          file_sizes.append(file_size)
+      while True:
+          for i in range(5):
+              if file_sizes[i] != file_sizes[0] and file_sizes[i] != file_sizes[i-1]:
+                  return i
+  def get_answer():
+      cache_control('earn_crypto')
+      us = {
+          'accept': 'application/json, text/javascript, */*; q=0.01',
+          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'x-requested-with': 'XMLHttpRequest',
+          'user-agent': ugentmu,
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+      }
+      gt_cp = requests.post('https://earn-crypto.co/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light')
+      status_code(gt_cp)
+      hash = eval(gt_cp.text)
+      gt = {
+          'user-agent': ugentmu,
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+          'sec-ch-ua-platform': '"Android"',
+          'accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      }
+      
+      file_names = []
+      for i in range(5):
+          file_name = f'{i}.jpg'
+          file_names.append(file_name)
+          gt_im = requests.get(f'https://earn-crypto.co/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
+          status_code(gt_im)
+          with open('cache/earn_crypto/'+file_name, 'wb') as f:
+              shutil.copyfileobj(gt_im.raw, f)
+      ind = cek()
+      answer = hash[ind]
+      y = f'cID=0&pC={answer}&rT=2'
+      us = {
+          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'x-requested-with': 'XMLHttpRequest',
+          'user-agent': ugentmu
+      }
+      ve = requests.post('https://earn-crypto.co/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y)
+      status_code(ve)
+      return answer
+  cookies, ugentmu = load_data('earn_crypto')
+  if not os.path.exists("data/earn_crypto/earn_crypto.json"):
+    save_data(tele,'earn_crypto')
+    earn_crypto(modulesl,banner,tele)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    'User-Agent': ugentmu,
+    
+  }
+  curl=requests.Session()
+  get_sl=curl.get('https://earn-crypto.co/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
+  if 'Account Balance' not in get_sl.text:
+    save_data(tele,'earn_crypto')
+    earn_crypto(modulesl,banner,tele)
+  try:
+    akun=Tree("[green] > [yellow]Account information")
+    get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
+    for info in get_inf:
+      akun.add('[green]> [yellow]'+info.text.strip())
+    rprint(akun)
+  except Exception as e:
+    save_data(tele,'earn_crypto')
+    earn_crypto(modulesl,banner,tele)
+  pct=Tree("[gree] > [yellow]Start working on ptc")
+  rprint(pct)
+  get_ptc=curl.get('https://earn-crypto.co/ptc.html',headers=ua,cookies=cookies)
+  status_code(get_ptc)
+  def balance():
+    get_sl=curl.get('https://earn-crypto.co/ptc.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
+    return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
+  get_id=bs(get_ptc.text,'html.parser').find_all('button',{'class':'btn btn-primary btn-sm w-100 mt-1'})
+  for _id in get_id:
+    try:
+     sesi=False
+     while(sesi==False):
+      _i=_id["onclick"].split("opensite('")[1].split("','")[0]
+      key=get_ptc.text.split("var hash_key = '")[1].split("';")[0]
+      get_reward=curl.get(f'https://earn-crypto.co/surf.php?sid={_i}&key={key}',headers=ua,cookies=cookies)
+      status_code(get_reward)
+      token1=get_reward.text.split("var token = '")[1].split("';")[0]
+      secon=get_reward.text.split("var secs = ")[1].split(";")[0]
+      for i in tqdm (range (int(secon)), leave=False,desc=hijau1+"visit > "+_id["onclick"].split("','")[1].split("');")[0]):
+              time.sleep(1)
+              pass
+      answer=get_answer()
+      reward=curl.post('https://earn-crypto.co/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies)
+      status_code(reward)
+      if json.loads(reward.text)["status"] == 200:
+        gas=bs(json.loads(reward.text)["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
+        print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+        print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+        sesi=True
+    except Exception as e:
+      keluar(e)
+      pass
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
+  get_sl=curl.get('https://earn-crypto.co/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
+  token=get_sl.text.split("var token = '")[1].split("';")[0]
+  gt_s=bs(get_sl.text,'html.parser').find_all('tr')
+  sl=Tree("[green]> [yellow]Start Bypassing Shortlinks")
+  rprint(sl)
+  for i in gt_s:
+   try:
+    name=i.find('td',{'class':'align-middle text-center'}).text
+    id=i.find('button',{'class':'btn btn-primary btn-sm'})
+    if None == id:
+      pass
+    else:
+      jumlah=int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])
+      re=jumlah
+      for i in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
+          get_sl = curl.get('https://earn-crypto.co/shortlinks.html', headers=ua, cookies=cookies)
+          status_code(get_sl)
+          token = get_sl.text.split("var token = '")[1].split("';")[0]
+          status = True
+          while(status==True):
+              da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+              gt_lk = curl.post('https://earn-crypto.co/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies)
+              status_code(gt_lk)
+              get_lk=json.loads(gt_lk.text)
+              if get_lk["status"] == 200:
+                  answer = bypass_link(get_lk['shortlink'],modulesl,jumlah=[str(re),str(jumlah)])
+                  if answer==False:break
+                  elif 'failed to bypass' in answer:pass
+                  else:
+                      try:
+                          get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                          status_code(get_sl)
+                          sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                          print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+sukses)
+                          print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+                          re-=1
+                      except:
+                          print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"invalid keys")
+                  break
+              elif get_lk['status'] == 600:
+                  print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+              else:
+                mes=bs(get_lk["message"],'html.parser').text
+                print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+mes)
+                break
+                  
+   except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
+  faucet=Tree("[green] > [yellow]Bypass faucet")
+  rprint(faucet)
+  while True:
+    get_sl=curl.get('https://earn-crypto.co/',headers=ua,cookies=cookies)
+    status_code(get_sl)
+    if 'You can claim again in' in get_sl.text:
+      tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
+      for i in tqdm (range (int(tim)), leave=False,desc="└── Please wait..."):
+            time.sleep(1)
+            pass
+    token=get_sl.text.split("var token = '")[1].split("';")[0]
+    answer=modulesl.RecaptchaV2('6Lc9J-khAAAAAD5unMlGLyhInd7zy4QqG-DOHeTm',get_sl.url)
+    gt=curl.post('https://earn-crypto.co/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies)
+    status_code(gt)
+    g=json.loads(gt.text)
+    if g["status"] == 200:
+      gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+      for i in tqdm (range (int(3600)), leave=False,desc="└── Please wait..."):
+            time.sleep(1)
+def earnbits(modulesl,banner,tele=None):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner("EARNBITS")
+  data_control('earnbits')
+  def cek():
+      file_sizes = []
+      for i in range(5):
+          file_size = os.path.getsize(f'cache/earnbits/{i}.jpg')
+          file_sizes.append(file_size)
+      while True:
+          for i in range(5):
+              if file_sizes[i] != file_sizes[0] and file_sizes[i] != file_sizes[i-1]:
+                  return i
+  def get_answer():
+      cache_control('earnbits')
+      us = {
+          'accept': 'application/json, text/javascript, */*; q=0.01',
+          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'x-requested-with': 'XMLHttpRequest',
+          'user-agent': ugentmu,
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+      }
+      gt_cp = requests.post('https://earnbits.io/system/libs/captcha/request.php',cookies=cookies, headers=us, data='cID=0&rT=1&tM=light')
+      status_code(gt_cp)
+      hash = eval(gt_cp.text)
+      gt = {
+          'user-agent': ugentmu,
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+          'sec-ch-ua-platform': '"Android"',
+          'accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      }
+      
+      file_names = []
+      for i in range(5):
+          file_name = f'{i}.jpg'
+          file_names.append(file_name)
+          gt_im = requests.get(f'https://earnbits.io/system/libs/captcha/request.php?cid=0&hash={hash[i]}', headers=gt,cookies=cookies, stream=True)
+          status_code(gt_im)
+          with open('cache/earnbits/'+file_name, 'wb') as f:
+              shutil.copyfileobj(gt_im.raw, f)
+      ind = cek()
+      answer = hash[ind]
+      y = f'cID=0&pC={answer}&rT=2'
+      us = {
+          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'x-requested-with': 'XMLHttpRequest',
+          'user-agent': ugentmu
+      }
+      ve = requests.post('https://earnbits.io/system/libs/captcha/request.php', cookies=cookies,headers=us, data=y)
+      status_code(ve)
+      return answer
+  cookies, ugentmu = load_data('earnbits')
+  if not os.path.exists("data/earnbits/earnbits.json"):
+    save_data(tele,'earnbits')
+    earnbits(modulesl,banner,tele)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    'User-Agent': ugentmu,
+    
+  }
+  curl=requests.Session()
+  get_sl=curl.get('https://earnbits.io/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
+  if 'Account Balance' not in get_sl.text:
+    save_data(tele,'earnbits')
+    earnbits(modulesl,banner,tele)
+  try:
+    akun=Tree("[green] > [yellow]Account information")
+    get_inf=bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})
+    for info in get_inf:
+      akun.add('[green]> [yellow]'+info.text.strip())
+    rprint(akun)
+  except Exception as e:
+    save_data(tele,'earnbits')
+    earnbits(modulesl,banner,tele)
+  pct=Tree("[gree] > [yellow]Start working on ptc")
+  rprint(pct)
+  get_ptc=curl.get('https://earnbits.io/ptc.html',headers=ua,cookies=cookies)
+  status_code(get_ptc)
+  def balance():
+    get_sl=curl.get('https://earnbits.io/ptc.html',headers=ua,cookies=cookies)
+    status_code(get_sl)
+    return bs(get_sl.text,'html.parser').find_all('div',{'class':'col-9 no-space'})[0].text.strip()
+  get_id=bs(get_ptc.text,'html.parser').find_all('button',{'class':'btn btn-success btn-sm w-100 mt-1'})
+  del get_id[0]
+  for _id in get_id:
+    try:
+     sesi=False
+     while(sesi==False):
+      _i=_id["onclick"].split("opensite('")[1].split("','")[0]
+      key=get_ptc.text.split("var hash_key = '")[1].split("';")[0]
+      get_reward=curl.get(f'https://earnbits.io/surf.php?sid={_i}&key={key}',headers=ua,cookies=cookies)
+      status_code(get_reward)
+      token1=get_reward.text.split("var token = '")[1].split("';")[0]
+      secon=get_reward.text.split("var secs = ")[1].split(";")[0]
+      for i in tqdm (range (int(secon)), leave=False,desc=hijau1+"visit > "+_id["onclick"].split("','")[1].split("');")[0]):
+              time.sleep(1)
+              pass
+      answer=get_answer()
+      reward=curl.post('https://earnbits.io/system/ajax.php',data=f"a=proccessPTC&data={_i}&token={token1}&captcha-idhf=0&captcha-hf={answer}",headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},cookies=cookies)
+      status_code(reward)
+      if json.loads(reward.text)["status"] == 200:
+        gas=bs(json.loads(reward.text)["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
+        print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+        print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+        sesi=True
+    except Exception as e:
+      keluar(e)
+      pass
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all ptc ;)")
+  get_sl=curl.get('https://earnbits.io/shortlinks.html',headers=ua,cookies=cookies)
+  status_code(get_sl)
+  token=get_sl.text.split("var token = '")[1].split("';")[0]
+  gt_s=bs(get_sl.text,'html.parser').find_all('tr')
+  sl=Tree("[green]> [yellow]Start Bypassing Shortlinks")
+  rprint(sl)
+  for i in gt_s:
+   try:
+    name=i.find('td',{'class':'align-middle'}).text
+    id=i.find('button',{'class':'btn btn-success btn-sm'})
+    if None == id:
+      pass
+    else:
+      jumlah=int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])
+      re=jumlah
+      for i in range(int(i.find_all('b', {'class': 'badge badge-dark'})[1].text.split('/')[0])):
+          get_sl = curl.get('https://earnbits.io/shortlinks.html', headers=ua, cookies=cookies)
+          status_code(get_sl)
+          token = get_sl.text.split("var token = '")[1].split("';")[0]
+          status = True
+          while(status==True):
+              da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+              gt_lk = curl.post('https://earnbits.io/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf={get_answer()}", allow_redirects=False, cookies=cookies)
+              status_code(gt_lk)
+              get_lk=json.loads(gt_lk.text)
+              if get_lk["status"] == 200:
+                  answer = bypass_link(get_lk['shortlink'],modulesl,jumlah=[str(re),str(jumlah)])
+                  if answer==False:break
+                  elif 'failed to bypass' in answer:pass
+                  else:
+                      try:
+                          get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                          status_code(get_sl)
+                          sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                          print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+sukses)
+                          print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+                          re-=1
+                      except:
+                          print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"invalid keys")
+                  break
+              elif get_lk['status'] == 600:
+                  print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+"Captcha wrong",end="\r")
+              else:
+                mes=bs(get_lk["message"],'html.parser').text
+                print(putih1+'├──'+hijau1+' [ '+merah1+'x'+hijau1+' ] '+mes)
+                break
+                  
+   except Exception as e:
+      keluar(str(e))
+      pass
+  print(putih1+'└──'+hijau1+' [ '+kuning1+'√'+hijau1+' ] '+"Success bypassing all shortlinks ;)")
+  faucet=Tree("[green] > [yellow]Bypass faucet")
+  rprint(faucet)
+  while True:
+    get_sl=curl.get('https://earnbits.io/',headers=ua,cookies=cookies)
+    status_code(get_sl)
+    if 'You can claim again in' in get_sl.text:
+      tim=int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0])*60
+      for i in tqdm (range (int(tim)), leave=False,desc="└── Please wait..."):
+            time.sleep(1)
+            pass
+    token=get_sl.text.split("var token = '")[1].split("';")[0]
+    answer=modulesl.RecaptchaV2('6LcJO3YnAAAAAODSQdQry4sVyosh5BT6YuYXQfW4',get_sl.url)
+    gt=curl.post('https://earnbits.io/system/ajax.php',headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded; charset=UTF-8","accept":"application/json, text/javascript, */*; q=0.01"},data=f"a=getFaucet&token={token}&captcha=1&challenge=false&response={answer}",cookies=cookies)
+    status_code(gt)
+    g=json.loads(gt.text)
+    if g["status"] == 200:
+      gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
+      print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
+      for i in tqdm (range (int(600)), leave=False,desc="└── Please wait..."):
+            time.sleep(1)
+def timps_co(modulesl,banner,tele=None):
+  def save_data(tele,name,inp=False):
+    if inp!=False:
+      user_agent=inp
+    try:
+        with open(f'data/{name}/{name}.json', 'r') as file:
+            data = json.load(file)
+            cookies = data.get('auth')
+            user_agent = data.get('data')
+            if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                cookies,user_agent=mes.split(name.upper()+' ')[1].split('$')
+            else:
+              #  print(f'{putih1}[{kuning1} ~ {putih1}] {hijau1}User-Agent sudah ada tetap update User-Agent? jika User-Agent sudah di update tetap cf gunakan User-Agent : XYZ/3.0')
+             #   jawab = input('y/n : '.lower())
+           #     if jawab == 'y':
+               #   user_agent = input(hijau1 + 'Masukkan auth mu > ')
+               if inp == False:
+                cookies = input(hijau1 + 'Masukkan data mu > ')
+            data = {
+            #    'auth': cookies,
+                'data': user_agent
+            }
+            with open(f'data/{name}/{name}.json', 'w') as file:
+                json.dump(data, file)
+          #  return cookies, user_agent
+    except FileNotFoundError:
+          if tele == True:
+              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
+              mes=receive_signal(1111)
+              #print(mes)
+              if name.upper() in mes:
+                cookies,user_agent=mes.split(name.upper()+' ')[1].split('$')
+          else:
+           #   cookies = input(hijau1 + 'Masukkan auth mu > ')
+            if inp ==False:
+              user_agent = input(hijau1 + 'Masukkan data mu > ')
+          data = {
+              'data': user_agent
+          }
+          with open(f'data/{name}/{name}.json', 'w') as file:
+              json.dump(data, file)
+          return user_agent
+  def load_data(name):
+      try:
+          with open(f'data/{name}/{name}.json', 'r') as file:
+              data = json.load(file)
+          user_agent = data['data']
+          return user_agent
+      except FileNotFoundError:
+          return None, None
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://timpsco.in/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  data = load_data(host)
+  refreshToken=data
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(tele=None,name=host)
+    timps_co(modulesl,banner,tele)
+  curl=requests.Session()
+  auth=json.loads(data)["variables"]["input"]["token"]
+  get_user={"operationName":"getUser","variables":{},"query":"query getUser {\n  getUser {\n    id\n    balance\n    credits\n    username\n    email\n    admin\n    status\n    createAt\n    log\n    xp\n    level\n    next_level\n    bonus_level\n    address_fp\n    bonus_loyalty\n    total_earn\n    statistics_earn {\n      id\n      clicks\n      total\n      __typename\n    }\n    __typename\n  }\n}\n"}
+  ptc_wall={"operationName":"getAdsPtcWall","variables":{"offset":0,"limit":50},"query":"query getAdsPtcWall($offset: Int, $limit: Int) {\n  getAdsPtcWall(offset: $offset, limit: $limit) {\n    Ads {\n      id\n      title\n      description\n      url\n      duration\n      reward\n      __typename\n    }\n    total\n    __typename\n  }\n}\n"}
+  urlbase='https://timpsco.in/graphql'
+  hd={"authorization":auth,"content-type":"application/json"}
+  refresh=curl.post(urlbase,headers=hd,data=json.dumps(json.loads(data))).json()
+  if refresh["data"]["refreshToken"] == None:
+    auth=auth
+  else:
+    auth=refresh["data"]["refreshToken"]["token"]
+    hasil={"operationName":"refreshToken","variables":{"input":{"token":refresh["data"]["refreshToken"]["token"],"refresh_token":refresh["data"]["refreshToken"]['refresh_token']}},"query":"mutation refreshToken($input: TokenInput) {\n  refreshToken(input: $input) {\n    token\n    refresh_token\n    __typename\n  }\n}\n"}
+    save_data(tele=None,name=host,inp=hasil)
+  hd={"authorization":auth,"content-type":"application/json","referer":"https://timpsco.in/dashboard"}
+  dash=curl.post(urlbase,headers=hd,data=json.dumps(get_user)).json()["data"]["getUser"]
+  akun=Tree('[green]> [yellow]Account information')
+  akun.add("[green]> [yellow]"+dash['username'].capitalize())
+  akun.add("[green]> [yellow]"+str(dash['balance']))
+  akun.add("[green]> [yellow]"+str(dash['credits']))
+  akun.add("[green]> [yellow]"+str(dash['status']))
+  akun.add("[green]> [yellow]"+str(dash['level']))
+  rprint(akun)
+  rprint(Tree('[green]> [yellow]Start ptc wall'))
+  ptc_wall=curl.post(urlbase,headers=hd,data=json.dumps(ptc_wall)).json()["data"]["getAdsPtcWall"]["Ads"]
+  for ptc in ptc_wall:
+   try:
+    view=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getAdsPtcWallID","variables":{"id":ptc["id"]},"query":"query getAdsPtcWallID($id: ID!) {\n  getAdsPtcWallID(id: $id) {\n    id\n    title\n    description\n    url\n    duration\n    reward\n    __typename\n  }\n}\n"})).json()["data"]["getAdsPtcWallID"]
+    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(view['description'].strip().splitlines()[0]),end=end())
+    sleep(1)
+    #animasi(detik=view['duration'])
+    hd["referer"]="https://timpsco.in/view-ad/"+ptc["id"]
+    verify=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"earnAdsPtcWall","variables":{"id":ptc["id"]},"query":"mutation earnAdsPtcWall($id: ID!) {\n  earnAdsPtcWall(id: $id) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    validate {\n      id_ad\n      __typename\n    }\n    notification\n    __typename\n  }\n}\n"})).json()
+    res=verify["data"]['earnAdsPtcWall']['user']
+    if res!=None:
+      print(putih1+'├──'+'─'*56)
+      sukses=Tree('[white]├── [green]> [yellow]Succes ptc wall')
+      sukses.add('[green]Balance [white]> [yellow]'+str(res["balance"]))
+      sukses.add('[green]level [white]> [yellow]'+str(res["level"]))
+      rprint(sukses)
+   except Exception as e:
+     keluar(str(e))
+     pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc wall!                             ')
+  rprint(Tree('[green]> [yellow]Start ptc iframe'))
+  while True:
+   try:
+    get_ads=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getAdsIframe","variables":{},"query":"query getAdsIframe {\n  getAdsIframe {\n    Ads {\n      id\n      title\n      description\n      url\n      duration\n      reward\n      __typename\n    }\n    total\n    __typename\n  }\n}\n"})).json()["data"]["getAdsIframe"]["Ads"]
+    if len(get_ads) == 0 :break
+    tipe=type(get_ads)
+    if str(tipe)=="<class 'list'>":
+      get_ads=get_ads[0]
+    
+    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(get_ads['description'].strip().splitlines()[0]),end=end())
+    sleep(1)
+    hd["referer"]="https://timpsco.in/surf-ads"
+    verify=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"earnAds","variables":{"id":get_ads["id"]},"query":"mutation earnAds($id: ID!) {\n  earnAds(id: $id) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    notification\n    __typename\n  }\n}\n"})).json()
+    res=verify["data"]['earnAds']['user']
+    if res!=None:
+      print(putih1+'├──'+'─'*56)
+      sukses=Tree('[white]├── [green]> [yellow]Succes ptc wall')
+      sukses.add('[green]Balance [white]> [yellow]'+str(res["balance"]))
+      sukses.add('[green]level [white]> [yellow]'+str(res["level"]))
+      rprint(sukses)
+   except Exception as e:
+     keluar(str(e))
+     pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc iframe!')
+  rprint(Tree('[green]> [yellow]Start shortlinks'))
+  get_sl=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getShortLinkAll","variables":{"offset":0,"limit":50,"status":1},"query":"query getShortLinkAll($offset: Int, $limit: Int, $status: Int) {\n  getShortLinkAll(offset: $offset, limit: $limit, status: $status) {\n    short_link {\n      id\n      site\n      link_refe\n      destination_link\n      api\n      value\n      view\n      createAt\n      like\n      status\n      rating\n      adult\n      total_views\n      __typename\n    }\n    total\n    __typename\n  }\n}\n"})).json()["data"]["getShortLinkAll"]["short_link"]
+  for sl in get_sl:
+    #print(sl)
+    jumlah=sl["view"]
+    id=sl["id"]
+    re=jumlah
+    for ulang in range(jumlah):
+     try:
+      gt_sl=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"createShortLink","variables":{"id":id},"query":"mutation createShortLink($id: ID!) {\n  createShortLink(id: $id)\n}\n"})).json()["data"]["createShortLink"]
+      answer=bypass_link(gt_sl,modulesl,jumlah=[str(re),jumlah])
+      if answer==False:break
+      elif 'failed to bypass' in answer:pass
+      else:
+        animasi(detik=105)
+        path=urlparse(answer).path.split('/short-link/')[1]
+        verif={"operationName":"validateClick","variables":{"key":path},"query":"mutation validateClick($key: String) {\n  validateClick(key: $key) {\n    msg\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    shortLinkValidClick {\n      id_short_link\n      value\n      __typename\n    }\n    notification\n    __typename\n  }\n}\n"}
+        hd["referer"]=answer
+        reward=curl.post(urlbase,headers=hd,data=json.dumps(verif)).json()["data"]['validateClick']
+        if reward["msg"] == 'ok':
+          dash=reward['user']
+          print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1}'+str(reward["msg"].capitalize())+'                         ')
+          print(putih1+'├──'+hijau1+f' {kuning1}Balance {putih1}> {hijau1}'+str(dash["balance"]))
+          print(putih1+'├──'+hijau1+f' {kuning1}level {putih1}> {hijau1}'+str(dash["level"]))
+          re-=1
+     except Exception as e:
+       keluar(str(e))
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc shortlinks!')
+  rprint(Tree('[green]> [yellow]Payout Boost'))
+  multi={1:"1x",2:"2x",3:"3x",4:"4x",5:"5x",6:"6x",7:"7x"}
+  for nomor,value in multi.items():
+    print(f"{hijau1}> {kuning1}{str(nomor)}{putih1}. {hijau1}{value}")
+  select=input(f"{hijau1}> {kuning1}select {putih1}: ")
+  rprint(Tree('[green]> [yellow]Select Currencies'))
+  get_coin=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinAll","variables":{},"query":"query getTypeCoinAll {\n  getTypeCoinAll {\n    id\n    name\n    sigla\n    value\n    image\n    id_coin\n    price_change_percentage_24h\n    pool_full\n    pool_total\n    network {\n      minimum_withdrawal_usd\n      network\n      description\n      contract\n      decimal_token\n      __typename\n    }\n    decimal_token\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinAll"]
+  nomor=0
+  for coin in get_coin:
+    print(f"{hijau1}> {kuning1}{str(nomor)}{putih1}. {hijau1}"+coin["name"])
+    nomor+=1
+  print(f"{putih1}[ {kuning1}! {putih1}]{hijau1}Jika ingin memilih coin lebih dari 1 pisah dengan koma contoh : 3,2,7,5")
+  coin=input(f"{hijau1}> {kuning1}select {putih1}: ")
+  if ',' in coin:
+    coin=coin.split(',')
+  else:
+    coin=coin.split()
+  data=[]
+  for coin in coin:
+    info=get_coin[int(coin)]
+    id=info["id"]
+    id_coin=info["id_coin"]
+    value=info["value"]
+    data.append({"id":id,"id_coin":id_coin,"value":value})
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner(host.upper()+' Auto Faucet')
+  data={"operationName":"autoClaim","variables":{"mult":int(select),"input":data},"query":"mutation autoClaim($mult: Int, $input: [TypeCoinInput]) {\n  autoClaim(mult: $mult, input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    coin {\n      sigla\n      name\n      value\n      id_coin\n      __typename\n    }\n    __typename\n  }\n}\n"}
+  rprint(Tree('[green]> [yellow]Start auto faucet'))
+  while True:
+    animasi(menit=1)
+    refresh=curl.post(urlbase,headers=hd,data=json.dumps(json.loads(refreshToken))).json()
+    if refresh["data"]["refreshToken"] == None:
+      auth=auth
+    else:
+      auth=refresh["data"]["refreshToken"]["token"]
+      hasil={"operationName":"refreshToken","variables":{"input":{"token":refresh["data"]["refreshToken"]["token"],"refresh_token":refresh["data"]["refreshToken"]['refresh_token']}},"query":"mutation refreshToken($input: TokenInput) {\n  refreshToken(input: $input) {\n    token\n    refresh_token\n    __typename\n  }\n}\n"}
+      save_data(tele=None,name=host,inp=hasil)
+    hd={"authorization":auth,"content-type":"application/json","referer":"https://timpsco.in/autofaucet"}
+    auto=curl.post(urlbase,headers=hd,data=json.dumps(data))
+    if 'Your balance is not enough!' in str(auto.text):
+      print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'Your balance is not enough!                             ')
+      break
+    get_bal=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getUserCoins","variables":{},"query":"query getUserCoins {\n  getUserCoins {\n    id\n    sigla\n    balance\n    id_coin\n    id_user\n    user_address {\n      address\n      network\n      __typename\n    }\n    __typename\n  }\n}\n"})).json()
+    print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1} Ok                      ')
+    for coin in get_bal["data"]["getUserCoins"]:
+      print(putih1+'├──'+hijau1+f' {kuning1}'+coin["id_coin"]+f' {putih1}> {hijau1}'+str(coin["balance"]))
+    print(putih1+'├──'+'─'*56)
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  

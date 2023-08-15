@@ -90,20 +90,23 @@ def RecaptchaV3(ANCHOR_URL):
 
 
   # -------------------------------------------
-def one_method(curl,url,headers=None):
+def one_method(curl,url,headers=None,go=None):
  try:
-  host=urlparse(url).netloc
+  if go:
+    host=go
+  else:
+    host=urlparse(url).netloc
   final = curl.get(url,headers=headers)
   status_code(final)
   sleep(15)
   bs4 = BeautifulSoup(final.text, "html.parser")
   inputs = bs4.find_all("input")
   data = urlencode({input.get("name"): input.get("value") for input in inputs})
-  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8',"user-agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"}, data=data)
+  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data)
+  #print(get_url.json())
   status_code(get_url)
   if get_url.json()['status'] == 'success':
       return get_url.json()["url"]
-  #sesi = False
  except Exception as e:
    return 'failed to bypass'
 def ctrsh(url):
@@ -256,6 +259,22 @@ def linksfly(url):
     return y["Location"]
   except Exception as e:
     return "failed to bypass"
+def wefly(url):
+  try:
+    url=urlparse(url)
+    y=requests.get('https://wefly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://phineypet.com/carnation-tattoo/"}).headers
+    sleep(15)
+    return y["Location"]
+  except Exception as e:
+    return "failed to bypass"
+def urlsfly(url):
+  try:
+    url=urlparse(url)
+    y=requests.get('https://urlsfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://misterio.ro/cele-mai-bizare-fobii-care-exista/"}).headers
+    sleep(15)
+    return y["Location"]
+  except Exception as e:
+    return "failed to bypass"
 def exe_io(url):
  try:
   curl=requests.Session()
@@ -380,32 +399,10 @@ def clks_pro(url):
  else:
    return res
 def shrinkme(url):
-  try:
-    curl=requests.Session()
-    step1=curl.get(url).text
-    tf=bs(step1,'html.parser')
-    csrf=tf.find('input',{'name':'_csrfToken'})["value"]
-    tokf=tf.find('input',{'name':'_Token[fields]'})["value"]
-    toku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
-    ref=tf.find('input',{'name':'ref'})["value"]
-    get_key=json.loads(step1.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
-    answer=RecaptchaV2(key=get_key,url=url)
-    data=f'_method=POST&_csrfToken={csrf}&ref=&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tokf}&_Token%5Bunlocked%5D={toku}'
-    step2=curl.post(url,data=data,headers={'content-type':'application/x-www-form-urlencoded;'}).text
-    sleep(15)
-    fl=bs(step2,"html.parser")
-    lin=fl.find('form',{'id':'go-link'})['action']
-    csrf=fl.find('input',{'name':'_csrfToken'})["value"]
-    tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
-    form=fl.find('input',{'name':'ad_form_data'})["value"]
-    tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
-    data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-    final=curl.post(urlparse(url).scheme+'://'+urlparse(url).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
-    if json.loads(final.text)["status"] == "success":
-      sleep(15)
-      return json.loads(final.text)["url"]
-  except Exception as e:
-    return "failed to bypass"
+  curl=requests.Session()
+  res= one_method(curl=curl,url='https://en.shrinke.me'+urlparse(url).path,headers={"referer":"https://themezon.net/managed-cloud-hosting-service-providers/"})
+  sleep(15)
+  return res
 def shrinkearn(url):
   try:
     curl=requests.Session()
@@ -523,33 +520,17 @@ def linksly(url):
   res= one_method(curl=curl,url='https://go.linksly.co'+urlparse(url).path,headers={"referer":"https://en.themezon.net/everything-about-cloud-servers-and-cloud-hosting/"})
   sleep(15)
   return res
+def short2url(url):
+  curl=requests.Session()
+  url='https://techyuth.xyz/blog'+urlparse(url).path
+  res= one_method(curl=curl,url=url,headers={"referer":"https://blog.mphealth.online/"},go="techyuth.xyz/blog")
+  sleep(15)
+  return res
 def adbitfly(url):
-  try:
+  #try:
     curl=requests.Session()
-    step1=curl.get(url,headers={"referer":"https://faucetgigs.com/processed/"}).text
-    tf=bs(step1,'html.parser')
-    csrf=tf.find('input',{'name':'_csrfToken'})["value"]
-    tokf=tf.find('input',{'name':'_Token[fields]'})["value"]
-    toku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
-    ref=tf.find('input',{'name':'ref'})["value"]
-    get_key=json.loads(step1.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
-    answer=RecaptchaV2(key=get_key,url=url)
-    data=f'_method=POST&_csrfToken={csrf}&ref={ref}&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tokf}&_Token%5Bunlocked%5D={toku}'
-    step2=curl.post(url,data=data,headers={'content-type':'application/x-www-form-urlencoded;',"referer":"https://faucetgigs.com/processed/"}).text
-    sleep(15)
-    fl=bs(step2,"html.parser")
-    lin=fl.find('form',{'id':'go-link'})['action']
-    csrf=fl.find('input',{'name':'_csrfToken'})["value"]
-    tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
-    form=fl.find('input',{'name':'ad_form_data'})["value"]
-    tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
-    data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-    final=curl.post(urlparse(url).scheme+'://'+urlparse(url).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
-    if json.loads(final.text)["status"] == "success":
-      sleep(15)
-      return json.loads(final.text)["url"]
-  except Exception as e:
-    return "failed to bypass"
+    res=one_method(curl,url=url.replace('short/',''),headers={"referer":"https://coinsward.com/blog/"})
+    return res
 def shorti_io(url):
   try:
     path=urlparse(url).path

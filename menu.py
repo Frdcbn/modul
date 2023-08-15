@@ -44,6 +44,10 @@ def menu(banner,modul,modulesl):
 "earnrub_pw":modul.earnrub_pw,
 "cryptohits":modul.cryptohits,
 "instanfaucet_xyz":modul.instanfaucet_xyz,
+"coinsmash_xyz":modul.coinsmash,
+"earn-crypto_co":modul.earn_crypto,
+"earnbits_io":modul.earnbits,
+"timps_co":modul.timps_co,
 }
     menu_dict=list(thread_map.items())
     if len(sys.argv) == 2:
