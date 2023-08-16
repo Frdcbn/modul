@@ -4378,59 +4378,62 @@ def timps_co(modulesl,banner,tele=None):
         hasil={"operationName":"refreshToken","variables":{"input":{"token":refresh["data"]["refreshToken"]["token"],"refresh_token":refresh["data"]["refreshToken"]['refresh_token']}},"query":"mutation refreshToken($input: TokenInput) {\n  refreshToken(input: $input) {\n    token\n    refresh_token\n    __typename\n  }\n}\n"}
         save_data(tele=None,name=host,inp=hasil)
       hd={"authorization":auth,"content-type":"application/json","referer":"https://timpsco.in/dashboard/lucky-game"}
-      if pilih == '2':
-        fauct=None
-        while True:
-          faucet_game=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinLuckyGame","variables":{},"query":"query getTypeCoinLuckyGame {\n  getTypeCoinLuckyGame {\n    id\n    name\n    sigla\n    value\n    image\n    earn\n    id_coin\n    price\n    clicks\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinLuckyGame"]
-          for coin in faucet_game:
-            if coin['earn'] != 0:
-              if select == coin['id_coin']:
-                fauct={
-          "operationName": "earnLuckyGame",
-          "variables": {
-            "input": {
-              "id": coin["id"],
-              "sigla": coin['sigla'],
-              "earn": coin['earn'],
-              "id_coin": coin['id_coin'],
-              "price": coin['price'],
-              "token_recaptcha": "asdasdasda"
+      status = False
+      while(status==False):
+        if pilih == '2':
+          fauct=None
+          while True:
+            faucet_game=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinLuckyGame","variables":{},"query":"query getTypeCoinLuckyGame {\n  getTypeCoinLuckyGame {\n    id\n    name\n    sigla\n    value\n    image\n    earn\n    id_coin\n    price\n    clicks\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinLuckyGame"]
+            for coin in faucet_game:
+              if coin['earn'] != 0:
+                if select == coin['id_coin']:
+                  fauct={
+            "operationName": "earnLuckyGame",
+            "variables": {
+              "input": {
+                "id": coin["id"],
+                "sigla": coin['sigla'],
+                "earn": coin['earn'],
+                "id_coin": coin['id_coin'],
+                "price": coin['price'],
+                "token_recaptcha": "asdasdasda"
+              }
+            },
+            "query": "mutation earnLuckyGame($input: TypeCoinLuckyGameInput) {\n  earnLuckyGame(input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    luckyNumber\n    notification\n    __typename\n  }\n}\n"
             }
-          },
-          "query": "mutation earnLuckyGame($input: TypeCoinLuckyGameInput) {\n  earnLuckyGame(input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    luckyNumber\n    notification\n    __typename\n  }\n}\n"
-          }
-                break
-          if fauct is not None:
-            break
-      elif pilih == '1':
-          faucet_game=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinLuckyGame","variables":{},"query":"query getTypeCoinLuckyGame {\n  getTypeCoinLuckyGame {\n    id\n    name\n    sigla\n    value\n    image\n    earn\n    id_coin\n    price\n    clicks\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinLuckyGame"]
-          for coin in faucet_game:
-            if coin['earn'] != 0:
-                fauct={
-          "operationName": "earnLuckyGame",
-          "variables": {
-            "input": {
-              "id": coin["id"],
-              "sigla": coin['sigla'],
-              "earn": coin['earn'],
-              "id_coin": coin['id_coin'],
-              "price": coin['price'],
-              "token_recaptcha": "asdasdasda"
+                  break
+            if fauct is not None:
+              break
+        elif pilih == '1':
+            faucet_game=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinLuckyGame","variables":{},"query":"query getTypeCoinLuckyGame {\n  getTypeCoinLuckyGame {\n    id\n    name\n    sigla\n    value\n    image\n    earn\n    id_coin\n    price\n    clicks\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinLuckyGame"]
+            for coin in faucet_game:
+              if coin['earn'] != 0:
+                  fauct={
+            "operationName": "earnLuckyGame",
+            "variables": {
+              "input": {
+                "id": coin["id"],
+                "sigla": coin['sigla'],
+                "earn": coin['earn'],
+                "id_coin": coin['id_coin'],
+                "price": coin['price'],
+                "token_recaptcha": "asdasdasda"
+              }
+            },
+            "query": "mutation earnLuckyGame($input: TypeCoinLuckyGameInput) {\n  earnLuckyGame(input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    luckyNumber\n    notification\n    __typename\n  }\n}\n"
             }
-          },
-          "query": "mutation earnLuckyGame($input: TypeCoinLuckyGameInput) {\n  earnLuckyGame(input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    luckyNumber\n    notification\n    __typename\n  }\n}\n"
-          }
-                break
-      faucet_game=curl.post(urlbase,headers=hd,data=json.dumps(fauct)).json()
-      print(putih1+'├──'+'─'*56)
-      if 'error' in str(faucet_game):
-        print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> '+faucet_game["errors"][0]['message']+'          ',end=end())
-      else:
-        get_bal=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getUserCoins","variables":{},"query":"query getUserCoins {\n  getUserCoins {\n    id\n    sigla\n    balance\n    id_coin\n    id_user\n    user_address {\n      address\n      network\n      __typename\n    }\n    __typename\n  }\n}\n"})).json()
-        print(putih1+'├──'+hijau1+f' {kuning1}Claim {putih1}> {hijau1} Faucet Game                      ')
-        print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1} Ok                      ')
-        for coin in get_bal["data"]["getUserCoins"]:
-          print(putih1+'├──'+hijau1+f' {kuning1}'+coin["id_coin"]+f' {putih1}> {hijau1}'+str(coin["balance"]))
+                  break
+        faucet_game=curl.post(urlbase,headers=hd,data=json.dumps(fauct)).json()
+        if 'error' in str(faucet_game):
+          print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> '+faucet_game["errors"][0]['message'],end=end())
+        else:
+          print(putih1+'├──'+'─'*56)
+          get_bal=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getUserCoins","variables":{},"query":"query getUserCoins {\n  getUserCoins {\n    id\n    sigla\n    balance\n    id_coin\n    id_user\n    user_address {\n      address\n      network\n      __typename\n    }\n    __typename\n  }\n}\n"})).json()
+          print(putih1+'├──'+hijau1+f' {kuning1}Claim {putih1}> {hijau1} Faucet Game                      ')
+          print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1} Ok                      ')
+          for coin in get_bal["data"]["getUserCoins"]:
+            print(putih1+'├──'+hijau1+f' {kuning1}'+coin["id_coin"]+f' {putih1}> {hijau1}'+str(coin["balance"]))
+          status=True
       animasi(menit=30)
       print(putih1+'├──'+'─'*56)
     
