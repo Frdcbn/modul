@@ -4101,29 +4101,20 @@ def timps_co(modulesl,banner,tele=None):
       user_agent=inp
     try:
         with open(f'data/{name}/{name}.json', 'r') as file:
-            data = json.load(file)
-            cookies = data.get('auth')
-            user_agent = data.get('data')
-            if tele == True:
-              send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
-              mes=receive_signal(1111)
-              #print(mes)
-              if name.upper() in mes:
-                cookies,user_agent=mes.split(name.upper()+' ')[1].split('$')
-            else:
-              #  print(f'{putih1}[{kuning1} ~ {putih1}] {hijau1}User-Agent sudah ada tetap update User-Agent? jika User-Agent sudah di update tetap cf gunakan User-Agent : XYZ/3.0')
-             #   jawab = input('y/n : '.lower())
-           #     if jawab == 'y':
-               #   user_agent = input(hijau1 + 'Masukkan auth mu > ')
-               if inp == False:
-                cookies = input(hijau1 + 'Masukkan data mu > ')
-            data = {
-            #    'auth': cookies,
-                'data': user_agent
-            }
-            with open(f'data/{name}/{name}.json', 'w') as file:
-                json.dump(data, file)
-          #  return cookies, user_agent
+             data = json.load(file)
+             cookies = data.get('auth')
+             user_agent = data.get('data')
+             if inp == False:
+              cookies = input(hijau1 + 'Masukkan data mu > ')
+              parsed_json = json.loads(cookies)
+              hasil = json.dumps(parsed_json, indent=2)
+              data = {
+              #    'auth': cookies,
+                  'data': hasil
+              }
+              with open(f'data/{name}/{name}.json', 'w') as file:
+                  json.dump(data, file)
+              return hasil
     except FileNotFoundError:
           if tele == True:
               send_signal(1111,f"`{name.upper()}` mengirim request input, kirim cookies dan User-Agent anda pisahkan dengan dolar($) contoh : `/cookies nama_sesi csrf=xxx$Mozillaxxx`")
@@ -4135,18 +4126,22 @@ def timps_co(modulesl,banner,tele=None):
            #   cookies = input(hijau1 + 'Masukkan auth mu > ')
             if inp ==False:
               user_agent = input(hijau1 + 'Masukkan data mu > ')
+              parsed_json = json.loads(user_agent)
+              hasil = json.dumps(parsed_json, indent=2)
           data = {
-              'data': user_agent
+              'data': hasil
           }
           with open(f'data/{name}/{name}.json', 'w') as file:
               json.dump(data, file)
-          return json.dumps(user_agent)
+          return user_agent
   def load_data(name):
       try:
           with open(f'data/{name}/{name}.json', 'r') as file:
               data = json.load(file)
-          user_agent = json.dumps(data['data'])
-          return user_agent
+          user_agent = data['data']
+          parsed_json = json.loads(user_agent)
+          formatted_json = json.dumps(parsed_json, indent=2)
+          return formatted_json
       except FileNotFoundError:
           return None, None
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -4167,7 +4162,7 @@ def timps_co(modulesl,banner,tele=None):
   data = load_data(host)
   refreshToken=data
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(tele=None,name=host)
+    save_data(tele=None,name=host,inp=False)
     timps_co(modulesl,banner,tele)
   curl=requests.Session()
   auth=json.loads(data)["variables"]["input"]["token"]
