@@ -120,6 +120,7 @@ def bypass_link(url,modulesl,jumlah):
   "zuba.link":modulesl.zuba_link,
   "sl-2.askpaccosi.com":modulesl.sl_ask,
   "panylink.com":modulesl.panylink,
+  "short2url.in":modulesl.short2url,
   }
   if urlparse(url).netloc in dictnya:
     print(putih1+'├──'+'─'*56)
@@ -2196,7 +2197,7 @@ def earnsolana(modulesl,banner,tele=None):
             if 'failed to bypass' in answer:
                 pass
             else:
-                animasi(detik=105)
+                animasi(detik=20)
                 reward = curl.get(answer, headers=ua, cookies=cookies)
                 status_code(reward)
                 reward=reward.text
@@ -4152,6 +4153,17 @@ def timps_co(modulesl,banner,tele=None):
   host=urlparse("https://timpsco.in/").netloc
   data_control(host)
   banner.banner(host.upper())
+  print(f"{hijau1}> {kuning1}1{putih1}. {hijau1}Start auto faucet")
+  print(f"{hijau1}> {kuning1}2{putih1}. {hijau1}Start faucet")
+  print(f"{hijau1}> {kuning1}3{putih1}. {hijau1}Start bypass shortlinks")
+  print(f"{hijau1}> {kuning1}4{putih1}. {hijau1}Start bypass ptc wall")
+  print(f"{hijau1}> {kuning1}5{putih1}. {hijau1}Start bypass ptc iframe")
+  print(f"{hijau1}> {kuning1}6{putih1}. {hijau1}Start all")
+  select=input(f"{hijau1}> {kuning1}select {putih1}: ")
+  if select == '6':
+    select=['1','2','3','4','5']
+  os.system('cls' if os.name == 'nt' else 'clear')
+  banner.banner(host.upper())
   data = load_data(host)
   refreshToken=data
   if not os.path.exists(f"data/{host}/{host}.json"):
@@ -4173,115 +4185,168 @@ def timps_co(modulesl,banner,tele=None):
   hd={"authorization":auth,"content-type":"application/json","referer":"https://timpsco.in/dashboard"}
   dash=curl.post(urlbase,headers=hd,data=json.dumps(get_user)).json()["data"]["getUser"]
   akun=Tree('[green]> [yellow]Account information')
-  akun.add("[green]> [yellow]"+dash['username'].capitalize())
-  akun.add("[green]> [yellow]"+str(dash['balance']))
-  akun.add("[green]> [yellow]"+str(dash['credits']))
-  akun.add("[green]> [yellow]"+str(dash['status']))
-  akun.add("[green]> [yellow]"+str(dash['level']))
+  akun.add("[green]> [yellow]Username [white]: [green]"+dash['username'].capitalize())
+  akun.add("[green]> [yellow]Balance [white]: [green]"+str(dash['balance']))
+  akun.add("[green]> [yellow]Credits [white]: [green]"+str(dash['credits']))
+  akun.add("[green]> [yellow]Status [white]: [green]"+str(dash['status']))
+  akun.add("[green]> [yellow]Level [white]: [green]"+str(dash['level']))
   rprint(akun)
-  rprint(Tree('[green]> [yellow]Start ptc wall'))
-  ptc_wall=curl.post(urlbase,headers=hd,data=json.dumps(ptc_wall)).json()["data"]["getAdsPtcWall"]["Ads"]
-  for ptc in ptc_wall:
-   try:
-    view=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getAdsPtcWallID","variables":{"id":ptc["id"]},"query":"query getAdsPtcWallID($id: ID!) {\n  getAdsPtcWallID(id: $id) {\n    id\n    title\n    description\n    url\n    duration\n    reward\n    __typename\n  }\n}\n"})).json()["data"]["getAdsPtcWallID"]
-    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(view['description'].strip().splitlines()[0]),end=end())
-    sleep(1)
-    #animasi(detik=view['duration'])
-    hd["referer"]="https://timpsco.in/view-ad/"+ptc["id"]
-    verify=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"earnAdsPtcWall","variables":{"id":ptc["id"]},"query":"mutation earnAdsPtcWall($id: ID!) {\n  earnAdsPtcWall(id: $id) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    validate {\n      id_ad\n      __typename\n    }\n    notification\n    __typename\n  }\n}\n"})).json()
-    res=verify["data"]['earnAdsPtcWall']['user']
-    if res!=None:
-      print(putih1+'├──'+'─'*56)
-      sukses=Tree('[white]├── [green]> [yellow]Succes ptc wall')
-      sukses.add('[green]Balance [white]> [yellow]'+str(res["balance"]))
-      sukses.add('[green]level [white]> [yellow]'+str(res["level"]))
-      rprint(sukses)
-   except Exception as e:
-     keluar(str(e))
-     pass
-  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc wall!                             ')
-  rprint(Tree('[green]> [yellow]Start ptc iframe'))
-  while True:
-   try:
-    get_ads=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getAdsIframe","variables":{},"query":"query getAdsIframe {\n  getAdsIframe {\n    Ads {\n      id\n      title\n      description\n      url\n      duration\n      reward\n      __typename\n    }\n    total\n    __typename\n  }\n}\n"})).json()["data"]["getAdsIframe"]["Ads"]
-    if len(get_ads) == 0 :break
-    tipe=type(get_ads)
-    if str(tipe)=="<class 'list'>":
-      get_ads=get_ads[0]
-    
-    print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(get_ads['description'].strip().splitlines()[0]),end=end())
-    sleep(1)
-    hd["referer"]="https://timpsco.in/surf-ads"
-    verify=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"earnAds","variables":{"id":get_ads["id"]},"query":"mutation earnAds($id: ID!) {\n  earnAds(id: $id) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    notification\n    __typename\n  }\n}\n"})).json()
-    res=verify["data"]['earnAds']['user']
-    if res!=None:
-      print(putih1+'├──'+'─'*56)
-      sukses=Tree('[white]├── [green]> [yellow]Succes ptc wall')
-      sukses.add('[green]Balance [white]> [yellow]'+str(res["balance"]))
-      sukses.add('[green]level [white]> [yellow]'+str(res["level"]))
-      rprint(sukses)
-   except Exception as e:
-     keluar(str(e))
-     pass
-  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc iframe!')
-  rprint(Tree('[green]> [yellow]Start shortlinks'))
-  get_sl=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getShortLinkAll","variables":{"offset":0,"limit":50,"status":1},"query":"query getShortLinkAll($offset: Int, $limit: Int, $status: Int) {\n  getShortLinkAll(offset: $offset, limit: $limit, status: $status) {\n    short_link {\n      id\n      site\n      link_refe\n      destination_link\n      api\n      value\n      view\n      createAt\n      like\n      status\n      rating\n      adult\n      total_views\n      __typename\n    }\n    total\n    __typename\n  }\n}\n"})).json()["data"]["getShortLinkAll"]["short_link"]
-  for sl in get_sl:
-    #print(sl)
-    jumlah=sl["view"]
-    id=sl["id"]
-    re=jumlah
-    for ulang in range(jumlah):
+  if '5' in select:
+    rprint(Tree('[green]> [yellow]Start ptc iframe'))
+    while True:
      try:
-      gt_sl=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"createShortLink","variables":{"id":id},"query":"mutation createShortLink($id: ID!) {\n  createShortLink(id: $id)\n}\n"})).json()["data"]["createShortLink"]
-      answer=bypass_link(gt_sl,modulesl,jumlah=[str(re),jumlah])
-      if answer==False:break
-      elif 'failed to bypass' in answer:pass
-      else:
-        animasi(detik=105)
-        path=urlparse(answer).path.split('/short-link/')[1]
-        verif={"operationName":"validateClick","variables":{"key":path},"query":"mutation validateClick($key: String) {\n  validateClick(key: $key) {\n    msg\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    shortLinkValidClick {\n      id_short_link\n      value\n      __typename\n    }\n    notification\n    __typename\n  }\n}\n"}
-        hd["referer"]=answer
-        reward=curl.post(urlbase,headers=hd,data=json.dumps(verif)).json()["data"]['validateClick']
-        if reward["msg"] == 'ok':
-          dash=reward['user']
-          print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1}'+str(reward["msg"].capitalize())+'                         ')
-          print(putih1+'├──'+hijau1+f' {kuning1}Balance {putih1}> {hijau1}'+str(dash["balance"]))
-          print(putih1+'├──'+hijau1+f' {kuning1}level {putih1}> {hijau1}'+str(dash["level"]))
-          re-=1
+      get_ads=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getAdsIframe","variables":{},"query":"query getAdsIframe {\n  getAdsIframe {\n    Ads {\n      id\n      title\n      description\n      url\n      duration\n      reward\n      __typename\n    }\n    total\n    __typename\n  }\n}\n"})).json()["data"]["getAdsIframe"]["Ads"]
+      if len(get_ads) == 0 :break
+      tipe=type(get_ads)
+      if str(tipe)=="<class 'list'>":
+        get_ads=get_ads[0]
+      print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(get_ads['description'].strip().splitlines()[0]),end=end())
+      sleep(1)
+      hd["referer"]="https://timpsco.in/surf-ads"
+      verify=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"earnAds","variables":{"id":get_ads["id"]},"query":"mutation earnAds($id: ID!) {\n  earnAds(id: $id) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    notification\n    __typename\n  }\n}\n"})).json()
+      res=verify["data"]['earnAds']['user']
+      if res!=None:
+        print(putih1+'├──'+'─'*56)
+        sukses=Tree('[white]├── [green]> [yellow]Succes ptc iframe')
+        sukses.add('[green]Balance [white]> [yellow]'+str(res["balance"]))
+        sukses.add('[green]level [white]> [yellow]'+str(res["level"]))
+        rprint(sukses)
      except Exception as e:
        keluar(str(e))
-  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc shortlinks!')
-  rprint(Tree('[green]> [yellow]Payout Boost'))
-  multi={1:"1x",2:"2x",3:"3x",4:"4x",5:"5x",6:"6x",7:"7x"}
-  for nomor,value in multi.items():
-    print(f"{hijau1}> {kuning1}{str(nomor)}{putih1}. {hijau1}{value}")
-  select=input(f"{hijau1}> {kuning1}select {putih1}: ")
-  rprint(Tree('[green]> [yellow]Select Currencies'))
-  get_coin=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinAll","variables":{},"query":"query getTypeCoinAll {\n  getTypeCoinAll {\n    id\n    name\n    sigla\n    value\n    image\n    id_coin\n    price_change_percentage_24h\n    pool_full\n    pool_total\n    network {\n      minimum_withdrawal_usd\n      network\n      description\n      contract\n      decimal_token\n      __typename\n    }\n    decimal_token\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinAll"]
-  nomor=0
-  for coin in get_coin:
-    print(f"{hijau1}> {kuning1}{str(nomor)}{putih1}. {hijau1}"+coin["name"])
-    nomor+=1
-  print(f"{putih1}[ {kuning1}! {putih1}]{hijau1}Jika ingin memilih coin lebih dari 1 pisah dengan koma contoh : 3,2,7,5")
-  coin=input(f"{hijau1}> {kuning1}select {putih1}: ")
-  if ',' in coin:
-    coin=coin.split(',')
-  else:
-    coin=coin.split()
-  data=[]
-  for coin in coin:
-    info=get_coin[int(coin)]
-    id=info["id"]
-    id_coin=info["id_coin"]
-    value=info["value"]
-    data.append({"id":id,"id_coin":id_coin,"value":value})
-  os.system('cls' if os.name == 'nt' else 'clear')
-  banner.banner(host.upper()+' Auto Faucet')
-  data={"operationName":"autoClaim","variables":{"mult":int(select),"input":data},"query":"mutation autoClaim($mult: Int, $input: [TypeCoinInput]) {\n  autoClaim(mult: $mult, input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    coin {\n      sigla\n      name\n      value\n      id_coin\n      __typename\n    }\n    __typename\n  }\n}\n"}
-  rprint(Tree('[green]> [yellow]Start auto faucet'))
-  while True:
-    animasi(menit=1)
+       pass
+    print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc iframe!')
+  if '4' in select:
+    rprint(Tree('[green]> [yellow]Start ptc wall'))
+    ptc_wall=curl.post(urlbase,headers=hd,data=json.dumps(ptc_wall)).json()["data"]["getAdsPtcWall"]["Ads"]
+    for ptc in ptc_wall:
+     try:
+      view=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getAdsPtcWallID","variables":{"id":ptc["id"]},"query":"query getAdsPtcWallID($id: ID!) {\n  getAdsPtcWallID(id: $id) {\n    id\n    title\n    description\n    url\n    duration\n    reward\n    __typename\n  }\n}\n"})).json()["data"]["getAdsPtcWallID"]
+      print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+parser(view['description'].strip().splitlines()[0]),end=end())
+      sleep(1)
+      #animasi(detik=view['duration'])
+      hd["referer"]="https://timpsco.in/view-ad/"+ptc["id"]
+      verify=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"earnAdsPtcWall","variables":{"id":ptc["id"]},"query":"mutation earnAdsPtcWall($id: ID!) {\n  earnAdsPtcWall(id: $id) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    validate {\n      id_ad\n      __typename\n    }\n    notification\n    __typename\n  }\n}\n"})).json()
+      res=verify["data"]['earnAdsPtcWall']['user']
+      if res!=None:
+        print(putih1+'├──'+'─'*56)
+        sukses=Tree('[white]├── [green]> [yellow]Succes ptc wall')
+        sukses.add('[green]Balance [white]> [yellow]'+str(res["balance"]))
+        sukses.add('[green]level [white]> [yellow]'+str(res["level"]))
+        rprint(sukses)
+     except Exception as e:
+       keluar(str(e))
+       pass
+    print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc wall!                             ')
+  if '3' in select:
+    rprint(Tree('[green]> [yellow]Start shortlinks'))
+    get_sl=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getShortLinkAll","variables":{"offset":0,"limit":50,"status":1},"query":"query getShortLinkAll($offset: Int, $limit: Int, $status: Int) {\n  getShortLinkAll(offset: $offset, limit: $limit, status: $status) {\n    short_link {\n      id\n      site\n      link_refe\n      destination_link\n      api\n      value\n      view\n      createAt\n      like\n      status\n      rating\n      adult\n      total_views\n      __typename\n    }\n    total\n    __typename\n  }\n}\n"})).json()["data"]["getShortLinkAll"]["short_link"]
+    for sl in get_sl:
+      #print(sl)
+      jumlah=sl["view"]
+      id=sl["id"]
+      re=jumlah
+      for ulang in range(jumlah):
+       try:
+        gt_sl=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"createShortLink","variables":{"id":id},"query":"mutation createShortLink($id: ID!) {\n  createShortLink(id: $id)\n}\n"})).json()["data"]["createShortLink"]
+        answer=bypass_link(gt_sl,modulesl,jumlah=[str(re),jumlah])
+        if answer==False:break
+        elif 'failed to bypass' in answer:pass
+        else:
+          animasi(detik=105)
+          path=urlparse(answer).path.split('/short-link/')[1]
+          verif={"operationName":"validateClick","variables":{"key":path},"query":"mutation validateClick($key: String) {\n  validateClick(key: $key) {\n    msg\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    shortLinkValidClick {\n      id_short_link\n      value\n      __typename\n    }\n    notification\n    __typename\n  }\n}\n"}
+          hd["referer"]=answer
+          reward=curl.post(urlbase,headers=hd,data=json.dumps(verif)).json()["data"]['validateClick']
+          if reward["msg"] == 'ok':
+            dash=reward['user']
+            print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1}'+str(reward["msg"].capitalize())+'                         ')
+            print(putih1+'├──'+hijau1+f' {kuning1}Balance {putih1}> {hijau1}'+str(dash["balance"]))
+            print(putih1+'├──'+hijau1+f' {kuning1}level {putih1}> {hijau1}'+str(dash["level"]))
+            re-=1
+       except Exception as e:
+         keluar(str(e))
+    print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  if '1' in select:
+    rprint(Tree('[green]> [yellow]Start auto faucet'))
+    rprint(Tree('[green]> [yellow]Payout Boost'))
+    multi={1:"1x",2:"2x",3:"3x",4:"4x",5:"5x",6:"6x",7:"7x"}
+    for nomor,value in multi.items():
+      print(f"{hijau1}> {kuning1}{str(nomor)}{putih1}. {hijau1}{value}")
+    select=input(f"{hijau1}> {kuning1}select {putih1}: ")
+    rprint(Tree('[green]> [yellow]Select Currencies'))
+    get_coin=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinAll","variables":{},"query":"query getTypeCoinAll {\n  getTypeCoinAll {\n    id\n    name\n    sigla\n    value\n    image\n    id_coin\n    price_change_percentage_24h\n    pool_full\n    pool_total\n    network {\n      minimum_withdrawal_usd\n      network\n      description\n      contract\n      decimal_token\n      __typename\n    }\n    decimal_token\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinAll"]
+    nomor=0
+    for coin in get_coin:
+      print(f"{hijau1}> {kuning1}{str(nomor)}{putih1}. {hijau1}"+coin["name"])
+      nomor+=1
+    print(f"{putih1}[ {kuning1}! {putih1}]{hijau1}Jika ingin memilih coin lebih dari 1 pisah dengan koma contoh : 3,2,7,5")
+    coin=input(f"{hijau1}> {kuning1}select {putih1}: ")
+    if ',' in coin:
+      coin=coin.split(',')
+    else:
+      coin=coin.split()
+    data=[]
+    for coin in coin:
+      info=get_coin[int(coin)]
+      id=info["id"]
+      id_coin=info["id_coin"]
+      value=info["value"]
+      data.append({"id":id,"id_coin":id_coin,"value":value})
+    os.system('cls' if os.name == 'nt' else 'clear')
+    banner.banner(host.upper()+' Auto Faucet')
+    data={"operationName":"autoClaim","variables":{"mult":int(select),"input":data},"query":"mutation autoClaim($mult: Int, $input: [TypeCoinInput]) {\n  autoClaim(mult: $mult, input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    coin {\n      sigla\n      name\n      value\n      id_coin\n      __typename\n    }\n    __typename\n  }\n}\n"}
+    rprint(Tree('[green]> [yellow]Start auto faucet'))
+    while True:
+      animasi(menit=1)
+      refresh=curl.post(urlbase,headers=hd,data=json.dumps(json.loads(refreshToken))).json()
+      if refresh["data"]["refreshToken"] == None:
+        auth=auth
+      else:
+        auth=refresh["data"]["refreshToken"]["token"]
+        hasil={"operationName":"refreshToken","variables":{"input":{"token":refresh["data"]["refreshToken"]["token"],"refresh_token":refresh["data"]["refreshToken"]['refresh_token']}},"query":"mutation refreshToken($input: TokenInput) {\n  refreshToken(input: $input) {\n    token\n    refresh_token\n    __typename\n  }\n}\n"}
+        save_data(tele=None,name=host,inp=hasil)
+      hd={"authorization":auth,"content-type":"application/json","referer":"https://timpsco.in/autofaucet"}
+      auto=curl.post(urlbase,headers=hd,data=json.dumps(data))
+      if 'Your balance is not enough!' in str(auto.text):
+        print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'Your balance is not enough!                             ')
+        break
+      get_bal=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getUserCoins","variables":{},"query":"query getUserCoins {\n  getUserCoins {\n    id\n    sigla\n    balance\n    id_coin\n    id_user\n    user_address {\n      address\n      network\n      __typename\n    }\n    __typename\n  }\n}\n"})).json()
+      print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1} Ok                      ')
+      for coin in get_bal["data"]["getUserCoins"]:
+        print(putih1+'├──'+hijau1+f' {kuning1}'+coin["id_coin"]+f' {putih1}> {hijau1}'+str(coin["balance"]))
+      print(putih1+'├──'+'─'*56)
+  if '2' in select:
+    print(f"{hijau1}> {kuning1}1{putih1}. {hijau1}Random Coin (Bawaan web)")
+    print(f"{hijau1}> {kuning1}2{putih1}. {hijau1}Target Coin (BruteForce)")
+    pilih=input(f"{hijau1}> {kuning1}select {putih1}: ")
+    if pilih == '2':
+      crypto_dict = {
+      "DigiByte": "digibyte",
+      "USD Coin": "usd-coin",
+      "Solana": "solana",
+      "Shiba Inu": "shiba-inu",
+      "Dogecoin": "dogecoin",
+      "TRON": "tron",
+      "Polygon": "matic-network",
+      "Litecoin": "litecoin",
+      "XRP": "ripple",
+      "Ethereum": "ethereum",
+      "Bitcoin": "bitcoin",
+      "Zcash": "zcash",
+      "Aave": "aave",
+      "Binance USD": "binance-usd",
+      "Dash": "dash",
+      "BNB": "binancecoin",
+      "Tether": "tether",
+      "Bitcoin Cash": "bitcoin-cash"
+      }
+      nomor=0
+      value=list(crypto_dict.values())
+      for nama,values in crypto_dict.items():
+        print(f"{hijau1}> {kuning1}{str(nomor)}{putih1}. {hijau1}{nama}")
+        nomor+=1
+      select=input(f"{hijau1}> {kuning1}select {putih1}: ")
+      select = value[int(select)]
     refresh=curl.post(urlbase,headers=hd,data=json.dumps(json.loads(refreshToken))).json()
     if refresh["data"]["refreshToken"] == None:
       auth=auth
@@ -4290,15 +4355,89 @@ def timps_co(modulesl,banner,tele=None):
       hasil={"operationName":"refreshToken","variables":{"input":{"token":refresh["data"]["refreshToken"]["token"],"refresh_token":refresh["data"]["refreshToken"]['refresh_token']}},"query":"mutation refreshToken($input: TokenInput) {\n  refreshToken(input: $input) {\n    token\n    refresh_token\n    __typename\n  }\n}\n"}
       save_data(tele=None,name=host,inp=hasil)
     hd={"authorization":auth,"content-type":"application/json","referer":"https://timpsco.in/autofaucet"}
-    auto=curl.post(urlbase,headers=hd,data=json.dumps(data))
-    if 'Your balance is not enough!' in str(auto.text):
-      print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'Your balance is not enough!                             ')
-      break
-    get_bal=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getUserCoins","variables":{},"query":"query getUserCoins {\n  getUserCoins {\n    id\n    sigla\n    balance\n    id_coin\n    id_user\n    user_address {\n      address\n      network\n      __typename\n    }\n    __typename\n  }\n}\n"})).json()
-    print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1} Ok                      ')
-    for coin in get_bal["data"]["getUserCoins"]:
-      print(putih1+'├──'+hijau1+f' {kuning1}'+coin["id_coin"]+f' {putih1}> {hijau1}'+str(coin["balance"]))
-    print(putih1+'├──'+'─'*56)
+    os.system('cls' if os.name == 'nt' else 'clear')
+    banner.banner(host.upper()+' all Faucet')
+    while True:
+      hd={"authorization":auth,"content-type":"application/json","referer":"https://timpsco.in/faucet"}
+      faucet_game=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"earnRollGame","variables":{"token":"token_recaptcha"},"query":"mutation earnRollGame($token: String) {\n  earnRollGame(token: $token) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    luckyNumber\n    notification\n    __typename\n  }\n}\n"})).json()
+      #print(str(faucet_game))
+      if "'luckyNumber': None," in str(faucet_game):
+        get_bal=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getUserCoins","variables":{},"query":"query getUserCoins {\n  getUserCoins {\n    id\n    sigla\n    balance\n    id_coin\n    id_user\n    user_address {\n      address\n      network\n      __typename\n    }\n    __typename\n  }\n}\n"})).json()
+        print(putih1+'├──'+hijau1+f' {kuning1}Claim {putih1}> {hijau1} Faucet                      ')
+        print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> failed to claim the faucet you have to wait for the timer to finish      ')
+        for coin in get_bal["data"]["getUserCoins"]:
+          print(putih1+'├──'+hijau1+f' {kuning1}'+coin["id_coin"]+f' {putih1}> {hijau1}'+str(coin["balance"]))
+      else:
+        get_bal=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getUserCoins","variables":{},"query":"query getUserCoins {\n  getUserCoins {\n    id\n    sigla\n    balance\n    id_coin\n    id_user\n    user_address {\n      address\n      network\n      __typename\n    }\n    __typename\n  }\n}\n"})).json()
+        res=faucet_game["data"]["earnRollGame"]["result"].split(" ")
+        
+        print(putih1+'├──'+hijau1+f' {kuning1}Claim {putih1}> {hijau1} Faucet                      ')
+        print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1}{res[0]} You win {res[1]} TIMPS                      ')
+        for coin in get_bal["data"]["getUserCoins"]:
+          print(putih1+'├──'+hijau1+f' {kuning1}'+coin["id_coin"]+f' {putih1}> {hijau1}'+str(coin["balance"]))
+      refresh=curl.post(urlbase,headers=hd,data=json.dumps(json.loads(refreshToken))).json()
+      if refresh["data"]["refreshToken"] == None:
+        auth=auth
+      else:
+        auth=refresh["data"]["refreshToken"]["token"]
+        hasil={"operationName":"refreshToken","variables":{"input":{"token":refresh["data"]["refreshToken"]["token"],"refresh_token":refresh["data"]["refreshToken"]['refresh_token']}},"query":"mutation refreshToken($input: TokenInput) {\n  refreshToken(input: $input) {\n    token\n    refresh_token\n    __typename\n  }\n}\n"}
+        save_data(tele=None,name=host,inp=hasil)
+      hd={"authorization":auth,"content-type":"application/json","referer":"https://timpsco.in/dashboard/lucky-game"}
+      if pilih == '2':
+        fauct=None
+        while True:
+          faucet_game=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinLuckyGame","variables":{},"query":"query getTypeCoinLuckyGame {\n  getTypeCoinLuckyGame {\n    id\n    name\n    sigla\n    value\n    image\n    earn\n    id_coin\n    price\n    clicks\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinLuckyGame"]
+          for coin in faucet_game:
+            if coin['earn'] != 0:
+              if select == coin['id_coin']:
+                fauct={
+          "operationName": "earnLuckyGame",
+          "variables": {
+            "input": {
+              "id": coin["id"],
+              "sigla": coin['sigla'],
+              "earn": coin['earn'],
+              "id_coin": coin['id_coin'],
+              "price": coin['price'],
+              "token_recaptcha": "asdasdasda"
+            }
+          },
+          "query": "mutation earnLuckyGame($input: TypeCoinLuckyGameInput) {\n  earnLuckyGame(input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    luckyNumber\n    notification\n    __typename\n  }\n}\n"
+          }
+                break
+          if fauct is not None:
+            break
+      elif pilih == '1':
+          faucet_game=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getTypeCoinLuckyGame","variables":{},"query":"query getTypeCoinLuckyGame {\n  getTypeCoinLuckyGame {\n    id\n    name\n    sigla\n    value\n    image\n    earn\n    id_coin\n    price\n    clicks\n    __typename\n  }\n}\n"})).json()["data"]["getTypeCoinLuckyGame"]
+          for coin in faucet_game:
+            if coin['earn'] != 0:
+                fauct={
+          "operationName": "earnLuckyGame",
+          "variables": {
+            "input": {
+              "id": coin["id"],
+              "sigla": coin['sigla'],
+              "earn": coin['earn'],
+              "id_coin": coin['id_coin'],
+              "price": coin['price'],
+              "token_recaptcha": "asdasdasda"
+            }
+          },
+          "query": "mutation earnLuckyGame($input: TypeCoinLuckyGameInput) {\n  earnLuckyGame(input: $input) {\n    user {\n      id\n      balance\n      credits\n      username\n      email\n      admin\n      status\n      createAt\n      log\n      xp\n      level\n      next_level\n      bonus_level\n      address_fp\n      bonus_loyalty\n      total_earn\n      statistics_earn {\n        id\n        clicks\n        total\n        __typename\n      }\n      __typename\n    }\n    result\n    luckyNumber\n    notification\n    __typename\n  }\n}\n"
+          }
+                break
+      faucet_game=curl.post(urlbase,headers=hd,data=json.dumps(fauct)).json()
+      print(putih1+'├──'+'─'*56)
+      if 'error' in str(faucet_game):
+        print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> '+faucet_game["errors"][0]['message']+'          ',end=end())
+      else:
+        get_bal=curl.post(urlbase,headers=hd,data=json.dumps({"operationName":"getUserCoins","variables":{},"query":"query getUserCoins {\n  getUserCoins {\n    id\n    sigla\n    balance\n    id_coin\n    id_user\n    user_address {\n      address\n      network\n      __typename\n    }\n    __typename\n  }\n}\n"})).json()
+        print(putih1+'├──'+hijau1+f' {kuning1}Claim {putih1}> {hijau1} Faucet Game                      ')
+        print(putih1+'├──'+hijau1+f' {kuning1}Message {putih1}> {hijau1} Ok                      ')
+        for coin in get_bal["data"]["getUserCoins"]:
+          print(putih1+'├──'+hijau1+f' {kuning1}'+coin["id_coin"]+f' {putih1}> {hijau1}'+str(coin["balance"]))
+      animasi(menit=30)
+      print(putih1+'├──'+'─'*56)
     
   
   
