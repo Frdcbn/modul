@@ -4140,12 +4140,12 @@ def timps_co(modulesl,banner,tele=None):
           }
           with open(f'data/{name}/{name}.json', 'w') as file:
               json.dump(data, file)
-          return user_agent
+          return json.dumps(user_agent)
   def load_data(name):
       try:
           with open(f'data/{name}/{name}.json', 'r') as file:
               data = json.load(file)
-          user_agent = data['data']
+          user_agent = json.dumps(data['data'])
           return user_agent
       except FileNotFoundError:
           return None, None
