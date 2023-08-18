@@ -17,14 +17,12 @@ def menu(banner,modul,modulesl):
 "adhives":modul.adhives,
 "allfaucet":modul.allfaucet,
 "bot_tele":modul.bot_tele,
-"btcadspace":modul.btcadspace,
 "btccanyon":modul.btccanyon,
 "claimbits":modul.claimbits,
 "claimlite":modul.claimlite,
 "claimsatoshi":modul.claimsatoshi,
 "clickscoin":modul.clickscoin,
 "coinfola":modul.coinfola,
-"coinpay_faucet":modul.coinpay_faucet,
 #"coinzask":modul.coinzask,
 "earnfree_cash":modul.earnfree_cash,
 "earnsolana":modul.earnsolana,
@@ -38,7 +36,6 @@ def menu(banner,modul,modulesl):
 "paid_family":modul.all_in_one,
 "paidbucks":modul.paidbucks,
 "rushbitcoin":modul.rushbitcoin,
-"tefaucet":modul.tefaucet,
 "tikiearn":modul.tikiearn,
 "cryptoscoop_online":modul.cryptoscop,
 "earnrub_pw":modul.earnrub_pw,
@@ -48,6 +45,8 @@ def menu(banner,modul,modulesl):
 "earn-crypto_co":modul.earn_crypto,
 "earnbits_io":modul.earnbits,
 "timps_co":modul.timps_co,
+"vie_faucet":modul.vie_faucet,
+"converter_btc_world":modul.converter_btc_world,
 }
     menu_dict=list(thread_map.items())
     if len(sys.argv) == 2:

@@ -1245,27 +1245,8 @@ def softindex_website(url):
     url=url.replace('go.','')
   else:
     url=url
-  step1=curl.get(url)
-  tf=bs(step1.text,'html.parser')
-  csrf=tf.find('input',{'name':'_csrfToken'})["value"]
-  tkf=tf.find('input',{'name':'_Token[fields]'})["value"]
-  tku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
-  ref=tf.find('input',{'name':'ref'})["value"]
-  get_key=json.loads(step1.text.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
-  answer=RecaptchaV2(key=get_key,url=step1.url)
-  data=f'_method=POST&_csrfToken={csrf}&ref=&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-  step2=curl.post(step1.url,data=data,headers={'content-type':'application/x-www-form-urlencoded;'}).text
-  sleep(15)
-  fl=bs(step2,"html.parser")
-  lin=fl.find('form',{'id':'go-link'})['action']
-  csrf=fl.find('input',{'name':'_csrfToken'})["value"]
-  tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
-  form=fl.find('input',{'name':'ad_form_data'})["value"]
-  tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
-  data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-  final=curl.post('https://'+urlparse(step1.url).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
-  if json.loads(final.text)["status"] == "success":
-      return json.loads(final.text)["url"]
+  curl=requests.Session()
+  return one_method(curl,url)
  except Exception as e:
     return "failed to bypass"
 def _1short_in(url):
