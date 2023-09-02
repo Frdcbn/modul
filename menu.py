@@ -32,12 +32,12 @@ def menu(banner,modul,modulesl):
 "freeclaimfaucet":modul.freeclaimfaucet,
 "james_trussy":modul.james_trussy,
 "ltchunt":modul.ltchunt,
-"nokofaucet":modul.nokofaucet,
-"paid_family":modul.all_in_one,
+#"nokofaucet":modul.nokofaucet,
+"paidtomoney":modul.all_in_one,
 "paidbucks":modul.paidbucks,
 "rushbitcoin":modul.rushbitcoin,
 "tikiearn":modul.tikiearn,
-"cryptoscoop_online":modul.cryptoscop,
+#"cryptoscoop_online":modul.cryptoscop,
 "earnrub_pw":modul.earnrub_pw,
 "cryptohits":modul.cryptohits,
 "instanfaucet_xyz":modul.instanfaucet_xyz,
@@ -47,6 +47,10 @@ def menu(banner,modul,modulesl):
 "timps_co":modul.timps_co,
 "vie_faucet":modul.vie_faucet,
 "converter_btc_world":modul.converter_btc_world,
+"whoopyrewards":modul.whoopyrewards,
+"cryptoearns":modul.cryptoearns,
+"gulio_site":modul.gulio,
+"cryptask":modul.cryptask,
 }
     menu_dict=list(thread_map.items())
     if len(sys.argv) == 2:

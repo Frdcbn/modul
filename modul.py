@@ -3107,8 +3107,6 @@ def all_in_one(modulesl,banner,tele=None):
   if not os.path.exists("data/all_in_one/all_in_one.json"):
     save_data(tele,'all_in_one')
     all_in_one(modulesl,banner,tele)
-  print(hijau1+"> "+kuning1+"Start bypass liteearn.com")
-  paid_family('https://liteearn.com/',"6Lejju8UAAAAAMCxObwhQJliWyTUXwEcUc43KOiQ",cookies,modulesl,tele)
   print(hijau1+"> "+kuning1+"Start bypass paidtomoney.com")
   paid_family('https://paidtomoney.com/',"6LfZswEVAAAAAHXORtki0EFzDZZIV02Wo0krcxRo",cookies,modulesl,tele)
 #--------------
@@ -3130,7 +3128,11 @@ def bitscript_family(url,modulesl,banner,key_links,tele,bal=None):
     
   }
   curl=requests.Session()
-  dahs=curl.get(url+'account',headers=ua,cookies=cookies)
+  try:
+    dahs=curl.get(url+'account',headers=ua,cookies=cookies)
+  except Exception as e:
+    save_data(tele,host)
+    bitscript_family(url,modulesl,banner,key_links,tele,bal)
   status_code(dahs)
   if 'Balance' not in dahs.text:
     save_data(tele,host)
@@ -3191,7 +3193,7 @@ def paidbucks(modulesl,banner,tele=None):
 def converter_btc_world(modulesl,banner,tele=None):
   bitscript_family('https://converter-btc.world/',modulesl,banner,"card shadow text-decoration-none",tele)
 def clickscoin(modulesl,banner,tele=None):
-  url="https://clickscoin.com/account"
+  url="https://clickscoin.com/"
   host=urlparse(url).netloc
   os.system('cls' if os.name == 'nt' else 'clear')
   banner.banner(host.upper())
@@ -3210,7 +3212,7 @@ def clickscoin(modulesl,banner,tele=None):
   }
   curl=requests.Session()
   try:
-    dahs=curl.get(url+'/account',headers=ua,cookies=cookies)
+    dahs=curl.get(url+'account',headers=ua,cookies=cookies)
     status_code(dahs)
     if 'Balance' not in dahs.text:
       save_data(tele,host)
@@ -3314,7 +3316,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
     rprint(Tree("[green]> [yellow]Start bypass shortlinks"))
     get_links=curl.get(f'https://{host}/links',headers=ua,cookies=cookies)
     status_code(get_links)
-    if 'links available' not in get_links.text:
+    if 'links available' not in get_links.text.lower():
       save_data(tele=None,name=host)
       vie_script(modulesl,banner,url,key_re,ptc, short,faucet,auto)
     if 'pre_verify' in get_links.url:
@@ -3505,6 +3507,8 @@ def cryptoscop(modulesl,banner,tele=None):
   print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more energy!')
 def earnrub_pw(modulesl,banner,tele=None):
   vie_script(modulesl,banner,url="https://earnrub.pw/",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=True,short=True,faucet=True,auto=True)
+def whoopyrewards(modulesl,banner,tele=None):
+  vie_script(modulesl,banner,url="https://whoopyrewards.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 def instanfaucet_xyz(modulesl,banner,tele=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://insfaucet.xyz/").netloc
@@ -3576,6 +3580,10 @@ def instanfaucet_xyz(modulesl,banner,tele=None):
        exit()
 def eurofaucet_de(modulesl,banner,tele=None):
   vie_script(modulesl,banner,url="https://eurofaucet.de/",key_re="6Lcza1QmAAAAAInStIpZuJYEOm-89v4zKNzglgU9",ptc=True,short=True,faucet=True,auto=True)
+def gulio(modulesl,banner,tele=None):
+  vie_script(modulesl,banner,url="https://gulio.site/",key_re="6Lcza1QmAAAAAInStIpZuJYEOm-89v4zKNzglgU9",ptc=False,short=True,faucet=False,auto=True)
+def cryptask(modulesl,banner,tele=None):
+  vie_script(modulesl,banner,url="https://cryptask.xyz/",key_re="6Lcza1QmAAAAAInStIpZuJYEOm-89v4zKNzglgU9",ptc=False,short=True,faucet=False,auto=True)
 def james_trussy(modulesl,banner,tele=None):
   vie_script(modulesl,banner,"https://james-trussy.com/","6Ler3E4kAAAAABUDc4UE9UWO7k_n2JydShddSpCO",ptc=False,short=True,faucet=False,auto=True)
 def coinsmash(modulesl,banner,tele=None):
@@ -4100,7 +4108,7 @@ def earnbits(modulesl,banner,tele=None):
       gas=bs(g["message"],"html.parser").find("div",{"class":"alert alert-success"}).text
       print(putih1+'├──'+hijau1+' [ '+kuning1+'>'+hijau1+' ] '+gas.strip())
       print(putih1+'├──'+hijau1+' [ '+kuning1+'+'+hijau1+' ] '+balance())
-      for i in tqdm (range (int(600)), leave=False,desc="└── Please wait..."):
+      for i in tqdm (range (int(3600)), leave=False,desc="└── Please wait..."):
             time.sleep(1)
 def timps_co(modulesl,banner,tele=None):
   def save_data(tele,name,inp=False):
@@ -4553,10 +4561,126 @@ def vie_faucet(modulesl,banner,tele=None):
    except Exception as e:
      keluar(str(e))
      pass
+def cryptoearns(modulesl,banner,tele=None):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://cryptoearns.com/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  cookies, ugentmu = load_data(host)
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(tele,host)
+    cryptoearns(modulesl,banner,tele)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  ua={
+    'User-Agent': ugentmu,
+    
+  }
+  curl=requests.Session()
+  dash=curl.get('https://cryptoearns.com/dashboard',headers=ua,cookies=cookies)
+  if "Account Balance" not in dash.text:
+    save_data(tele,host)
+    cryptoearns(modulesl,banner,tele)
+  status_code(dash)
+  akun=Tree("[green]> [yellow]Account information")
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'finance_card'})
+  for info in info:
+    info_text=info.text.strip().replace('\n',' : ')
+    akun.add("[green]> [yellow]"+info_text.split(":")[1].strip() + " [white]: [yellow]" + info_text.split(":")[0].strip())
+  rprint(akun)
+  ptc=curl.get('https://cryptoearns.com/ptc',headers=ua,cookies=cookies)
+  status_code(ptc)
+  rprint(Tree("[gree] > [yellow]Start ptc"))
+  ads=bs(ptc.text,'html.parser').find_all('div',{'class':'col-lg-6'})
+  for ads in ads:
+   try:
+    if 'window.location' not in str(ads):pass
+    else:
+      name=parser(ads.find('h5').text.strip())
+      url=ads.find('button',{'class':'claim-btn w-100 text-white'})['onclick'].split("= '")[1].split("'")[0]
+      print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end=' '*20+'\r')
+      view=curl.get(url,headers=ua,cookies=cookies)
+      status_code(view)
+      token=bs(view.text,'html.parser').find('input',{'name':'token'})['value']
+      animasi(detik=int(view.text.split('let timer = ')[1].split(';')[0]))
+      answer=modulesl.RecaptchaV2('6Lf0_KonAAAAAPgw0s0gneoF_o-_pQ-BY9PdOfVa',url)
+      ua["content-type"]="application/x-www-form-urlencoded"
+      data=f"captcha=recaptchav2&g-recaptcha-response={answer}&ci_csrf_token=&token={token}"
+      reward=curl.post(url.replace('view','verify'),headers=ua,cookies=cookies,data=data)
+      status_code(reward)
+      if 'Good job!' in reward.text:
+        print(putih1+'├── '+hijau1+"Good job! "+reward.text.split("text: '")[1].split("balance',")[0]+"balance.")
+   except Exception as e:
+    keluar(str(e))
+    pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc!')
+  ptc=curl.get('https://cryptoearns.com/ptc/ptcwindow',headers=ua,cookies=cookies)
+  status_code(ptc)
+  rprint(Tree("[gree] > [yellow]Start ptc window"))
+  ads=bs(ptc.text,'html.parser').find_all('div',{'class':'col-lg-6'})
+  for ads in ads:
+   try:
+    if 'window.location' not in str(ads):pass
+    else:
+      name=parser(ads.find('h5').text.strip())
+      url=ads.find('button',{'class':'claim-btn w-100 text-white'})['onclick'].split("= '")[1].split("'")[0]
+      print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}View : '+name,end=' '*20+'\r')
+      view=curl.get(url,headers=ua,cookies=cookies)
+      status_code(view)
+      token=bs(view.text,'html.parser').find('input',{'name':'token'})['value']
+      animasi(detik=int(view.text.split('startview(')[1].split(',')[0]))
+      answer=modulesl.RecaptchaV2('6Lf0_KonAAAAAPgw0s0gneoF_o-_pQ-BY9PdOfVa',url)
+      ua["content-type"]="application/x-www-form-urlencoded"
+      ua["referer"]=url
+      data=f"captcha=recaptchav2&g-recaptcha-response={answer}&ci_csrf_token=&token={token}"
+      reward=curl.post(url.replace('wview','verifywindow'),headers=ua,cookies=cookies,data=data)
+      status_code(reward)
+      if 'Good job!' in reward.text:
+        print(putih1+'├── '+hijau1+"Good job! "+reward.text.split("text: '")[1].split("balance',")[0]+"balance.")
+   except Exception as e:
+     keluar(str(e))
+     pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more ptc window!')
+  sl=curl.get('https://cryptoearns.com/links',headers=ua,cookies=cookies)
+  status_code(sl)
+  rprint(Tree("[gree] > [yellow]Start shortlinks"))
+  sl=bs(sl.text,'html.parser').find_all('div',{'class':'col-lg-6'})
+  for sl in sl:
+   try:
+    url=sl.find('a')['href']
+    jumlah=int(sl.find_all('div',{'class':'pil me-2'})[1].text.strip().split('/')[0])
+    re=jumlah
+    for ulang in range(re):
+      link=curl.get(url,headers=ua,cookies=cookies,allow_redirects=False).text.split('<script> location.href = "')[1].split('"; </script>')[0]
+      answer=bypass_link(link,modulesl,jumlah=[str(re),str(jumlah)])
+      if answer==False:break
+      if answer=="failed to bypass":pass
+      else:
+        animasi(detik=105)
+        reward=curl.get(answer,headers=ua,cookies=cookies)
+        status_code(reward)
+        if 'Good job!' in reward.text:
+          print(putih1+'├── '+hijau1+"Good job! "+reward.text.split("text: '")[1].split("balance',")[0]+"balance.")
+          re-=1
+   except Exception as e:
+     keluar(str(e))
+     pass
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
+  rprint(Tree("[gree] > [yellow]Start auto faucet"))
+  while True:
+   try:
+    auto=curl.get('https://cryptoearns.com/auto',headers=ua,cookies=cookies)
+    status_code(auto)
+    animasi(detik=int(auto.text.split('let timer = ')[1].split(',')[0]))
+    data="token="+bs(auto.text,'html.parser').find('input',{'name':'token'})['value']
+    ua["content-type"]="application/x-www-form-urlencoded"
+    verify=curl.post('https://cryptoearns.com/auto/verify',headers=ua,cookies=cookies,data=data)
+    if 'Good job!' in verify.text:
+          print(putih1+'├── '+hijau1+"Good job! "+verify.text.split("text: '")[1].split("balance',")[0]+"balance.")
+   except Exception as e:
+      keluar(str(e))
+      break
+  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more auto faucet!')
   
-  
-  
-  
-  
-  
-  
+    
