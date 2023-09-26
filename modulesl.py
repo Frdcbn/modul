@@ -246,7 +246,8 @@ def cuty_io(url):
 def shortfly(url):
   try:
     url=urlparse(url)
-    y=requests.get('https://shortsfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://shinbhu.net/things-you-should-never-do-on-an-interview-it-will-kill-your-chances/"}).headers
+    curl=requests.Session()
+    y=curl.get('https://shortsfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://advertisingexcel.com/outgoing/","user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).headers
     sleep(15)
     return y["Location"]
   except Exception as e:
@@ -254,7 +255,8 @@ def shortfly(url):
 def linksfly(url):
   try:
     url=urlparse(url)
-    y=requests.get('https://linksfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://shinbhu.net/things-you-should-never-do-on-an-interview-it-will-kill-your-chances/"}).headers
+    curl=requests.Session()
+    y=curl.get('https://linksfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://advertisingexcel.com/outgoing/","user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).headers
     sleep(15)
     return y["Location"]
   except Exception as e:
@@ -262,7 +264,8 @@ def linksfly(url):
 def wefly(url):
   try:
     url=urlparse(url)
-    y=requests.get('https://wefly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://phineypet.com/carnation-tattoo/"}).headers
+    curl=requests.Session()
+    y=curl.get('https://wefly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://advertisingexcel.com/outgoing/","user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).headers
     sleep(15)
     return y["Location"]
   except Exception as e:
@@ -270,7 +273,8 @@ def wefly(url):
 def urlsfly(url):
   try:
     url=urlparse(url)
-    y=requests.get('https://urlsfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://misterio.ro/cele-mai-bizare-fobii-care-exista/"}).headers
+    curl=requests.Session()
+    y=curl.get('https://urlsfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://advertisingexcel.com/outgoing/","user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).headers
     sleep(15)
     return y["Location"]
   except Exception as e:
