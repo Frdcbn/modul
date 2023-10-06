@@ -21,7 +21,7 @@ def end():
   return ' '*20+'\r'
 def status_code(req):
   print(putih1+"Response "+str(req.status_code)+' '+req.reason,end=end())
-  sleep(0.5)
+  sleep(0.2)
   print(' ',end=end())
 def get_res(api, key, url):
      ua = {
