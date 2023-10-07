@@ -46,6 +46,7 @@ def menu(banner,modul,modulesl):
 "paidlink":modul.paidlink,
 "faucet_mom":modul.faucet_mom,
 "faucetbob":modul.faucetbob,
+"proearn.site":modul.proearn,
 }
     menu_dict=list(thread_map.items())
     if len(sys.argv) == 2:

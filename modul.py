@@ -398,14 +398,14 @@ def sl(modulesl,banner,host,cookies,ugentmu,path_sl,key_all_sl,key_button_id,key
           traceback.print_exc()
           pass
       print(putih1 + '├──' + hijau1 + ' [ ' + kuning1 + '√' + hijau1 + ' ] ' + "Success bypassing all shortlinks ;)")
-def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.html',key_all_ptc=('button', {'class': 'btn btn-success btn-sm w-100 mt-1'}),path_sl='/shortlinks.html',key_all_sl=('tr'),key_button_id=('button', {'class': 'btn btn-success btn-sm'}),key_amount_sl=('b', {'class': 'badge badge-dark'}),run=None):
+def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.html',key_all_ptc=('button', {'class': 'btn btn-success btn-sm w-100 mt-1'}),path_sl='/shortlinks.html',key_all_sl=('tr'),key_button_id=('button', {'class': 'btn btn-success btn-sm'}),key_amount_sl=('b', {'class': 'badge badge-dark'}),run=None,ptc1=None):
     os.system('cls' if os.name == 'nt' else 'clear')
     banner.banner(host.upper())
     data_control(name=host)
     cookies, ugentmu = load_data(host)
     if not os.path.exists(f"data/{host}/{host}.json"):
         save_data(host)
-        bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run)
+        bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
     cookiek = SimpleCookie()
     cookiek.load(cookies)
     cookies = {k: v.value for k, v in cookiek.items()}
@@ -425,7 +425,7 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
     banner.banner(host.upper())
     if 'Account Balance' not in get_sl.text:
         save_data(host)
-        bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run)
+        bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
     try:
         akun = Tree("[green]> [yellow]Account information")
         get_inf = bs(get_sl.text, 'html.parser').find_all('div', {'class': 'col-9 no-space'})
@@ -434,13 +434,17 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
         rprint(akun)
     except Exception as e:
         save_data(host)
-        bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run)
+        bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
     def balance():
         get_sl = curl.get(f'https://{host}{path_sl}', headers=ua, cookies=cookies)
         status_code(get_sl)
         return bs(get_sl.text, 'html.parser').find_all('div', {'class': 'col-9 no-space'})[0].text.strip()
     if run == '1':
-      ptc(modulesl,banner,host,cookies,ugentmu,path_ptc,key_all_ptc,curl)
+      if ptc1 == 'Off':
+        print('Ptc off')
+        pass
+      else:
+        ptc(modulesl,banner,host,cookies,ugentmu,path_ptc,key_all_ptc,curl)
     if run == '2':
       sl(modulesl,banner,host,cookies,ugentmu,path_sl,key_all_sl,key_button_id,key_amount_sl,curl)
     if run == '3':
@@ -454,17 +458,17 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
         try:
             get_sl = curl.get(fauceturl, headers=ua, cookies=cookies)
             if 'Faucet Locked!' in get_sl.text:
-              if 'more Shortlinks today to be able to Roll & Win FREE Coins!' in get_sl.text:
+              if 'You must visit' in get_sl.text:
                 print(bs(get_sl.text,'html.parser').find('div',{'class':'alert alert-warning'}).text.strip())
                 sl(modulesl,banner,host,cookies,ugentmu,path_sl,key_all_sl,key_button_id,key_amount_sl,curl)
-                bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0')
+                bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
               else:
                 animasi(menit=1440)
-                bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0')
+                bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
             waktu=get_sl.text.split('every ')[1].split(' minutes')[0]
             if 'Just a moment...' in get_sl.text:
               save_data(host)
-              bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run)
+              bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
             status_code(get_sl)
             if 'You can claim again in' in get_sl.text:
                 tim = int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0]) * 60
@@ -488,7 +492,10 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
             print(putih1 + '├──' + hijau1 + f' {putih1}[{merah1}!{putih1}] {str(e)}')
             pass
     if run == '0':
-      ptc(modulesl,banner,host,cookies,ugentmu,path_ptc,key_all_ptc,curl)
+      if ptc1 == 'Off':
+        print('Ptc off')
+      else:
+        ptc(modulesl,banner,host,cookies,ugentmu,path_ptc,key_all_ptc,curl)
       sl(modulesl,banner,host,cookies,ugentmu,path_sl,key_all_sl,key_button_id,key_amount_sl,curl)
       if faucet=='Off':
         print('Faucet off')
@@ -503,14 +510,14 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
               if 'more Shortlinks today to be able to Roll & Win FREE Coins!' in get_sl.text:
                 print(bs(get_sl.text,'html.parser').find('div',{'class':'alert alert-warning'}).text.strip())
                 sl(modulesl,banner,host,cookies,ugentmu,path_sl,key_all_sl,key_button_id,key_amount_sl,curl)
-                bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0')
+                bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
               else:
                 animasi(menit=1440)
-                bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0')
+                bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
             waktu=get_sl.text.split('every ')[1].split(' minutes')[0]
             if 'Just a moment...' in get_sl.text:
               save_data(host)
-              bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run)
+              bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
             status_code(get_sl)
             if 'You can claim again in' in get_sl.text:
                 tim = int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0]) * 60
@@ -545,6 +552,8 @@ def ltchunt(modulesl,banner):
   bits_family(modulesl,banner,'ltchunt.com', '6Ld28FEkAAAAAHU7Z8ddeMVLzt4CAIzITn9g7ENZ',faucet='Off')
 def faucetbob(modulesl,banner):
   bits_family(modulesl,banner,'faucetofbob.xyz', '6LcXEsIaAAAAAKEMIqgfoqCiBrHGAjmkfwgkfcQr',faucet='Off')
+def proearn(modulesl,banner):
+  bits_family(modulesl,banner,'proearn.site', '6LcXEsIaAAAAAKEMIqgfoqCiBrHGAjmkfwgkfcQr',faucet='Off',ptc1='Off')
 def coinfola(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinfola')
