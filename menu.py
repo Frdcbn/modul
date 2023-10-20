@@ -12,70 +12,49 @@ def menu(banner,modul,modulesl):
     putih1 = "\033[1;97m"  # Terang
     merah1 = "\033[1;91m"  # Terang
     biru1 = "\033[1;94m"  # Terang
-    thread_map = {
-"metode bypass":None,
-"allfaucet":modul.allfaucet,
-"btccanyon":modul.btccanyon,
-"claimbits":modul.claimbits,
-"claimlite":modul.claimlite,
-"clickscoin":modul.clickscoin,
-"coinfola":modul.coinfola,
-"earnsolana":modul.earnsolana,
-"eurofaucet_de":modul.eurofaucet_de,
-"faucetcrypto_net":modul.faucetcrypto_net,
-"faucetspeedbtc":modul.faucetspeedbtc,
-"freeclaimfaucet":modul.freeclaimfaucet,
-"james_trussy":modul.james_trussy,
-"ltchunt":modul.ltchunt,
-"paidtomoney":modul.all_in_one,
-"rushbitcoin":modul.rushbitcoin,
-"tikiearn":modul.tikiearn,
-"earnrub_pw":modul.earnrub_pw,
-"cryptohits":modul.cryptohits,
-"instanfaucet_xyz":modul.instanfaucet_xyz,
-"earn-crypto_co":modul.earn_crypto,
-"earnbits_io":modul.earnbits,
-#"timps_co Maintenance":modul.timps_co,
-#"vie_faucet Maintenance":modul.vie_faucet,
-"whoopyrewards":modul.whoopyrewards,
-"cryptoearns":modul.cryptoearns,
-"gulio_site":modul.gulio,
-"cryptask":modul.cryptask,
-"faucetpayz":modul.faucetpayz,
-"nevcoin":modul.nevcoin,
-"paidlink":modul.paidlink,
-"faucet_mom":modul.faucet_mom,
-"faucetbob":modul.faucetbob,
-"proearn.site":modul.proearn,
-}
-    menu_dict=list(thread_map.items())
-    if len(sys.argv) == 2:
-      tele=True
-      select = sys.argv[1]
-      fl=sys.argv[0]
-    else:
-      tele=None
-      fl=sys.argv[0]
-      os.system("clear")
-      
-  
-      # Cetak judul banner menu
-      banner.banner(' MAIN MENU ')
-  
-      # Muat data dari file JSON
-      
-      
-      # Cetak daftar menu
-      menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(thread_map.keys())]
-      if len(menu_items) % 2 != 0:
-          menu_items.append("")
-      menu_content = "\n".join([f"{menu_items[i]:<60}{menu_items[i + 1]}" for i in range(0, len(menu_items), 2)])
-      cetak(Panel(menu_content, width=80, title="[bold green]Menu Bot", padding=(0, 4), style="bold white"))
-
-          #time.sleep(0.1)
-  
-      # Meminta input pengguna
-      select = input(putih1 + "select : ")
+    Bits_Family ={
+    "btccanyon":modul.btccanyon,
+    "claimbits":modul.claimbits,
+    "claimlite":modul.claimlite,
+    "ltchunt":modul.ltchunt,
+    "rushbitcoin":modul.rushbitcoin,
+    #"earn-crypto_co":modul.earn_crypto,
+    "earnbits_io":modul.earnbits,
+    "faucetpayz":modul.faucetpayz,
+    "nevcoin":modul.nevcoin,
+    "proearn.site":modul.proearn,
+    }
+    micin = {
+    "coinfola":modul.coinfola,
+    "earnsolana":modul.earnsolana,
+    "faucetspeedbtc":modul.faucetspeedbtc,
+    "freeclaimfaucet":modul.freeclaimfaucet,
+    "tikiearn":modul.tikiearn,
+    "earnrub_pw":modul.earnrub_pw,
+    "instanfaucet_xyz":modul.instanfaucet_xyz,
+    "whoopyrewards":modul.whoopyrewards,
+    "cryptoearns":modul.cryptoearns,
+    "paidlink":modul.paidlink,
+    "sumicrypto":modul.sumicrypto,
+    "chillfaucet":modul.chillfaucet,
+    "keforcash":modul.keforcash,
+    }
+    menu={
+      "settings":None,
+      "bits family":None,
+      "micin family":None
+    }
+    menu_dict = list(Bits_Family.items()) + list(micin.items())
+    tele=None
+    fl=sys.argv[0]
+    os.system("clear")
+    banner.banner(' MAIN MENU ')
+    menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(menu.keys())]
+    if len(menu_items) % 2 != 0:
+        menu_items.append("")
+    menu_content = "\n".join([f"{menu_items[i]:<60}{menu_items[i + 1]}" for i in range(0, len(menu_items), 2)])
+    cetak(Panel(menu_content, width=80, title="[bold green]Menu Bot", padding=(0, 4), style="bold white"))
+    select = input(putih1 + "select : ")
     if select == "0":
         print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
         sel = input(putih1 + "select : ")
@@ -83,10 +62,35 @@ def menu(banner,modul,modulesl):
             api_key = input("Api key captcha ai > ")
             with open("ckey.txt", "w") as e:
                 e.write(api_key)
-            menu(banner,modul,modulesl)
+            #menu(banner,modul,modulesl)
         exit()
-    else:
+    if select == "1":
+        menu_dict=list(Bits_Family.items())
+        os.system("clear")
+        banner.banner(' BITS FAMILY MENU ')
+        menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(Bits_Family.keys())]
+        if len(menu_items) % 2 != 0:
+            menu_items.append("")
+        menu_content = "\n".join([f"{menu_items[i]:<60}{menu_items[i + 1]}" for i in range(0, len(menu_items), 2)])
+        cetak(Panel(menu_content, width=80, title="[bold green]Menu Bot", padding=(0, 4), style="bold white"))
+        select = input(putih1 + "select : ")
         selected_index = int(select)
         if 0 <= selected_index < len(menu_dict):
           _, selected_function = menu_dict[selected_index]
           selected_function(modulesl, banner)
+        
+    if select == "2":
+        menu_dict=list(micin.items())
+        os.system("clear")
+        banner.banner(' MICIN FAMILY MENU ')
+        menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(micin.keys())]
+        if len(menu_items) % 2 != 0:
+            menu_items.append("")
+        menu_content = "\n".join([f"{menu_items[i]:<60}{menu_items[i + 1]}" for i in range(0, len(menu_items), 2)])
+        cetak(Panel(menu_content, width=80, title="[bold green]Menu Bot", padding=(0, 4), style="bold white"))
+        select = input(putih1 + "select : ")
+        selected_index = int(select)
+        if 0 <= selected_index < len(menu_dict):
+          _, selected_function = menu_dict[selected_index]
+          selected_function(modulesl, banner)
+        

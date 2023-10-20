@@ -10,6 +10,8 @@ import urllib.parse
 import requests
 from bs4 import BeautifulSoup as bs
 import concurrent.futures
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
@@ -39,7 +41,6 @@ def get_ans(api, id):
      res=requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}',headers=ua)
      status_code(res)
      return res.text
-
 def RecaptchaV2(key, url):
     with open('ckey.txt') as f:
         api_list = f.read().splitlines()
@@ -70,6 +71,49 @@ def RecaptchaV2(key, url):
             print('Get ID', end='\r')
 # -------------------------------------------
 # RecaptchaV3 BYPASS
+def get_resai(api, key, url):
+     ua = {
+            "host": "ocr.captchaai.com",
+            "content-type": "application/json/x-www-form-urlencoded"
+        }
+     res=requests.get(f'https://ocr.captchaai.com/in.php?key={api}&method=userrecaptcha&version=v3&action=verify&min_score=0.3&googlekey={key}&pageurl={url}',headers=ua)
+     status_code(res)
+     return res.text
+def get_ansai(api, id):
+     ua = {
+            "host": "ocr.captchaai.com",
+            "content-type": "application/json/x-www-form-urlencoded"
+        }
+     res=requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}',headers=ua)
+     status_code(res)
+     return res.text
+def RecaptchaV3ai(key, url):
+    with open('ckey.txt') as f:
+        api_list = f.read().splitlines()
+
+    while True:
+        api = random.choice(api_list)
+        get_res_text = get_resai(api, key, url)
+        time.sleep
+        if 'OK' in get_res_text:
+            id = get_res_text.split('|')[1]
+            start_time = time.time()
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                while True:
+                    time.sleep(1)  # Mengurangi waktu tunggu menjadi setengah detik
+
+                    get_ans_text = get_ansai(api, id)
+                    elapsed_time = time.time() - start_time
+                    
+                    if 'CAPCHA_NOT_READY' in get_ans_text:
+                        print('Belum ada respon dari reCAPTCHA', end='\r')
+                    elif 'OK' in get_ans_text:
+                        return get_ans_text.split('|')[1]
+                    else:
+                      print(get_ans_text, end='\r')
+                      return None
+        else:
+            print('Get ID', end='\r')
 def RecaptchaV3(ANCHOR_URL):
     url_base = 'https://www.google.com/recaptcha/'
     post_data = "v={}&reason=q&c={}&k={}&co={}"
@@ -90,6 +134,87 @@ def RecaptchaV3(ANCHOR_URL):
 
 
   # -------------------------------------------
+# -------------------------------------------
+# Antibot BYPASS
+def Session():
+    session = requests.Session()
+    retry = Retry(connect=5, backoff_factor=1)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+class Api_GXP:
+    def __init__(self):
+        self.url = "http://goodxevilpay.pp.ua"
+        self.key = "SmmFtPlEkUPTzyDPG78UsPDE8hWwIciI|offfast"
+        self.max_wait = 300
+        self.sleep = 5
+
+    def in_api(self, data):
+        session = Session()
+        params = {"key": (None, self.key)}
+        for key in data:
+            params[key] = (None, data[key])
+        return session.post(self.url + '/in.php', files=params, verify=False, timeout=15)
+
+    def res_api(self, api_id):
+        session = Session()
+        params = {"key": self.key, "id": api_id}
+        return session.get(self.url + '/res.php', params=params, verify=False, timeout=15)
+        
+    def get_balance(self):
+        session = Session()
+        params = {"key": self.key, "action": "getbalance"}
+        return session.get(self.url + '/res.php', params=params, verify=False, timeout=15).text
+
+    def run(self, data):
+        
+        get_in = self.in_api(data)
+        if get_in:
+            if "|" in get_in.text:
+                api_id = get_in.text.split("|")[1]
+            else:
+                return get_in.text
+        else:
+            return "ERROR_CAPTCHA_UNSOLVABLE"
+        for i in range(self.max_wait//self.sleep):
+            time.sleep(self.sleep)
+            get_res = self.res_api(api_id)
+            if get_res:
+                answer = get_res.text
+                if 'CAPCHA_NOT_READY' in answer:
+                    print(answer,end='\r\r')
+                    continue
+                elif "|" in answer:
+                    return answer.split("|")[1]
+                else:
+                    return answer
+def antibot(html,key=None):
+  anu={
+    "method": "antibot"
+  }
+  html=bs(html.text,'html.parser')
+  if key:
+    utama=html.find('p', class_=key).find('img')['src'].split('data:image/png;base64,')[1]
+  else:
+    utama=html.find_all('p', class_='alert-info')[1].find('img')['src'].split('data:image/png;base64,')[1]
+  api = Api_GXP()
+  if utama:
+    antibot_links_script =html.find_all('script', {'type': 'text/javascript'})[3]
+    script_text = antibot_links_script.string
+    for data in script_text.split('var ablinks=[')[1].split(']')[0].split('","'):
+      dat=bs(data,'html.parser')
+      rel=dat.find('a')['rel'][0].split('\\"')[1].split('"\\')[0]
+      img=dat.find('img')['src'].split('data:image/png;base64,')[1].split('\\"')[0]
+      anu[rel]=img
+    anu["main"]=utama
+    answer= api.run(anu).replace(',','+')
+    return answer
+def hcaptcha(key,url):
+  data = {"method": "hcaptcha", "pageurl": url, "sitekey": key}
+  api = Api_GXP()
+  hCaptcha = api.run(data)
+  return hCaptcha
 def one_method(curl,url,headers=None,go=None):
  try:
   if go:
@@ -144,36 +269,13 @@ def ctrsh(url):
   except Exception as e:
     return "failed to bypass"
 def try2(url):
-  #try:
+  try:
     curl = requests.Session()
-    curl.headers.update({'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36'})
-    sesi = True
-    url = curl.get(url)
-    step1 = curl.post('https://'+urlparse(url.url).hostname+'/wp-admin/admin-ajax.php', data="action=remove_short_main_session", headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}).text
-    send_data = json.loads(step1)
-    if send_data["success"]:
-        url = send_data["data"]["alias"]
-    while(sesi==True):
-        curl.headers.update({'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36'})
-       # print(url)
-        if "try2link.com" in url:
-                break
-        step1 = curl.get(url)
-        send_data = curl.post(urlparse(url).scheme+'://'+urlparse(url).hostname+'/wp-admin/admin-ajax.php', data="action=remove_short_main_session", headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'})
-     #   print(send_data.text)
-        if "alias" and "success" in send_data.text:
-            send_data = json.loads(send_data.text)
-            url = send_data["data"]["alias"]
-       #     print(url)
-            if "try2link.com" in url:
-                break
-        else:
-            url = BeautifulSoup(step1.text, 'html.parser').find('a', {'id':'go_d'})["href"]
-    res=one_method(curl,url,headers=None)
+    res=one_method(curl,url,headers={'referer':'https://bluetechno.net/solve-the-problem-of-automatically-downloading-photos-and-videos-in-whatsapp/'})
     sleep(15)
     return res
- # except Exception as e:
-  #  return "failed to bypass"
+  except Exception as e:
+    return "failed to bypass"
 def gplinks_bypass(url: str):
   try:
    client = cloudscraper.create_scraper(allow_brotli=False)  
