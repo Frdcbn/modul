@@ -23,21 +23,23 @@ def menu(banner,modul,modulesl):
     "faucetpayz":modul.faucetpayz,
     "nevcoin":modul.nevcoin,
     "proearn.site":modul.proearn,
+    "litecoinbits":modul.litecoinbits,
+    "ptctask":modul.ptctask,
+    "webshort":modul.webshort,
+    "lazyfaucet":modul.lazyfaucet,
     }
     micin = {
     "coinfola":modul.coinfola,
     "earnsolana":modul.earnsolana,
     "faucetspeedbtc":modul.faucetspeedbtc,
-    "freeclaimfaucet":modul.freeclaimfaucet,
-    "tikiearn":modul.tikiearn,
     "earnrub_pw":modul.earnrub_pw,
     "instanfaucet_xyz":modul.instanfaucet_xyz,
     "whoopyrewards":modul.whoopyrewards,
-    "cryptoearns":modul.cryptoearns,
     "paidlink":modul.paidlink,
-    "sumicrypto":modul.sumicrypto,
     "chillfaucet":modul.chillfaucet,
     "keforcash":modul.keforcash,
+    "claimcoin_in":modul.claimcoin_in,
+    #"dotfaucet":modul.dotfaucet,
     }
     menu={
       "settings":None,

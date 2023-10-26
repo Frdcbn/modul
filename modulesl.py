@@ -1531,3 +1531,59 @@ def panylink(url):
   #sesi = False
  except Exception as e:
    return 'failed to bypass'
+def botfly(url):
+ try:
+  curl=requests.Session()
+  step1=curl.get(url,headers={'User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'})
+  red=step1.text.split("""setTimeout("location.href ='""")[1].split("""'",500);""")[0]
+  step2=curl.get(red,headers={'User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'})
+  csrf=step2.text.split('<input type="hidden" name="_csrfToken" autocomplete="off" value="')[1].split('"/></div>')[0]
+  tkf=step2.text.split('<input type="hidden" name="_Token[fields]" autocomplete="off" value="')[1].split('"/>')[0]
+  tku=step2.text.split('<input type="hidden" name="_Token[unlocked]" autocomplete="off" value="')[1].split('"')[0]
+  data=f'_method=POST&_csrfToken={csrf}&action=continue&page=2&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+  sleep(5)
+  jum=2
+  while True:
+    jum+=1
+    step3=curl.post(step2.url,headers={'content-type':'application/x-www-form-urlencoded','User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36','accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'},data=data)
+    if 'Please check the captcha box to proceed to the destination page' in step3.text:
+      tf=bs(step3.text,'html.parser')
+      csrf=tf.find('input',{'name':'_csrfToken'})["value"]
+      tkf=tf.find('input',{'name':'_Token[fields]'})["value"]
+      tku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
+      get_key=json.loads(step3.text.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
+      answer=RecaptchaV2(key=get_key,url=step3.url)
+      data=f'_method=POST&_csrfToken={csrf}&action=captcha&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D=adcopy_challenge%257Cadcopy_response%257Ccaptcha_code%257Ccaptcha_namespace%257Cg-recaptcha-response%257Ch-captcha-response'
+      step3=curl.post(step2.url,headers={'content-type':'application/x-www-form-urlencoded','User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'},data=data)
+      fl=bs(step3.text,'html.parser')
+      csrf=fl.find('input',{'name':'_csrfToken'})["value"]
+      tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
+      form=fl.find('input',{'name':'ad_form_data'})["value"]
+      tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
+      path=fl.find('form',{'method':'post'})["action"]
+      data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+      sleep(5)
+      hs=urlparse(step3.url).netloc
+      final=curl.post(f'https://{hs}{path}',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}).json()
+      if final['status'] =='success':return final['url']
+    elif '/links/go' in step3.text:
+      fl=bs(step3.text,'html.parser')
+      csrf=fl.find('input',{'name':'_csrfToken'})["value"]
+      tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
+      form=fl.find('input',{'name':'ad_form_data'})["value"]
+      tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
+      path=fl.find('form',{'method':'post'})["action"]
+      data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+      sleep(5)
+      hs=urlparse(step3.url).netloc
+      final=curl.post(f'https://{hs}{path}',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}).json()
+      if final['status'] =='success':return final['url']
+    else:
+      tf=bs(step3.text,'html.parser')
+      csrf=tf.find('input',{'name':'_csrfToken'})["value"]
+      tkf=tf.find('input',{'name':'_Token[fields]'})["value"]
+      tku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
+      data=f'_method=POST&_csrfToken={csrf}&action=continue&page={str(jum)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+    sleep(5)
+ except Exception as e:
+   return 'failed to bypass'
