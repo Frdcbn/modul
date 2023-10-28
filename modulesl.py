@@ -1,4 +1,4 @@
-import re,json,time,uuid
+import re,json,time,uuid,os
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse,urlencode
@@ -41,7 +41,7 @@ def get_ans(api, id):
      res=requests.get(f'http://ocr.captchaai.com/res.php?key={api}&action=get&id={id}',headers=ua)
      status_code(res)
      return res.text
-def RecaptchaV2(key, url):
+def RecaptchaV2ai(key, url):
     with open('ckey.txt') as f:
         api_list = f.read().splitlines()
 
@@ -143,52 +143,52 @@ def Session():
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
-class Api_GXP:
-    def __init__(self):
-        self.url = "http://goodxevilpay.pp.ua"
-        self.key = "SmmFtPlEkUPTzyDPG78UsPDE8hWwIciI|offfast"
-        self.max_wait = 300
-        self.sleep = 5
+def Session():
+    session = requests.Session()
+    retry = Retry(connect=5, backoff_factor=1)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
 
-    def in_api(self, data):
-        session = Session()
-        params = {"key": (None, self.key)}
-        for key in data:
-            params[key] = (None, data[key])
-        return session.post(self.url + '/in.php', files=params, verify=False, timeout=15)
+def in_api(data, key, url):
+    session = Session()
+    params = {"key": (None, key)}
+    for key in data:
+        params[key] = (None, data[key])
+    return session.post(url + '/in.php', files=params, verify=False, timeout=15)
 
-    def res_api(self, api_id):
-        session = Session()
-        params = {"key": self.key, "id": api_id}
-        return session.get(self.url + '/res.php', params=params, verify=False, timeout=15)
-        
-    def get_balance(self):
-        session = Session()
-        params = {"key": self.key, "action": "getbalance"}
-        return session.get(self.url + '/res.php', params=params, verify=False, timeout=15).text
+def res_api(api_id, key, url):
+    session = Session()
+    params = {"key": key, "id": api_id}
+    return session.get(url + '/res.php', params=params, verify=False, timeout=15)
 
-    def run(self, data):
-        
-        get_in = self.in_api(data)
-        if get_in:
-            if "|" in get_in.text:
-                api_id = get_in.text.split("|")[1]
-            else:
-                return get_in.text
+def get_balance(key, url):
+    session = Session()
+    params = {"key": key, "action": "getbalance"}
+    return session.get(url + '/res.php', params=params, verify=False, timeout=15).text
+
+def run(data, key, url='http://goodxevilpay.pp.ua', max_wait=300, sleep=5):
+    get_in = in_api(data, key, url)
+    if get_in:
+        if "|" in get_in.text:
+            api_id = get_in.text.split("|")[1]
         else:
-            return "ERROR_CAPTCHA_UNSOLVABLE"
-        for i in range(self.max_wait//self.sleep):
-            time.sleep(self.sleep)
-            get_res = self.res_api(api_id)
-            if get_res:
-                answer = get_res.text
-                if 'CAPCHA_NOT_READY' in answer:
-                    print(answer,end='\r\r')
-                    continue
-                elif "|" in answer:
-                    return answer.split("|")[1]
-                else:
-                    return answer
+            return get_in.text
+    else:
+        return "ERROR_CAPTCHA_UNSOLVABLE"
+    for i in range(max_wait // sleep):
+        time.sleep(sleep)
+        get_res = res_api(api_id, key, url)
+        if get_res:
+            answer = get_res.text
+            if 'CAPCHA_NOT_READY' in answer:
+                continue
+            elif "|" in answer:
+                return answer.split("|")[1]
+            else:
+                print(answer)
+                return answer
 def antibot(html,key=None):
   anu={
     "method": "antibot"
@@ -198,7 +198,6 @@ def antibot(html,key=None):
     utama=html.find('p', class_=key).find('img')['src'].split('data:image/png;base64,')[1]
   else:
     utama=html.find_all('p', class_='alert-info')[1].find('img')['src'].split('data:image/png;base64,')[1]
-  api = Api_GXP()
   if utama:
     antibot_links_script =html.find_all('script', {'type': 'text/javascript'})[3]
     script_text = antibot_links_script.string
@@ -208,13 +207,26 @@ def antibot(html,key=None):
       img=dat.find('img')['src'].split('data:image/png;base64,')[1].split('\\"')[0]
       anu[rel]=img
     anu["main"]=utama
-    answer= api.run(anu).replace(',','+')
+    xe=open('xkey.txt').read().splitlines()[0]
+    answer= run(anu,xe).replace(',','+')
     return answer
 def hcaptcha(key,url):
   data = {"method": "hcaptcha", "pageurl": url, "sitekey": key}
-  api = Api_GXP()
-  hCaptcha = api.run(data)
-  return hCaptcha
+  xe=open('xkey.txt').read().splitlines()[0]
+  re = run(data,xe)
+  return re
+def RecaptchaV2xe(key,url):
+  data = {"method": "userrecaptcha", "pageurl": url, "sitekey": key}
+  xe=open('xkey.txt').read().splitlines()[0]
+  re = run(data,xe)
+  return re
+def RecaptchaV2(key,url):
+  if os.path.exists('ckey.txt'):
+    return RecaptchaV2ai(key, url)
+  elif os.path.exists('xkey.txt'):
+    return RecaptchaV2xe(key,url)
+  else:
+    exit('Please input key in settings')
 def one_method(curl,url,headers=None,go=None):
  try:
   if go:
@@ -1534,9 +1546,12 @@ def panylink(url):
 def botfly(url):
  try:
   curl=requests.Session()
-  step1=curl.get(url,headers={'User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'})
-  red=step1.text.split("""setTimeout("location.href ='""")[1].split("""'",500);""")[0]
-  step2=curl.get(red,headers={'User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'})
+  step1=curl.get(url)
+  if 'http://terafly.me/go.php?' in step1.url:
+    red=step1.url.split('http://terafly.me/go.php?')[1]
+  else:
+    red=step1.text.split("""setTimeout("location.href ='""")[1].split("""'",500);""")[0]
+  step2=curl.get(red)
   csrf=step2.text.split('<input type="hidden" name="_csrfToken" autocomplete="off" value="')[1].split('"/></div>')[0]
   tkf=step2.text.split('<input type="hidden" name="_Token[fields]" autocomplete="off" value="')[1].split('"/>')[0]
   tku=step2.text.split('<input type="hidden" name="_Token[unlocked]" autocomplete="off" value="')[1].split('"')[0]
@@ -1586,4 +1601,4 @@ def botfly(url):
       data=f'_method=POST&_csrfToken={csrf}&action=continue&page={str(jum)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
     sleep(5)
  except Exception as e:
-   return 'failed to bypass'
+    pass

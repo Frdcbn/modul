@@ -395,7 +395,7 @@ def sl(modulesl,banner,host,cookies,ugentmu,path_sl,key_all_sl,key_button_id,key
                           break
                       else:
                         try:
-                            animasi(detik=105)
+                            animasi(detik=35)
                             get_sl = curl.get(answer, headers=ua, cookies=cookies)
                             status_code(get_sl)
                             sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
@@ -477,7 +477,7 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
       if faucet:fauceturl=f'https://{host}/{faucet}'
       else:fauceturl=f'https://{host}/'
       while True:
-        try:
+        #try:
             get_sl = curl.get(fauceturl, headers=ua, cookies=cookies)
             if 'Faucet Locked!' in get_sl.text:
               if 'You must visit' in get_sl.text:
@@ -487,7 +487,7 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
               else:
                 animasi(menit=1440)
                 bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
-            waktu=get_sl.text.split('every ')[1].split(' minutes')[0]
+            waktu=get_sl.text.split('<h1 class="text-warning"><i class="fa fa-arrow-down"></i>')[1].split(' minutes')[0]
             if 'Just a moment...' in get_sl.text:
               save_data(host)
               bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
@@ -510,9 +510,9 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
             else:
               gas = bs(g["message"], "html.parser").text
               print(putih1 + '├──' + hijau1 + f' {putih1}[{merah1}!{putih1}] '+gas)
-        except Exception as e:
-            print(putih1 + '├──' + hijau1 + f' {putih1}[{merah1}!{putih1}] {str(e)}')
-            pass
+        # except Exception as e:
+        #     print(putih1 + '├──' + hijau1 + f' {putih1}[{merah1}!{putih1}] {str(e)}')
+        #     pass
     if run == '0':
       if ptc1 == 'Off':
         print('Ptc off')
@@ -727,7 +727,7 @@ def earn_crypto(modulesl,banner):
                   elif 'failed to bypass' in answer:pass
                   else:
                       try:
-                          animasi(detik=105)
+                          animasi(detik=35)
                           get_sl = curl.get(answer, headers=ua, cookies=cookies)
                           status_code(get_sl)
                           sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
@@ -851,6 +851,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
             jumlah = i.find('span').text.split('/')
             re=int(jumlah[0])
             for ulang in range(int(jumlah[0])):
+              try:
                 url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
                 status_code(url)
                 url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
@@ -860,7 +861,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
                 if 'failed to bypass' in answer:
                     pass
                 else:
-                    animasi(detik=105)
+                    animasi(detik=35)
                     reward = curl.get(answer, headers=ua, cookies=cookies)
                     status_code(reward)
                     if 'Good job!' in reward.text:
@@ -868,6 +869,9 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
                     else:
                         print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
                 re-=1
+              except Exception as e:
+                keluar(str(e))
+                pass
         except Exception as e:
             keluar(str(e))
             pass
@@ -983,7 +987,7 @@ def instanfaucet_xyz(modulesl,banner):
       if 'failed to bypass' in answer:
         pass
       else:
-        animasi(detik=105)
+        animasi(detik=35)
         reward=curl.get(answer,headers=hd,cookies=cookies)
         status_code(reward)
         if 'Good job!' in reward.text:
@@ -1038,7 +1042,7 @@ def chillfaucet(modulesl,banner):
       if 'failed to bypass' in answer:
         pass
       else:
-        animasi(detik=105)
+        animasi(detik=35)
         reward=curl.get(answer,headers=hd,cookies=cookies)
         status_code(reward)
         if 'Good job!' in reward.text:
@@ -1105,7 +1109,7 @@ def paidlink(modulesl,banner):
               if answer=='failed to bypass':
                 pass
               else:
-                animasi(detik=105)
+                animasi(detik=35)
                 get_reward=curl.get(answer,headers=headers)
                 if 'You have successfully completed the shortlink' in get_reward.text:
                   print(putih1+'├── '+hijau1+bs(get_reward.text,'html.parser').find('div',{'class':'alert alert-success alert-dismissible'}).text.strip())
@@ -1170,7 +1174,7 @@ def coinfola(modulesl,banner):
             if 'failed to bypass' in answer:
                 pass
             else:
-              animasi(detik=105)
+              animasi(detik=35)
               reward = curl.get(answer, headers=ua, cookies=cookies)
               if 'Congratulations.' in reward.text:
                   _1 = reward.text.split("message: 'You")[1].split("tickets.'")[0]
@@ -1232,7 +1236,7 @@ def faucetspeedbtc(modulesl,banner):
               if answer==False:break
               if 'failed to bypass' in answer:pass
               else:
-                  animasi(detik=105)
+                  animasi(detik=35)
                   reward = curl.get(answer, headers=ua, cookies=cookies)
                   status_code(reward)
                   reward=reward.text

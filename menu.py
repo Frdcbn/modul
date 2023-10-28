@@ -59,10 +59,15 @@ def menu(banner,modul,modulesl):
     select = input(putih1 + "select : ")
     if select == "0":
         print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
+        print(f"{putih1}[{hijau1}1{putih1}]{biru1}.Solver Captcha Tg(@Xevil_check_bot)")
         sel = input(putih1 + "select : ")
         if sel == "0":
             api_key = input("Api key captcha ai > ")
             with open("ckey.txt", "w") as e:
+                e.write(api_key)
+        if sel == "1":
+            api_key = input("Api key Xevil > ")
+            with open("xkey.txt", "w") as e:
                 e.write(api_key)
             #menu(banner,modul,modulesl)
         exit()
