@@ -1,4 +1,4 @@
-import pathlib
+import pathlib,sys
 import threading
 import os
 import time
@@ -50,6 +50,7 @@ def menu(banner,modul,modulesl):
     tele=None
     fl=sys.argv[0]
     os.system("clear")
+    print(sys.argv)
     banner.banner(' MAIN MENU ')
     menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(menu.keys())]
     if len(menu_items) % 2 != 0:
