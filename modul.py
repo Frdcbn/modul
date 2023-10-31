@@ -64,6 +64,18 @@ def persen(detik):
             print(f"{persen:.2f}%", end=end())
             time.sleep(1)
         print(end())
+def animasi(menit=None,detik=None):
+  if menit:
+    detik = menit * 60
+  if detik:
+    detik=detik
+  pattern_list = list("▁▃▅▇▅▃▁") * detik
+  for i in range(detik):
+      animasi = "".join(pattern_list[i:i+5])
+      output = f"{hijau1}[{kuning1}{animasi}{hijau1}] {putih1}- {hijau1}Please wait {hijau1}{detik//60:02d}:{detik%60:02d}"
+      print(output, end=' '*20+'\r')
+      time.sleep(1)
+      detik -= 1
 def bypass_link(url,modulesl,jumlah):
   dictnya={
   "1short.info":modulesl._1short_in,
@@ -142,21 +154,10 @@ def bypass_link(url,modulesl,jumlah):
     else:
       print(putih1+'├── '+kuning1+'Status : '+hijau1+"success")
       print(putih1+'├──'+'─'*56)
+      animasi(detik=30)
       return res
   else:
     return False
-def animasi(menit=None,detik=None):
-  if menit:
-    detik = menit * 60
-  if detik:
-    detik=detik
-  pattern_list = list("▁▃▅▇▅▃▁") * detik
-  for i in range(detik):
-      animasi = "".join(pattern_list[i:i+5])
-      output = f"{hijau1}[{kuning1}{animasi}{hijau1}] {putih1}- {hijau1}Please wait {hijau1}{detik//60:02d}:{detik%60:02d}"
-      print(output, end=' '*20+'\r')
-      time.sleep(1)
-      detik -= 1
 def parse_data(data):
     parsed_data = {}
     try:
@@ -395,7 +396,7 @@ def sl(modulesl,banner,host,cookies,ugentmu,path_sl,key_all_sl,key_button_id,key
                           break
                       else:
                         try:
-                            animasi(detik=35)
+                            
                             get_sl = curl.get(answer, headers=ua, cookies=cookies)
                             status_code(get_sl)
                             sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
@@ -477,7 +478,7 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
       if faucet:fauceturl=f'https://{host}/{faucet}'
       else:fauceturl=f'https://{host}/'
       while True:
-        #try:
+        try:
             get_sl = curl.get(fauceturl, headers=ua, cookies=cookies)
             if 'Faucet Locked!' in get_sl.text:
               if 'You must visit' in get_sl.text:
@@ -487,7 +488,7 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
               else:
                 animasi(menit=1440)
                 bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
-            waktu=get_sl.text.split('<h1 class="text-warning"><i class="fa fa-arrow-down"></i>')[1].split(' minutes')[0]
+            waktu=get_sl.text.split('<h1 class="text-warning"><i class="fa fa-arrow-down"></i>')[1].split(' minutes')[0].split('every ')[1]
             if 'Just a moment...' in get_sl.text:
               save_data(host)
               bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
@@ -510,9 +511,9 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
             else:
               gas = bs(g["message"], "html.parser").text
               print(putih1 + '├──' + hijau1 + f' {putih1}[{merah1}!{putih1}] '+gas)
-        # except Exception as e:
-        #     print(putih1 + '├──' + hijau1 + f' {putih1}[{merah1}!{putih1}] {str(e)}')
-        #     pass
+        except Exception as e:
+            print(putih1 + '├──' + hijau1 + f' {putih1}[{merah1}!{putih1}] {str(e)}')
+            pass
     if run == '0':
       if ptc1 == 'Off':
         print('Ptc off')
@@ -537,7 +538,7 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
               else:
                 animasi(menit=1440)
                 bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
-            waktu=get_sl.text.split('every ')[1].split(' minutes')[0]
+            waktu=get_sl.text.split('<h1 class="text-warning"><i class="fa fa-arrow-down"></i>')[1].split(' minutes')[0].split('every ')[1]
             if 'Just a moment...' in get_sl.text:
               save_data(host)
               bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
@@ -727,7 +728,7 @@ def earn_crypto(modulesl,banner):
                   elif 'failed to bypass' in answer:pass
                   else:
                       try:
-                          animasi(detik=35)
+                          
                           get_sl = curl.get(answer, headers=ua, cookies=cookies)
                           status_code(get_sl)
                           sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
@@ -861,7 +862,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
                 if 'failed to bypass' in answer:
                     pass
                 else:
-                    animasi(detik=35)
+                    
                     reward = curl.get(answer, headers=ua, cookies=cookies)
                     status_code(reward)
                     if 'Good job!' in reward.text:
@@ -939,6 +940,8 @@ def whoopyrewards(modulesl,banner):
   vie_script(modulesl,banner,url="https://whoopyrewards.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 def keforcash(modulesl,banner):
   vie_script(modulesl,banner,url="https://keforcash.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
+def liteearn(modulesl,banner):
+  vie_script(modulesl,banner,url="https://liteearn.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 # def dotfaucet(modulesl,banner):
 #   vie_script(modulesl,banner,url="https://dotfaucet.com",key_re="6LfktLIiAAAAANsyH-ftLZhnlWunaltU16O4xXAC",ptc=True,short=True,faucet=False,auto=True)
 #--------------- vie new family ---------------#
@@ -987,7 +990,7 @@ def instanfaucet_xyz(modulesl,banner):
       if 'failed to bypass' in answer:
         pass
       else:
-        animasi(detik=35)
+        
         reward=curl.get(answer,headers=hd,cookies=cookies)
         status_code(reward)
         if 'Good job!' in reward.text:
@@ -1042,7 +1045,7 @@ def chillfaucet(modulesl,banner):
       if 'failed to bypass' in answer:
         pass
       else:
-        animasi(detik=35)
+        
         reward=curl.get(answer,headers=hd,cookies=cookies)
         status_code(reward)
         if 'Good job!' in reward.text:
@@ -1109,7 +1112,7 @@ def paidlink(modulesl,banner):
               if answer=='failed to bypass':
                 pass
               else:
-                animasi(detik=35)
+                
                 get_reward=curl.get(answer,headers=headers)
                 if 'You have successfully completed the shortlink' in get_reward.text:
                   print(putih1+'├── '+hijau1+bs(get_reward.text,'html.parser').find('div',{'class':'alert alert-success alert-dismissible'}).text.strip())
@@ -1174,7 +1177,7 @@ def coinfola(modulesl,banner):
             if 'failed to bypass' in answer:
                 pass
             else:
-              animasi(detik=35)
+              
               reward = curl.get(answer, headers=ua, cookies=cookies)
               if 'Congratulations.' in reward.text:
                   _1 = reward.text.split("message: 'You")[1].split("tickets.'")[0]
@@ -1236,7 +1239,7 @@ def faucetspeedbtc(modulesl,banner):
               if answer==False:break
               if 'failed to bypass' in answer:pass
               else:
-                  animasi(detik=35)
+                  
                   reward = curl.get(answer, headers=ua, cookies=cookies)
                   status_code(reward)
                   reward=reward.text
@@ -1263,3 +1266,109 @@ def faucetspeedbtc(modulesl,banner):
       print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy')
       break
   exit()
+def coinpayz(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  data_control('coinpayz')
+  banner.banner('COINPAYZ')
+  cookies, ugentmu = load_data('coinpayz')
+  if not os.path.exists("data/coinpayz/coinpayz.json"):
+    save_data('coinpayz')
+    coinpayz(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  headers = {
+    'Host': 'coinpayz.xyz',
+    'User-Agent': ugentmu,
+  }
+  curl=requests.Session()
+  curl.headers.update(headers)
+  curl.cookies.update(cookies)
+  td=f'{putih1}[ {merah1}× {putih1}] {hijau1}> {putih1}'
+  dash=curl.get('https://coinpayz.xyz/dashboard',headers=headers)
+  status_code(dash)
+  if 'Balance' not in dash.text:
+    save_data('coinpayz')
+    coinpayz(modulesl,banner)
+  print(td+'Account information')
+  ds=bs(dash.text,'html.parser').find('div',class_='flex-grow-1')
+  print(td+ds.text.strip().replace('\n',' : '))
+  print(td+'start shortlinks')
+  sl=curl.get('https://coinpayz.xyz/links')
+  status_code(sl)
+  sli=bs(sl.text,'html.parser').find_all('div',class_='card card-body text-center bg-metallic')
+  for bp in sli:
+   try:
+    jumlah=int(bp.find('span',class_='badge badge-soft-info font-size-12').text.strip().split('/')[0])
+    link=bp.find('a',class_='btn btn-info waves-effect waves-light')['href']
+    re=jumlah
+    for i in range(jumlah):
+      try:
+            get_links=curl.get(link,allow_redirects=False)
+            status_code(get_links)
+            links=get_links.text.split('<script> location.href = "')[1].split('";')[0]
+            answer=bypass_link(links,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer:
+              if 'failed' in answer:
+                pass
+              else:
+                sukses=curl.get(answer)
+                status_code(sukses)
+                if 'Good job!' in sukses.text:
+                  print(hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+sukses.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
+                  re-=1
+      except Exception as e:
+       print(td+str(e))
+   except Exception as e:
+     print(td+str(e))
+def wildfaucet(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  data_control('wildfaucet')
+  banner.banner('WILDFAUCET')
+  cookies, ugentmu = load_data('wildfaucet')
+  if not os.path.exists("data/wildfaucet/wildfaucet.json"):
+    save_data('wildfaucet')
+    wildfaucet(modulesl,banner)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  headers = {
+    'Host': 'wildfaucet.com',
+    'User-Agent': ugentmu,
+  }
+  curl=requests.Session()
+  curl.headers.update(headers)
+  curl.cookies.update(cookies)
+  data={'api_key':'EM-4250e8f3295c1b07c4cbf1e8d291ec821b81de46831b257273c6d4ec926e125e'}
+  dash=curl.post('https://wildfaucet.com/em-assets/themes/default/dash/',data=data)
+  info=bs(dash.text,'html.parser').find('div',class_='balance')
+  akun=Tree("[green] > [yellow]Account information")
+  akun.add('[yellow]'+info.text.strip().replace('\n',' : ').split('Satoshi : Withdrawal :  :  :  : Buy Balance')[0].replace(' : ',' [white]:[yellow] ')+' Satoshi')
+  rprint(akun)
+  rprint(Tree("[green] > [yellow]Start shortlinks"))
+  sl=curl.post('https://wildfaucet.com/em-assets/themes/default/earn/sortlink/',data=data)
+  links=bs(sl.text,'html.parser').find_all('div',class_='em_short')
+  for link in links:
+    jumlah=link.find('a').text.strip().split('Claim (')[1].split('/')
+    if jumlah[0] != '0':
+      jumlah=int(eval(jumlah[1].split(')')[0]+'-'+jumlah[0]))
+    else:
+      jumlah=int(jumlah[1].split(')')[0])
+    re=jumlah
+    url=link.find('a',class_='btn')['href']
+    for i in range(jumlah):
+     try:
+      uri=curl.get(url,allow_redirects=False)
+      uri=uri.headers['location']
+      answer=bypass_link(uri,modulesl,jumlah=[str(re),str(jumlah)])
+      if answer:
+        if 'failed to bypass' in answer:pass
+        else:
+          get_reward=curl.get(answer)
+          dash=curl.post('https://wildfaucet.com/em-assets/themes/default/earn/sortlink/',data=data)
+          info=bs(dash.text,'html.parser').find('div',class_='balance')
+          rprint(Tree('[white]├── [yellow]'+info.text.strip().replace('\n',' : ').split('Satoshi : Withdrawal :  :  :  : Buy Balance')[0].replace(' : ',' [white]:[yellow] ')+' Satoshi'))
+          re-=1
+     except Exception as e:
+       pass
+  

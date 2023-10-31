@@ -283,9 +283,18 @@ def ctrsh(url):
 def try2(url):
   try:
     curl = requests.Session()
-    res=one_method(curl,url,headers={'referer':'https://bluetechno.net/solve-the-problem-of-automatically-downloading-photos-and-videos-in-whatsapp/'})
-    sleep(15)
-    return res
+    step1=curl.get(url)
+    url1=url
+    ht=bs(step1.text,'html.parser')
+    url=ht.find('a',{'class':'btn btn-primary'})['href']
+    sleep(int(ht.find('input',{'id':'co-time'})['value']))
+    jumlah=int(ht.find('span',{'class':'go-step'}).text.split('/')[1])-1
+    for i in range(jumlah):
+      step2=curl.get(url)
+      ht=bs(step2.text,'html.parser')
+      url=ht.find('a',{'class':'btn btn-primary'})['href']
+      sleep(int(ht.find('input',{'id':'co-time'})['value']))
+    return one_method(curl=curl,url=url,headers={"referer":step2.url})
   except Exception as e:
     return "failed to bypass"
 def gplinks_bypass(url: str):
@@ -1601,4 +1610,6 @@ def botfly(url):
       data=f'_method=POST&_csrfToken={csrf}&action=continue&page={str(jum)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
     sleep(5)
  except Exception as e:
+    return "failed to bypass"
     pass
+#print(botfly('http://botfly.me/CBw3rzg1njv'))
