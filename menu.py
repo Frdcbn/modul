@@ -28,6 +28,7 @@ def menu(banner,modul,modulesl):
     "ptctask":modul.ptctask,
     "webshort":modul.webshort,
     "lazyfaucet":modul.lazyfaucet,
+    "adhives":modul.adhives,
     }
     micin = {
     "coinfola":modul.coinfola,

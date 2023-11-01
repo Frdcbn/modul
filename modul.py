@@ -566,6 +566,8 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
             pass
 def btccanyon(modulesl,banner):
   bits_family(modulesl,banner,'btccanyon.com', '6LdzF6MlAAAAACcN9JGXW8tSs4dy1MjeKZKFJ11M',faucet='Off')
+def adhives(modulesl,banner):
+  bits_family(modulesl,banner,'adhives.com', '6LfIcuwhAAAAAM-IMeblhrQgEre-uAqfVvud93mY',faucet='Off')
 def webshort(modulesl,banner):
   bits_family(modulesl,banner,'websort.site', '6LeeZaMoAAAAAHZ1THR9WhP0AfheNGudnspfpVGJ',ptc1='Off')
 def ptctask(modulesl,banner):
@@ -1341,6 +1343,9 @@ def wildfaucet(modulesl,banner):
   curl.cookies.update(cookies)
   data={'api_key':'EM-4250e8f3295c1b07c4cbf1e8d291ec821b81de46831b257273c6d4ec926e125e'}
   dash=curl.post('https://wildfaucet.com/em-assets/themes/default/dash/',data=data)
+  if 'Balance' not in dash.text:
+    save_data('wildfaucet')
+    wildfaucet(modulesl,banner)
   info=bs(dash.text,'html.parser').find('div',class_='balance')
   akun=Tree("[green] > [yellow]Account information")
   akun.add('[yellow]'+info.text.strip().replace('\n',' : ').split('Satoshi : Withdrawal :  :  :  : Buy Balance')[0].replace(' : ',' [white]:[yellow] ')+' Satoshi')
