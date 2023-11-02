@@ -1341,7 +1341,8 @@ def wildfaucet(modulesl,banner):
   curl=requests.Session()
   curl.headers.update(headers)
   curl.cookies.update(cookies)
-  data={'api_key':'EM-4250e8f3295c1b07c4cbf1e8d291ec821b81de46831b257273c6d4ec926e125e'}
+  get_key=curl.get('https://wildfaucet.com/dash/').text.split("var apiKey = '")[1].split("';var")[0]
+  data={'api_key':get_key}
   dash=curl.post('https://wildfaucet.com/em-assets/themes/default/dash/',data=data)
   if 'Balance' not in dash.text:
     save_data('wildfaucet')
