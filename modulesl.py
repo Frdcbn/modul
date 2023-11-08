@@ -12,6 +12,8 @@ from bs4 import BeautifulSoup as bs
 import concurrent.futures
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
+import random,string
+from requests_html import HTMLSession
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
@@ -136,13 +138,6 @@ def RecaptchaV3(ANCHOR_URL):
   # -------------------------------------------
 # -------------------------------------------
 # Antibot BYPASS
-def Session():
-    session = requests.Session()
-    retry = Retry(connect=5, backoff_factor=1)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
 def Session():
     session = requests.Session()
     retry = Retry(connect=5, backoff_factor=1)
@@ -1612,4 +1607,43 @@ def botfly(url):
  except Exception as e:
     return "failed to bypass"
     pass
-#print(botfly('http://botfly.me/CBw3rzg1njv'))
+# def rsshort(url):
+#   def icon(ref):
+#     headers = {
+#       'Host': 'rseducationinfo.com',
+#       # 'content-length': '262',
+#       'x-requested-with': 'XMLHttpRequest',
+#       'user-agent': 'Mozilla/5.0 (iPad; CPU OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/87.0.4280.77 Mobile/15E148 Safari/604.1',
+#       'x-iconcaptcha-token': '8d963d28f1d0bd4be89c05fbac1670f366547725',
+#       'content-type': 'multipart/form-data; boundary=----WebKitFormBoundaryVykdbU4zAlhb9AZc',
+#       'accept': '*/*',
+#       'origin': 'https://rseducationinfo.com',
+#       'sec-fetch-site': 'same-origin',
+#       'sec-fetch-mode': 'cors',
+#       'sec-fetch-dest': 'empty',
+#       'referer': 'https://rseducationinfo.com/CHEMISTRY',
+#       # 'accept-encoding': 'gzip, deflate, br',
+#       'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+#       'cookie': 'csrf_cookie_name=03c4352ea87edf0899d3e5e55b3ff245',
+#       'cookie': 'ci_sessions=pnicr05qsmmcvbel5m53ls4si7j3vh70',
+#       'cookie': '__gads=ID=3130e587fbca82bb:T=1699200874:RT=1699200874:S=ALNI_MYhQ75e_iDzNHdXi-EE32DR6t_eOw',
+#       'cookie': '__gpi=UID=00000c80727a592c:T=1699200874:RT=1699200874:S=ALNI_MbSC9xMTX-y5TSULw7Jk7r_P5K_Vw',
+#       'cookie': '_ga=GA1.1.1532231828.1699200873',
+#       'cookie': '_ga_V986F17XBG=GS1.1.1699200878.1.0.1699200878.0.0.0',
+#     }
+#     data = '------WebKitFormBoundaryVykdbU4zAlhb9AZc\nContent-Disposition: form-data; name=payload\n\neyJpIjoxLCJhIjoxLCJ0IjoibGlnaHQiLCJ0ayI6IjhkOTYzZDI4ZjFkMGJkNGJlODljMDVmYmFjMTY3MGYzNjY1NDc3MjUiLCJ0cyI6MTY5OTIwMDg5ODE5OH0=\n------WebKitFormBoundaryVykdbU4zAlhb9AZc--\n'
+    
+#     response = requests.post('https://rseducationinfo.com/iconcaptchar/captcharequest', headers=headers, data=data)
+#   curl = HTMLSession()
+#   ua={'User-Agent':'Mozilla/5.0 (iPad; CPU OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/87.0.4280.77 Mobile/15E148 Safari/604.1'}
+#   step1=curl.get(url,headers=ua)
+#   print(step1.text)
+#   ur=bs(step1.text,'html.parser').find_all('meta')[1]['content'].split('url=')[1].split('"')[0]
+#   print(ur)
+#   step2=curl.get(ur,headers=ua)
+#   step2.html.render()
+#   step2.html.find('csrf_test_name')
+#   print(bs(step2.text,'html.parser').find_all('name'))
+#   if 'csrf_test_name' in step2.text:
+#     print(True)
+# print(rsshort('https://rsshort.com/zcRx'))

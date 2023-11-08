@@ -944,6 +944,8 @@ def keforcash(modulesl,banner):
   vie_script(modulesl,banner,url="https://keforcash.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 def liteearn(modulesl,banner):
   vie_script(modulesl,banner,url="https://liteearn.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
+def coin_4u(modulesl,banner):
+  vie_script(modulesl,banner,url="https://coin-4u.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 # def dotfaucet(modulesl,banner):
 #   vie_script(modulesl,banner,url="https://dotfaucet.com",key_re="6LfktLIiAAAAANsyH-ftLZhnlWunaltU16O4xXAC",ptc=True,short=True,faucet=False,auto=True)
 #--------------- vie new family ---------------#
