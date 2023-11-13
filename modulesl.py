@@ -194,8 +194,10 @@ def antibot(html,key=None):
   else:
     utama=html.find_all('p', class_='alert-info')[1].find('img')['src'].split('data:image/png;base64,')[1]
   if utama:
-    antibot_links_script =html.find_all('script', {'type': 'text/javascript'})[3]
-    script_text = antibot_links_script.string
+    antibot_links_script =html.find_all('script', {'type': 'text/javascript'})
+    for antibot_links_script in antibot_links_script:
+      if 'var ablinks' in str(antibot_links_script):
+        script_text = antibot_links_script.string
     for data in script_text.split('var ablinks=[')[1].split(']')[0].split('","'):
       dat=bs(data,'html.parser')
       rel=dat.find('a')['rel'][0].split('\\"')[1].split('"\\')[0]

@@ -37,7 +37,6 @@ def menu(banner,modul,modulesl):
     "earnrub_pw":modul.earnrub_pw,
     "instanfaucet_xyz":modul.instanfaucet_xyz,
     "whoopyrewards":modul.whoopyrewards,
-    "paidlink":modul.paidlink,
     "chillfaucet":modul.chillfaucet,
     "keforcash":modul.keforcash,
     "claimcoin_in":modul.claimcoin_in,
@@ -45,6 +44,7 @@ def menu(banner,modul,modulesl):
     "wildfaucet":modul.wildfaucet,
     "liteearn":modul.liteearn,
     "coin_4u":modul.coin_4u,
+    "cryptofuture":modul.cryptofuture,
     #"dotfaucet":modul.dotfaucet,
     }
     menu={

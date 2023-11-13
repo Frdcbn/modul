@@ -154,7 +154,7 @@ def bypass_link(url,modulesl,jumlah):
     else:
       print(putih1+'├── '+kuning1+'Status : '+hijau1+"success")
       print(putih1+'├──'+'─'*56)
-      animasi(detik=30)
+      animasi(detik=105)
       return res
   else:
     return False
@@ -864,7 +864,8 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
                 if 'failed to bypass' in answer:
                     pass
                 else:
-                    
+                    if urlparse(answer).netloc =='earnsolana.xyz':
+                      answer=answer.replace('back','verify')
                     reward = curl.get(answer, headers=ua, cookies=cookies)
                     status_code(reward)
                     if 'Good job!' in reward.text:
@@ -937,7 +938,173 @@ def earnrub_pw(modulesl,banner):
 def claimcoin_in(modulesl,banner):
   vie_script(modulesl,banner,url="https://claimcoin.in/",key_re="6LfO65QlAAAAAE4tUQ1uwmXFMW1TvT5QxEDtrK25",ptc=True,short=True,faucet=False,auto=True)
 def earnsolana(modulesl,banner):
-  vie_script(modulesl,banner,url="https://earnsolana.xyz/",key_re="6Lem2pIjAAAAAESScDYn7ChChD9JS7pqa0d7TUUL",ptc=True,short=True,faucet=False,auto=True)
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://earnsolana.xyz/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['email'])
+    earnsolana(modulesl,banner)
+  email = load_data(host,custom=['email'])["email"]
+  curl=requests.Session()
+  headers={
+    "Host":"earnsolana.xyz",
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "User-Agent":"XYZ/3.0"
+  }
+  headers_p={
+    "Host":"earnsolana.xyz",
+    "User-Agent":"XYZ/3.0",
+    "content-type":"application/x-www-form-urlencoded"
+  }
+  login=curl.get('https://earnsolana.xyz/?r=1548',headers=headers)
+  csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  auth=curl.post('https://earnsolana.xyz/auth/login',data=f'wallet={email}&csrf_token_name={csrf}',headers=headers_p)
+  if 'Success!' in auth.text:
+    print(hijau1+'Login Success')
+    url=bs(auth.text,'html.parser').find_all('a',{'class':'collapse-item'})
+    url_sl=[]
+    url_f=[]
+    for url in url:
+      if 'faucet' in url['href']:
+        url_f.append(url['href'])
+      if 'links' in url['href']:
+        url_sl.append(url['href'])
+    # while True:
+    #   for faucet in url_f:
+    #     print(faucet)
+    #     fc=curl.get(faucet,headers=headers)
+    #     get_data=bs(fc.text,'html.parser')
+    #     csrf=get_data.find('input',{'name':'csrf_token_name'})['value']
+    #     token=get_data.find('input',{'name':'token'})['value']
+    #     atb=modulesl.antibot(fc,key='alert alert-warning text-center')
+    #     re=modulesl.RecaptchaV2('6Lem2pIjAAAAAESScDYn7ChChD9JS7pqa0d7TUUL',faucet)
+    #     data=f'antibotlinks=+{atb}&csrf_token_name={csrf}&token={token}&captcha=recaptchav2&g-recaptcha-response={re}&wallet={email}'
+    #     print(data)
+    #     get_reward=curl.post(faucet.replace('currency','verify'),headers={
+    #   "Host":"earnsolana.xyz",
+    #   "User-Agent":"XYZ/3.0",
+    #   "content-type":"application/x-www-form-urlencoded",
+    #   "referer":faucet
+    #   },data=data)
+    #     if get_reward.url=='https://earnsolana.xyz/firewall':
+    #       csrf=bs(get_reward.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+    #       data=f'g-recaptcha-response={re}&captchaType=recaptchav2&csrf_token_name={csrf}'
+    #       firewall=curl.post('https://earnsolana.xyz/firewall/verify',headers=headers_p,data=data)
+    #       print(firewall.text)
+    #     else:
+    #       print(get_reward.text)
+    #       if 'Success!' in get_reward.text:
+    #         print(get_reward.text.split("html: '")[1].split("',")[0])
+    #     #exit()
+    for i in range(len(url_sl)):
+      print(str(i)+'.'+url_sl[i].split('https://earnsolana.xyz/links/currency/')[1].upper())
+    currency=input('select > ')
+    os.system('cls' if os.name == 'nt' else 'clear')
+    host=urlparse("https://earnsolana.xyz/").netloc
+    banner.banner(host.upper())
+    get_sl=curl.get(url_sl[int(currency)],headers=headers)
+    data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
+    for sl in data_sl:
+      jumlah=int(sl.find('span',{'class':'badge badge-light'}).text.split('/')[0])
+      re=jumlah
+      for u in range(jumlah):
+        get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False).text.split(' <script> location.href = "')[1].split('"; </script>')[0]
+        answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+        if answer:
+          if 'failed to bypass' in answer:
+            pass
+          else:
+            get_reward=curl.get(answer,headers=headers)
+            if 'Success!' in get_reward.text:
+              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
+            re-=1
+        else:
+          break
+def cryptofuture(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://cryptofuture.co.in/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['email'])
+    cryptofuture(modulesl,banner)
+  email = load_data(host,custom=['email'])["email"]
+  curl=requests.Session()
+  headers={
+    "Host":"cryptofuture.co.in",
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "User-Agent":"XYZ/3.0"
+  }
+  headers_p={
+    "Host":"cryptofuture.co.in",
+    "User-Agent":"XYZ/3.0",
+    "content-type":"application/x-www-form-urlencoded"
+  }
+  login=curl.get('https://cryptofuture.co.in/?r=5471',headers=headers)
+  csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  auth=curl.post('https://cryptofuture.co.in/auth/login',data=f'wallet={email}&csrf_token_name={csrf}',headers=headers_p)
+  if 'Success!' in auth.text:
+    print(hijau1+'Login Success')
+    url=bs(auth.text,'html.parser').find_all('a',{'class':'collapse-item'})
+    url_sl=[]
+    url_f=[]
+    for url in url:
+      if 'faucet' in url['href']:
+        url_f.append(url['href'])
+      if 'links' in url['href']:
+        url_sl.append(url['href'])
+    # while True:
+    #   for faucet in url_f:
+    #     print(faucet)
+    #     fc=curl.get(faucet,headers=headers)
+    #     get_data=bs(fc.text,'html.parser')
+    #     csrf=get_data.find('input',{'name':'csrf_token_name'})['value']
+    #     token=get_data.find('input',{'name':'token'})['value']
+    #     atb=modulesl.antibot(fc,key='alert alert-warning text-center')
+    #     re=modulesl.RecaptchaV2('6Lem2pIjAAAAAESScDYn7ChChD9JS7pqa0d7TUUL',faucet)
+    #     data=f'antibotlinks=+{atb}&csrf_token_name={csrf}&token={token}&captcha=recaptchav2&g-recaptcha-response={re}&wallet={email}'
+    #     print(data)
+    #     get_reward=curl.post(faucet.replace('currency','verify'),headers={
+    #   "Host":"earnsolana.xyz",
+    #   "User-Agent":"XYZ/3.0",
+    #   "content-type":"application/x-www-form-urlencoded",
+    #   "referer":faucet
+    #   },data=data)
+    #     if get_reward.url=='https://earnsolana.xyz/firewall':
+    #       csrf=bs(get_reward.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+    #       data=f'g-recaptcha-response={re}&captchaType=recaptchav2&csrf_token_name={csrf}'
+    #       firewall=curl.post('https://earnsolana.xyz/firewall/verify',headers=headers_p,data=data)
+    #       print(firewall.text)
+    #     else:
+    #       print(get_reward.text)
+    #       if 'Success!' in get_reward.text:
+    #         print(get_reward.text.split("html: '")[1].split("',")[0])
+    #     #exit()
+    for i in range(len(url_sl)):
+      print(str(i)+'.'+url_sl[i].split('https://CryptoFuture.co.in/links/currency/')[1].upper())
+    currency=input('select > ')
+    os.system('cls' if os.name == 'nt' else 'clear')
+    host=urlparse("https://cryptofuture.co.in/").netloc
+    banner.banner(host.upper())
+    get_sl=curl.get(url_sl[int(currency)],headers=headers)
+    data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
+    for sl in data_sl:
+      jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
+      re=jumlah
+      for u in range(jumlah):
+        get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False).text.split(' <script> location.href = "')[1].split('"; </script>')[0]
+        answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+        if answer:
+          if 'failed to bypass' in answer:
+            pass
+          else:
+            get_reward=curl.get(answer,headers=headers)
+            if 'Success!' in get_reward.text:
+              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
+            re-=1
+        else:
+          break
 def whoopyrewards(modulesl,banner):
   vie_script(modulesl,banner,url="https://whoopyrewards.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 def keforcash(modulesl,banner):
@@ -1060,69 +1227,6 @@ def chillfaucet(modulesl,banner):
      pass
   print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 #--------------- other family ---------------#
-def paidlink(modulesl,banner):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  host=urlparse("https://paidlink.pro/").netloc
-  data_control(host)
-  banner.banner(host.upper())
-  email = load_data(host,custom=['email'])["email"]
-  if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
-    paidlink(modulesl,banner)
-  curl=requests.Session()
-  headers={
-    "Host":"paidlink.pro",
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "User-Agent":"XYZ/3.0"
-  }
-  get=curl.get('https://paidlink.pro/referral/9265',headers=headers)
-  ua={
-    "Host":"paidlink.pro",
-    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "User-Agent":"XYZ/3.0",
-    "content-type":"application/x-www-form-urlencoded"
-  }
-  login=curl.post('https://paidlink.pro/login',data='email='+email,headers=ua)
-  if 'invite your friend and earn 25% commission' in login.text:
-    print(hijau1+'Login success ✓')
-    bsi=bs(login.text,'html.parser')
-    coin=bsi.find_all('td')
-    data_coins=[]
-    for coins in coin:
-      if '/change-coin/' in str(coins):
-        data_coins.append(coins)
-    i=0
-    for coins in data_coins:
-      print(putih1+'[ '+hijau1+str(i)+putih1+' ] '+putih1+coins.find('img')['alt'])
-      i+=1
-    run=int(input(putih1+'[ '+kuning1+'?'+putih1+' ] '+ 'Input » '))
-    change=curl.get('https://paidlink.pro'+data_coins[run].find('a')['href'],headers=headers)
-    os.system('cls' if os.name == 'nt' else 'clear')
-    host=urlparse("https://paidlink.pro/").netloc
-    data_control(host)
-    banner.banner(host.upper())
-    get_all_sl=bs(change.text,'html.parser').find_all('div',{'class':'col-md-3'})
-    rprint(Tree("[green]> [yellow]Start bypass shortlinks"))
-    for sl in get_all_sl:
-      try:
-        if 'reward' in sl.text:
-          jumlah=int(sl.find('span',{'class':'desc'}).text.split('views left : ')[1].split('/')[0])
-          url=sl.find('a',{'class':'btn btn-primary'})['href']
-          re=jumlah
-          for jum in range(jumlah):
-            get_url=curl.get('https://paidlink.pro/'+url,headers=headers,allow_redirects=False).headers['location']
-            answer=bypass_link(get_url,modulesl,jumlah=[str(re),str(jumlah)])
-            if answer:
-              if answer=='failed to bypass':
-                pass
-              else:
-                
-                get_reward=curl.get(answer,headers=headers)
-                if 'You have successfully completed the shortlink' in get_reward.text:
-                  print(putih1+'├── '+hijau1+bs(get_reward.text,'html.parser').find('div',{'class':'alert alert-success alert-dismissible'}).text.strip())
-      except Exception as e:
-        keluar(str(e))
-        pass
 def coinfola(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('coinfola')
