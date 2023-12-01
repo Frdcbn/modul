@@ -13,7 +13,6 @@ import concurrent.futures
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 import random,string
-from requests_html import HTMLSession
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
@@ -182,14 +181,15 @@ def run(data, key, url='http://goodxevilpay.pp.ua', max_wait=300, sleep=5):
             elif "|" in answer:
                 return answer.split("|")[1]
             else:
-                print(answer)
                 return answer
-def antibot(html,key=None):
+def antibot(html,key=None,name_key=None):
   anu={
     "method": "antibot"
   }
   html=bs(html.text,'html.parser')
-  if key:
+  if name_key and key:
+    utama=html.find(name_key, class_=key).find('img')['src'].split('data:image/png;base64,')[1]
+  elif key:
     utama=html.find('p', class_=key).find('img')['src'].split('data:image/png;base64,')[1]
   else:
     utama=html.find_all('p', class_='alert-info')[1].find('img')['src'].split('data:image/png;base64,')[1]
@@ -198,7 +198,11 @@ def antibot(html,key=None):
     for antibot_links_script in antibot_links_script:
       if 'var ablinks' in str(antibot_links_script):
         script_text = antibot_links_script.string
-    for data in script_text.split('var ablinks=[')[1].split(']')[0].split('","'):
+    try:
+      val=script_text.split('var ablinks=[')[1].split(']')[0].split('","')
+    except:
+      val=script_text.split('var ablinks= [')[1].split(']')[0].split('","')
+    for data in val:
       dat=bs(data,'html.parser')
       rel=dat.find('a')['rel'][0].split('\\"')[1].split('"\\')[0]
       img=dat.find('img')['src'].split('data:image/png;base64,')[1].split('\\"')[0]
