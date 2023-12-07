@@ -14,6 +14,8 @@ from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 import random,string,subprocess
 from urllib3.exceptions import InsecureRequestWarning
+from concurrent.futures import ThreadPoolExecutor
+
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
@@ -46,6 +48,29 @@ def run_js(nama,code):
             return f"Error: {result.stderr}"
     except subprocess.TimeoutExpired:
         return "Error: Timeout saat mengeksekusi file js"
+def check_proxy(item):
+    try:
+        response = requests.get('https://rsshort.com', proxies={'http': f'{item}', 'https': f'{item}'}, timeout=1.5)
+        print('Checking proxy: ' + f'{item}      ', end='\r\r\r\r')
+        if response.status_code == 200:
+            return f'{item}'
+    except (requests.RequestException, ValueError):
+        pass
+    return None
+def proxy():
+  while True: 
+    print('Sedang mencari proxy aktif, please wait...', end='\r\r\r')
+
+    data=requests.get('https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=all&ssl=all&anonymity=all',headers={'referer':'https://proxyscrape.com/free-proxy-list'}).text.splitlines()
+
+    proxies_ssl = []
+
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        futures = [executor.submit(check_proxy, item) for item in data]
+        results = [future.result() for future in futures if future.result() is not None]
+    if results:
+      print('Proxy ditemukan!!                          ', end='\r\r\r')
+      return results
 # -------------------------------------------
 # RecaptchaV2 BYPASS
 def end():
@@ -1638,7 +1663,7 @@ def botfly(url):
     return "failed to bypass"
     pass
 def rsshort(url):
-  #try:
+  try:
     #while True:
       curl = requests.Session()
       retry = Retry(connect=5, backoff_factor=1)
@@ -1647,32 +1672,38 @@ def rsshort(url):
       curl.mount('https://', adapter)
       curl.verify = False
       requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-      key=open('sca.txt').read().splitlines()[0]
-      #pr=random.choice(proxy())
-      proxies = {
-    'http': f'http://scraperapi:{key}@proxy-server.scraperapi.com:8001',
-    'https': f'http://scraperapi:{key}@proxy-server.scraperapi.com:8001',
+      #key=open('sca.txt').read().splitlines()[0]
+      pr=random.choice(proxy())
+      #print(pr)
+      curl.proxies = {
+    'http': pr,#f'http://scraperapi.keep_headers=true.session_number=1:{key}@proxy-server.scraperapi.com:8001',
+    'https': pr,#f'http://scraperapi.keep_headers=true.session_number=1:{key}@proxy-server.scraperapi.com:8001',
       }
       ua={'User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'}
-      step1=curl.get(url,headers=ua,verify=False)
+      step1=curl.get(url,headers=ua,timeout=1)
+      status_code(step1)
+      #print(step1.text)
       ur=bs(step1.text,'html.parser').find_all('meta')[1]['content'].split('url=')[1].split('"')[0]
+      #print(ur)
       nama_f=urlparse(url).path.replace('/','')
       urut=1
       while True:
-        step2=curl.get(ur,headers=ua,verify=False)
+        step2=curl.get(ur,headers=ua)
+        status_code(step2)
+        #print(step2.cookies)
         #sleep(15)
         #print(bs(step2.text,'html.parser').text.strip().replace('\n',''))
         data=bs(step2.text,'html.parser').find_all('script')
         for fd in data:
           if fd.text.startswith('var _'):
             res=run_js(nama_f,fd.text.replace('eval','console.log'))
+            #print(res)
             break
         for fd in data:
           if fd.text.startswith('var _'):
             stepnya=run_js(nama_f,fd.text.replace('eval','console.log'))
             if 'Step' in stepnya:
               break
-        #print(bs(stepnya.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser').text.strip())
         data=bs(res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
         csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
         inputs = data.find_all("input")
@@ -1711,7 +1742,8 @@ def rsshort(url):
           for key, value in data.items():
               payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
           payload += '--{}--'.format(boundary)
-          get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload,verify=False)
+          get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload)
+          status_code(get_data)
           if get_data.status_code==200:
             data_g=base64.b64encode(json.dumps({'i': 1, 'tk': icon_token, 'ts': int(time.time() * 1000)}).encode()).decode()
             ua_g={
@@ -1723,7 +1755,8 @@ def rsshort(url):
             'Sec-Fetch-Mode': 'no-cors',
             'Sec-Fetch-Dest': 'image',
             'Referer': ur}
-            gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g,verify=False)
+            gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g)
+            status_code(gambar)
             ans1=random.randint(200, 250)
             ans2=random.randint(33,35)
             ic={
@@ -1755,7 +1788,8 @@ def rsshort(url):
                 payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
             payload += '--{}--'.format(boundary)
             #print(payload)
-            cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload,verify=False)
+            cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload)
+            status_code(cek_captcha)
             #print(cek_captcha.status_code)
             #if cek_captcha.status_code!=200:
               #break
@@ -1776,12 +1810,14 @@ def rsshort(url):
           'Sec-Fetch-Dest': 'document',
           'Referer': ur
         }
-        get_data=curl.post(ur,headers=ua_p,data=data,allow_redirects=False,verify=False)
+        get_data=curl.post(ur,headers=ua_p,data=data,allow_redirects=False)
+        status_code(get_data)
         #print(get_data.headers)
         ur=get_data.headers['location']
         #print(ur)
         urut+=1
-        get_data=curl.get(ur,allow_redirects=False,verify=False)
+        get_data=curl.get(ur,allow_redirects=False)
+        status_code(get_data)
         #print(get_data.headers)
         if get_data.status_code==302:
           if '//rs' not in get_data.headers['location']:
@@ -1789,13 +1825,13 @@ def rsshort(url):
   # inputs = data.find_all("input")
   # data = "&".join([f"{input.get('name')}={input.get('value')}" for input in inputs])
   #print(data)
-  # except Exception as e:
-  #   return "failed to bypass"
-  #   pass
+  except Exception as e:
+    return "failed to bypass"
+    pass
 # start_time = time.time()
 # print(rsshort('https://rsshort.com/YESf8IbO'))
 # end_time = time.time()
-
+#print(rsshort('https://rsshort.com/ZlmV6'))
 # # Hitung selisih waktu untuk mendapatkan durasi eksekusi
 # execution_time = end_time - start_time
 
