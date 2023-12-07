@@ -1,4 +1,4 @@
-import re,json,time,uuid,os
+import re,json,time,uuid,os,string,random,shutil
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse,urlencode
@@ -12,12 +12,40 @@ from bs4 import BeautifulSoup as bs
 import concurrent.futures
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
-import random,string
+import random,string,subprocess
+from urllib3.exceptions import InsecureRequestWarning
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
 merah1 = "\033[1;91m"#Terang
 biru1 = "\033[1;94m"#Terang
+def Session():
+    session = requests.Session()
+    retry = Retry(connect=5, backoff_factor=1)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+# -------------------------------------------
+def run_js(nama,code):
+    # Menulis kode ke dalam file js
+    with open(f'{nama}.js', 'w') as file:
+        file.write(code)
+
+    try:
+        # Menjalankan file js menggunakan subprocess
+        result = subprocess.run(['node', f'{nama}.js'], capture_output=True, text=True, timeout=10)
+
+        # Menghapus file js setelah dijalankan
+        subprocess.run(['rm', f'{nama}.js'])
+
+        # Mengecek apakah proses berjalan tanpa error
+        if result.returncode == 0:
+            return result.stdout
+        else:
+            return f"Error: {result.stderr}"
+    except subprocess.TimeoutExpired:
+        return "Error: Timeout saat mengeksekusi file js"
 # -------------------------------------------
 # RecaptchaV2 BYPASS
 def end():
@@ -137,31 +165,20 @@ def RecaptchaV3(ANCHOR_URL):
   # -------------------------------------------
 # -------------------------------------------
 # Antibot BYPASS
-def Session():
-    session = requests.Session()
-    retry = Retry(connect=5, backoff_factor=1)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
-
 def in_api(data, key, url):
     session = Session()
     params = {"key": (None, key)}
     for key in data:
         params[key] = (None, data[key])
     return session.post(url + '/in.php', files=params, verify=False, timeout=15)
-
 def res_api(api_id, key, url):
     session = Session()
     params = {"key": key, "id": api_id}
     return session.get(url + '/res.php', params=params, verify=False, timeout=15)
-
 def get_balance(key, url):
     session = Session()
     params = {"key": key, "action": "getbalance"}
     return session.get(url + '/res.php', params=params, verify=False, timeout=15).text
-
 def run(data, key, url='http://goodxevilpay.pp.ua', max_wait=300, sleep=5):
     get_in = in_api(data, key, url)
     if get_in:
@@ -179,8 +196,10 @@ def run(data, key, url='http://goodxevilpay.pp.ua', max_wait=300, sleep=5):
             if 'CAPCHA_NOT_READY' in answer:
                 continue
             elif "|" in answer:
+                #print(answer)
                 return answer.split("|")[1]
             else:
+                #print(answer)
                 return answer
 def antibot(html,key=None,name_key=None):
   anu={
@@ -213,6 +232,11 @@ def antibot(html,key=None,name_key=None):
     return answer
 def hcaptcha(key,url):
   data = {"method": "hcaptcha", "pageurl": url, "sitekey": key}
+  xe=open('xkey.txt').read().splitlines()[0]
+  re = run(data,xe)
+  return re
+def rscaptcha(img):
+  data = data = {"method": "rscaptcha","body": img}
   xe=open('xkey.txt').read().splitlines()[0]
   re = run(data,xe)
   return re
@@ -250,7 +274,7 @@ def one_method(curl,url,headers=None,go=None):
 def ctrsh(url):
   try:
     url_g=url
-    curl=requests.Session()
+    curl=Session()
     step1=curl.get('https://sinonimos.de/?url8j='+url).text
     url=step1.split('<script>window.location.href = "')[1].split('";</script>')[0]
     status=False
@@ -283,7 +307,7 @@ def ctrsh(url):
     return "failed to bypass"
 def try2(url):
   try:
-    curl = requests.Session()
+    curl=Session()
     step1=curl.get(url)
     url1=url
     ht=bs(step1.text,'html.parser')
@@ -347,7 +371,7 @@ def droplink(url):
         return "failed to bypass"
 def cuty_io(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url,headers={'User-Agent': 'XYZ/3.0'})
   token=bs(step1.text,'html.parser').find('input',{"name":"_token"})["value"]
   step2=curl.post(step1.url,data=f"_token={token}",headers={'User-Agent':'XYZ/3.0','content-type':'application/x-www-form-urlencoded'}).text
@@ -370,7 +394,7 @@ def cuty_io(url):
 def shortfly(url):
   try:
     url=urlparse(url)
-    curl=requests.Session()
+    curl=Session()
     y=curl.get('https://shortsfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://advertisingexcel.com/outgoing/","user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).headers
     sleep(15)
     return y["Location"]
@@ -379,7 +403,7 @@ def shortfly(url):
 def linksfly(url):
   try:
     url=urlparse(url)
-    curl=requests.Session()
+    curl=Session()
     y=curl.get('https://linksfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://advertisingexcel.com/outgoing/","user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).headers
     sleep(15)
     return y["Location"]
@@ -388,7 +412,7 @@ def linksfly(url):
 def wefly(url):
   try:
     url=urlparse(url)
-    curl=requests.Session()
+    curl=Session()
     y=curl.get('https://wefly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://advertisingexcel.com/outgoing/","user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).headers
     sleep(15)
     return y["Location"]
@@ -397,7 +421,7 @@ def wefly(url):
 def urlsfly(url):
   try:
     url=urlparse(url)
-    curl=requests.Session()
+    curl=Session()
     y=curl.get('https://urlsfly.me/flyinc.'+url.path,allow_redirects=False,headers={"referer":"https://advertisingexcel.com/outgoing/","user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).headers
     sleep(15)
     return y["Location"]
@@ -405,7 +429,7 @@ def urlsfly(url):
     return "failed to bypass"
 def exe_io(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url,headers={"user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"})
   tf=bs(step1.text,'html.parser')
   csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -438,7 +462,7 @@ def exe_io(url):
     return "failed to bypass"
 def fl_lc(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     step1=curl.get(url)
     fd=bs(step1.text,'html.parser')
     id=fd.find('form')['id']
@@ -489,7 +513,7 @@ def clks_pro(url):
  def _main(url):
    for i in range(3):
      try:
-      curl=requests.Session()
+      curl=Session()
       ua={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"}
       get_url=curl.get(url,headers=ua)
       bs4 = BeautifulSoup(get_url.content, "html.parser")
@@ -527,13 +551,13 @@ def clks_pro(url):
  else:
    return res
 def shrinkme(url):
-  curl=requests.Session()
+  curl=Session()
   res= one_method(curl=curl,url='https://en.shrinke.me'+urlparse(url).path,headers={"referer":"https://themezon.net/managed-cloud-hosting-service-providers/"})
   sleep(15)
   return res
 def shrinkearn(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     step1=curl.get(url).text
     fl=bs(step1,'html.parser')
     url_post=fl.find('form')["action"]
@@ -566,7 +590,7 @@ def shrinkearn(url):
     return "failed to bypass"
 def clksh(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     step1=curl.get(url)
     tf=bs(step1.text,'html.parser')
     csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -599,7 +623,7 @@ def clksh(url):
     return "failed to bypass"
 def usalink(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     url_base=urlparse(url)
     step1=curl.get('https://go.theconomy.me/'+url_base.path).text
  #   print(step1)
@@ -627,7 +651,7 @@ def usalink(url):
     return "failed to bypass"
 def ez4short(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     step1=curl.get(url,headers={"referer":"https://techmody.io/new-features-in-chrome-90-just-released/"})
     sleep(3)
     fl=bs(step1.text,'html.parser')
@@ -644,25 +668,25 @@ def ez4short(url):
   except Exception as e:
     return 'failed to bypass'
 def linksly(url):
-  curl=requests.Session()
+  curl=Session()
   res= one_method(curl=curl,url='https://go.linksly.co'+urlparse(url).path,headers={"referer":"https://en.themezon.net/everything-about-cloud-servers-and-cloud-hosting/"})
   sleep(15)
   return res
 def short2url(url):
-  curl=requests.Session()
+  curl=Session()
   url='https://techyuth.xyz/blog'+urlparse(url).path
   res= one_method(curl=curl,url=url,headers={"referer":"https://blog.mphealth.online/"},go="techyuth.xyz/blog")
   sleep(15)
   return res
 def adbitfly(url):
   #try:
-    curl=requests.Session()
+    curl=Session()
     res=one_method(curl,url=url.replace('short/',''),headers={"referer":"https://coinsward.com/blog/"})
     return res
 def shorti_io(url):
   try:
     path=urlparse(url).path
-    curl=requests.Session()
+    curl=Session()
     step1=curl.get('https://blog.financeandinsurance.xyz'+path).text
     tf=bs(step1,'html.parser')
     csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -687,7 +711,7 @@ def shorti_io(url):
     return "failed to bypass"
 def ex_foary_com(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(f'https://forex-trnd.com/blo{urlparse(url).path}?r=/blo{urlparse(url).path}',headers={"referer":"https://forex-golds.com/how-to-use-renko-charts/"})
   sleep(10)
   fl=bs(step1.text,'html.parser')
@@ -704,7 +728,7 @@ def ex_foary_com(url):
     return "failed to bypass"
 def oii(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url)
   tf=bs(step1.text,'html.parser')
   csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -740,7 +764,7 @@ def oii(url):
     return "failed to bypass"
 def linkjust(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url,headers={"referer":"https://forexrw7.com/forex-trading-could-it-be-a-profitable-career-for-me/"})
   fl=bs(step1.text,"html.parser")
   sleep(5)
@@ -758,7 +782,7 @@ def linkjust(url):
     return "failed to bypass"
 def myra(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get('https://myra.x10.bz'+urlparse(url).path)
   sleep(10)
   fl=bs(step1.text,'html.parser')
@@ -775,7 +799,7 @@ def myra(url):
     return "failed to bypass"
 def mitly(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url,headers={"user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).text
   tf=bs(step1,'html.parser')
   csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -816,7 +840,7 @@ def mitly(url):
     return "failed to bypass"
 def adshorti_xyz(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url.replace('link.',''))
   sleep(15)
   fl=bs(step1.text,"html.parser")
@@ -834,7 +858,7 @@ def adshorti_xyz(url):
     return "failed to bypass"
 def birdurl(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url.replace('go.',''),headers={"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
   sleep(10)
   fl=bs(step1.text,'html.parser')
@@ -852,7 +876,7 @@ def birdurl(url):
     return "failed to bypass"
 def owlink(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url.replace('go.',''),headers={"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
   sleep(10)
   fl=bs(step1.text,'html.parser')
@@ -870,7 +894,7 @@ def owlink(url):
     return "failed to bypass"
 def flyzu(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get('https://go.flyzu.icu'+urlparse(url).path,headers={"referer":"https://zubatecno.com/2022/09/07/7-amazing-ways-to-beat-writers-block/"}).text
   tf=bs(step1,'html.parser')
   csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -933,7 +957,7 @@ def web1s_info(url):
       gas=curl.post(gas.url,data=data,headers={"content-type":"application/x-www-form-urlencoded"},allow_redirects=False)
       sleep(15)
       return gas.headers['Location']
-  curl=requests.Session()
+  curl=Session()
   get_url=curl.get(url)
   if 'Tiếp Tục' in get_url.text:
     return final(get_url.url)
@@ -977,7 +1001,7 @@ def web1s_info(url):
       return final(ceki)
 def hrshort(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   url='https://'+url.split('url=')[1]
   res=one_method(curl,url)
   sleep(15)
@@ -986,7 +1010,7 @@ def hrshort(url):
     return "failed to bypass"
 def adshorti_co(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   url=url.replace('link.','')
   res=one_method(curl,url)
   sleep(15)
@@ -995,7 +1019,7 @@ def adshorti_co(url):
     return "failed to bypass"
 def cashurl_win(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url)
   bs4 = BeautifulSoup(step1.content, "html.parser")
   inputs = bs4.find_all("input")
@@ -1019,7 +1043,7 @@ def cashurl_win(url):
    return "failed to bypass"
 def illink_net(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     step1=curl.get('https://illink.net'+urlparse(url).path).text
     tf=bs(step1,'html.parser')
     csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -1046,7 +1070,7 @@ def illink_net(url):
     return "failed to bypass"
 def mitly(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url,headers={"user-agent":"Mozilla/5.0 (Linux; Android 11; Phh-Treble vanilla Build/RQ3A.211001.001;) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/90.0.4430.91 Safari/537.36"}).text
   tf=bs(step1,'html.parser')
   csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -1088,7 +1112,7 @@ def mitly(url):
 def linkvor_pw(url):
  try:
   url='https://g.linkvor.pw'+urlparse(url).path
-  curl=requests.Session()
+  curl=Session()
   res= one_method(curl,url)
   sleep(15)
   return res
@@ -1096,7 +1120,7 @@ def linkvor_pw(url):
    return 'failed to bypass'
 def link4m_com(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   answer=RecaptchaV2('6LcQsTQgAAAAADNQ_pCfukfvS0i9lk4oJTVSs5bZ',url)
   data=f"g-recaptcha-response={answer}&alias={url.split('/go/')[1]}"
   final=curl.post('https://link4m.com/links/check-captcha',data=data,headers={"user-agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36",'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'},allow_redirects=False)
@@ -1107,7 +1131,7 @@ def link4m_com(url):
    return 'failed to bypass'
 def insfly(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   res=one_method(curl,url,headers={"referer":"https://enit.in/H3ScKu"})
   sleep(15)
   return res
@@ -1115,7 +1139,7 @@ def insfly(url):
    return 'failed to bypass'
 def zuba_link(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     host=urlparse(url).netloc
     get_ref=urlparse(curl.get(url).url).netloc
     final = curl.get(url,headers={"referer":f"https://{get_ref}/?p=9%20.%20%27?session=4%27"}).text
@@ -1131,7 +1155,7 @@ def zuba_link(url):
     return 'failed to bypass'
 def shortzu_icu(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     url="https://shortzu.icu/"+urlparse(url).path
     res=one_method(curl,url,headers={"referer":"https://earn.zubatecno.com/?p=9%20.%20%27?session=4%27"})
     sleep(15)
@@ -1140,7 +1164,7 @@ def shortzu_icu(url):
     return 'failed to bypass'
 def clickzu_icu(url):
   try:
-    curl=requests.Session()
+    curl=Session()
     url="https://clickzu.icu/"+urlparse(url).path
     res=one_method(curl,url,headers={"referer":"https://earn.battleroyal.online/?p=10%20.%20%27?session=4%27"})
     sleep(15)
@@ -1149,12 +1173,12 @@ def clickzu_icu(url):
     return 'failed to bypass'
 def chainfo(url):
   url="https://go.bitcosite.com"+urlparse(url).path
-  curl=requests.Session()
+  curl=Session()
   res=one_method(curl,url,headers={"referer":"https://bitzite.com/the-benefits-of-working-with-a-single-agency-in-real-estate/"})
   return res
 def cbshort(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   url=url.replace('ser2','ser3')
   res=one_method(curl,url)
   sleep(15)
@@ -1163,7 +1187,7 @@ def cbshort(url):
     return 'failed to bypass'
 def links1s_com(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   cek=curl.get(url)
   if 'Please check the captcha box to proceed to the destination page.' in cek.text:
     step1=curl.get(url)
@@ -1188,7 +1212,7 @@ def links1s_com(url):
     return 'failed to bypass'
 def shareus(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   res=one_method(curl,url.replace('go.',''),headers={"referer":"https://mdisk.net.in/"})
   sleep(15)
   return res
@@ -1236,13 +1260,13 @@ def megaurl(url):
     except Exception as e:
         return "failed to bypass"
 def link1s_net(url):
-  curl=requests.Session()
+  curl=Session()
   res=one_method(curl,url,headers={"referer":"https://nguyenvanbao.com/danh-cho-nguoi-moi-vao-nghe-make-money-online/"})
   sleep(20)
   return res
 def bitads(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   host=urlparse(url).netloc
   final = curl.get(url).text
   sleep(15)
@@ -1257,7 +1281,7 @@ def bitads(url):
    return "failed to bypass"
 def adbull(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url+'?ref=',headers={"referer":"https://deportealdia.live/2021/03/23/novedades-en-la-nba/"})
   sleep(10)
   fl=bs(step1.text,'html.parser')
@@ -1275,7 +1299,7 @@ def adbull(url):
     return "failed to bypass"
 def url_namaidani(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"}).text
   tf=bs(step1,'html.parser')
   csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -1300,7 +1324,7 @@ def url_namaidani(url):
     return "failed to bypass"
 def megafly(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   url=url.replace('go.','get.')
   step1=curl.get(url)
   bs4 = BeautifulSoup(step1.content, "html.parser")
@@ -1320,7 +1344,7 @@ def megafly(url):
     return "failed to bypass"
 def kiw_app(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url)
   bs4 = BeautifulSoup(step1.content, "html.parser")
   inputs = bs4.find_all("input")
@@ -1341,7 +1365,7 @@ def kiw_app(url):
 def freeltc_top(url):
   try:
     pat=urlparse(url).path
-    curl=requests.Session()
+    curl=Session()
     step1=curl.get('https://short.freeltc.top'+pat).text
     tf=bs(step1,'html.parser')
     csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -1366,20 +1390,20 @@ def freeltc_top(url):
     return "failed to bypass"
 def softindex_website(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   if '&url=' in url:
     url=url.split('&url=')
   if 'go.' in url:
     url=url.replace('go.','')
   else:
     url=url
-  curl=requests.Session()
+  curl=Session()
   return one_method(curl,url)
  except Exception as e:
     return "failed to bypass"
 def _1short_in(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url)
   gt=bs(step1.text,'html.parser')
   csrf=gt.find('input',{'name':'_token'})['value']
@@ -1395,7 +1419,7 @@ def _1short_in(url):
     return "failed to bypass"
 def urlcash(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   if '&url=' in url:
     url=url.split('&url=')
   if 'go1.' in url:
@@ -1428,7 +1452,7 @@ def urlcash(url):
     return "failed to bypass"
 def coinparty(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get('https://coinsparty.com'+urlparse(url.replace('/m','')).path)
   sleep(10)
   fl=bs(step1.text,'html.parser')
@@ -1444,7 +1468,7 @@ def coinparty(url):
  except Exception as e:
     return "failed to bypass"
 def trafic1s(url):
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
   tf=bs(step1.text,'html.parser')
   csrf=tf.find('input',{'name':'_csrfToken'})["value"]
@@ -1465,7 +1489,7 @@ def trafic1s(url):
       return json.loads(final.text)["url"]
 def gain_lk(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   ua={
     "User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36",
     "x-requested-with":"mark.via.gp"
@@ -1513,7 +1537,7 @@ def gain_lk(url):
    return "failed to bypass"
    pass
 def sl_ask(url):
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url)
   bs4 = BeautifulSoup(step1.text, "html.parser")
   inputs = bs4.find_all("input")
@@ -1537,7 +1561,7 @@ def sl_ask(url):
       break
 def panylink(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   url="https://panylink.com/"+urlparse(url).path
   host=urlparse(url).netloc
   final = curl.get(url,headers={"referer":"https://btcpany.com/?p=20%20.%20%27?session=3%27"})
@@ -1555,7 +1579,7 @@ def panylink(url):
    return 'failed to bypass'
 def botfly(url):
  try:
-  curl=requests.Session()
+  curl=Session()
   step1=curl.get(url)
   if 'http://terafly.me/go.php?' in step1.url:
     red=step1.url.split('http://terafly.me/go.php?')[1]
@@ -1613,43 +1637,176 @@ def botfly(url):
  except Exception as e:
     return "failed to bypass"
     pass
-# def rsshort(url):
-#   def icon(ref):
-#     headers = {
-#       'Host': 'rseducationinfo.com',
-#       # 'content-length': '262',
-#       'x-requested-with': 'XMLHttpRequest',
-#       'user-agent': 'Mozilla/5.0 (iPad; CPU OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/87.0.4280.77 Mobile/15E148 Safari/604.1',
-#       'x-iconcaptcha-token': '8d963d28f1d0bd4be89c05fbac1670f366547725',
-#       'content-type': 'multipart/form-data; boundary=----WebKitFormBoundaryVykdbU4zAlhb9AZc',
-#       'accept': '*/*',
-#       'origin': 'https://rseducationinfo.com',
-#       'sec-fetch-site': 'same-origin',
-#       'sec-fetch-mode': 'cors',
-#       'sec-fetch-dest': 'empty',
-#       'referer': 'https://rseducationinfo.com/CHEMISTRY',
-#       # 'accept-encoding': 'gzip, deflate, br',
-#       'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
-#       'cookie': 'csrf_cookie_name=03c4352ea87edf0899d3e5e55b3ff245',
-#       'cookie': 'ci_sessions=pnicr05qsmmcvbel5m53ls4si7j3vh70',
-#       'cookie': '__gads=ID=3130e587fbca82bb:T=1699200874:RT=1699200874:S=ALNI_MYhQ75e_iDzNHdXi-EE32DR6t_eOw',
-#       'cookie': '__gpi=UID=00000c80727a592c:T=1699200874:RT=1699200874:S=ALNI_MbSC9xMTX-y5TSULw7Jk7r_P5K_Vw',
-#       'cookie': '_ga=GA1.1.1532231828.1699200873',
-#       'cookie': '_ga_V986F17XBG=GS1.1.1699200878.1.0.1699200878.0.0.0',
-#     }
-#     data = '------WebKitFormBoundaryVykdbU4zAlhb9AZc\nContent-Disposition: form-data; name=payload\n\neyJpIjoxLCJhIjoxLCJ0IjoibGlnaHQiLCJ0ayI6IjhkOTYzZDI4ZjFkMGJkNGJlODljMDVmYmFjMTY3MGYzNjY1NDc3MjUiLCJ0cyI6MTY5OTIwMDg5ODE5OH0=\n------WebKitFormBoundaryVykdbU4zAlhb9AZc--\n'
-    
-#     response = requests.post('https://rseducationinfo.com/iconcaptchar/captcharequest', headers=headers, data=data)
-#   curl = HTMLSession()
-#   ua={'User-Agent':'Mozilla/5.0 (iPad; CPU OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/87.0.4280.77 Mobile/15E148 Safari/604.1'}
-#   step1=curl.get(url,headers=ua)
-#   print(step1.text)
-#   ur=bs(step1.text,'html.parser').find_all('meta')[1]['content'].split('url=')[1].split('"')[0]
-#   print(ur)
-#   step2=curl.get(ur,headers=ua)
-#   step2.html.render()
-#   step2.html.find('csrf_test_name')
-#   print(bs(step2.text,'html.parser').find_all('name'))
-#   if 'csrf_test_name' in step2.text:
-#     print(True)
-# print(rsshort('https://rsshort.com/zcRx'))
+def rsshort(url):
+  #try:
+    #while True:
+      curl = requests.Session()
+      retry = Retry(connect=5, backoff_factor=1)
+      adapter = HTTPAdapter(max_retries=retry)
+      curl.mount('http://', adapter)
+      curl.mount('https://', adapter)
+      curl.verify = False
+      requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+      key=open('sca.txt').read().splitlines()[0]
+      #pr=random.choice(proxy())
+      proxies = {
+    'http': f'http://scraperapi:{key}@proxy-server.scraperapi.com:8001',
+    'https': f'http://scraperapi:{key}@proxy-server.scraperapi.com:8001',
+      }
+      ua={'User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'}
+      step1=curl.get(url,headers=ua,verify=False)
+      ur=bs(step1.text,'html.parser').find_all('meta')[1]['content'].split('url=')[1].split('"')[0]
+      nama_f=urlparse(url).path.replace('/','')
+      urut=1
+      while True:
+        step2=curl.get(ur,headers=ua,verify=False)
+        #sleep(15)
+        #print(bs(step2.text,'html.parser').text.strip().replace('\n',''))
+        data=bs(step2.text,'html.parser').find_all('script')
+        for fd in data:
+          if fd.text.startswith('var _'):
+            res=run_js(nama_f,fd.text.replace('eval','console.log'))
+            break
+        for fd in data:
+          if fd.text.startswith('var _'):
+            stepnya=run_js(nama_f,fd.text.replace('eval','console.log'))
+            if 'Step' in stepnya:
+              break
+        #print(bs(stepnya.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser').text.strip())
+        data=bs(res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
+        inputs = data.find_all("input")
+        key1=inputs[len(inputs)-1].get('name')
+        value1=inputs[len(inputs)-1].get('value')
+        if '_iconcaptcha-token' in res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''):
+          #sleep(15)
+          icon_token=data.find('input',{'name':'_iconcaptcha-token'})['value']
+          timestamp = int(time.time() * 1000)
+          data = {
+            'i': 1,
+            'a': 1,
+            't': 'light',
+            'tk': icon_token,
+            'ts': timestamp}
+          #print(data)
+          json_data = json.dumps(data)
+          py = base64.b64encode(json_data.encode()).decode()
+          data={"payload":py}
+          #print(data)
+          id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
+          ua_cp = {
+            'Host': urlparse(ur).netloc,
+            'X-Requested-With': 'XMLHttpRequest',
+            #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+            'X-Iconcaptcha-Token': icon_token,
+            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
+            'Accept': '*/*',
+            'Origin': 'https://'+urlparse(ur).netloc,
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Dest': 'empty',
+            'Referer': ur}
+          boundary = "----WebKitFormBoundary"+id_
+          payload = ''
+          for key, value in data.items():
+              payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
+          payload += '--{}--'.format(boundary)
+          get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload,verify=False)
+          if get_data.status_code==200:
+            data_g=base64.b64encode(json.dumps({'i': 1, 'tk': icon_token, 'ts': int(time.time() * 1000)}).encode()).decode()
+            ua_g={
+            'Host': urlparse(ur).netloc,
+            #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'X-Requested-With': 'mark.via.gq',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'no-cors',
+            'Sec-Fetch-Dest': 'image',
+            'Referer': ur}
+            gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g,verify=False)
+            ans1=random.randint(200, 250)
+            ans2=random.randint(33,35)
+            ic={
+              'i': 1,
+              'x': ans1,
+              'y': ans2,
+              'w': 320,
+              'a': 2,
+              'tk': icon_token,
+              'ts': int(time.time() * 1000)
+            }
+            #print(ic)
+            data_verif=base64.b64encode(json.dumps(ic).encode()).decode()
+            id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
+            uacp = {
+              'Host': urlparse(ur).netloc,
+              'X-Requested-With': 'XMLHttpRequest',
+              #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+              'X-Iconcaptcha-Token': icon_token,
+              'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
+              'Accept': '*/*',
+              'Referer': ur}
+            # print(uacp)
+            # print(data_verif)
+            dataq={"payload":data_verif}
+            boundary = "----WebKitFormBoundary"+id_
+            payload = ''
+            for key, value in dataq.items():
+                payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
+            payload += '--{}--'.format(boundary)
+            #print(payload)
+            cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload,verify=False)
+            #print(cek_captcha.status_code)
+            #if cek_captcha.status_code!=200:
+              #break
+            #print(cek_captcha.status_code)
+          data=f'csrf_test_name={csrf_name}&_iconcaptcha-token={icon_token}&ic-hf-se={str(ans1)}%2C{str(ans2)}%2C320&ic-hf-id=1&ic-hf-hp=&{key1}={value1}'
+        else:
+          data=f'csrf_test_name={csrf_name}&{key1}={value1}'
+        ua_p = {
+          'Host': urlparse(ur).netloc,
+          'Origin': 'https://'+urlparse(ur).netloc,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'X-Requested-With': 'mark.via.gq',
+          'Sec-Fetch-Site': 'same-origin',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-User': '?1',
+          'Sec-Fetch-Dest': 'document',
+          'Referer': ur
+        }
+        get_data=curl.post(ur,headers=ua_p,data=data,allow_redirects=False,verify=False)
+        #print(get_data.headers)
+        ur=get_data.headers['location']
+        #print(ur)
+        urut+=1
+        get_data=curl.get(ur,allow_redirects=False,verify=False)
+        #print(get_data.headers)
+        if get_data.status_code==302:
+          if '//rs' not in get_data.headers['location']:
+            return get_data.headers['location']
+  # inputs = data.find_all("input")
+  # data = "&".join([f"{input.get('name')}={input.get('value')}" for input in inputs])
+  #print(data)
+  # except Exception as e:
+  #   return "failed to bypass"
+  #   pass
+# start_time = time.time()
+# print(rsshort('https://rsshort.com/YESf8IbO'))
+# end_time = time.time()
+
+# # Hitung selisih waktu untuk mendapatkan durasi eksekusi
+# execution_time = end_time - start_time
+
+# print(f"Waktu eksekusi: {execution_time} detik")
+# def scrape():
+#   curl=Session()
+#   y=curl.get('https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=all&ssl=all&anonymity=all',headers={'User-Agent':'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537'}).text.splitlines()
+#   aktif=[]
+#   for dt in y:
+#       cek=check_proxy(dt)
+#       if cek:
+#         aktif.append(dt)
+#   print(aktif)
+# scrape()
