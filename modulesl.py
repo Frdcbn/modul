@@ -15,7 +15,6 @@ from urllib3.util import Retry
 import random,string,subprocess
 from urllib3.exceptions import InsecureRequestWarning
 from concurrent.futures import ThreadPoolExecutor
-
 hijau1 = "\033[1;92m"#Terang
 kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
@@ -50,34 +49,76 @@ def run_js(nama,code):
         return "Error: Timeout saat mengeksekusi file js"
 def check_proxy(item):
     try:
-        response = requests.get('https://rsshort.com', proxies={'http': f'{item}', 'https': f'{item}'}, timeout=1.5)
         print('Checking proxy: ' + f'{item}      ', end='\r\r\r\r')
+        response = requests.get('https://rsshort.com', proxies={'http': f'{item}', 'https': f'{item}'}, timeout=1.5)
         if response.status_code == 200:
-            return f'{item}'
-    except (requests.RequestException, ValueError):
-        pass
+            return item
+    except requests.ConnectionError as ce:pass
+        #print(f'ConnectionError: {ce} for {item}')
+    except requests.Timeout as to:pass
+        #print(f'Timeout: {to} for {item}')
+    except ValueError as ve:pass
+        #print(f'ValueError: {ve} for {item}')
     return None
-def proxy():
-  while True: 
+def save_to_file(results, filename='proxy.txt'):
+    with open(filename, 'w') as file:
+        for item in results:
+            file.write(f'{item}\n')
+def proxy(re=False):
     print('Sedang mencari proxy aktif, please wait...', end='\r\r\r')
-
-    data=requests.get('https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=all&ssl=all&anonymity=all',headers={'referer':'https://proxyscrape.com/free-proxy-list'}).text.splitlines()
-
-    proxies_ssl = []
-
-    with ThreadPoolExecutor(max_workers=20) as executor:
+    data = requests.get('https://api.proxyscrape.com/?request=getproxies&proxytype=socks4&timeout=10000&country=all', headers={'referer': 'https://proxyscrape.com/free-proxy-list'}).text.splitlines()
+    data1 = requests.get('https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=all&ssl=all&anonymity=all', headers={'referer': 'https://proxyscrape.com/free-proxy-list'}).text.splitlines()
+    #data2 = requests.get('https://www.proxy-list.download/api/v1/get?type=socks4').text.splitlines()
+    data = data + data1
+    for url in ['https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/https.txt', 'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-https.txt', 'https://raw.githubusercontent.com/mmpx12/proxy-list/master/https.txt', 'https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt', 'https://raw.githubusercontent.com/aslisk/proxyhttps/main/https.txt']:
+      dat=requests.get(url).text.splitlines()
+      data=data+dat
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = [executor.submit(check_proxy, item) for item in data]
         results = [future.result() for future in futures if future.result() is not None]
     if results:
-      print('Proxy ditemukan!!                          ', end='\r\r\r')
-      return results
+        print('Proxy ditemukan!!                          ', end='\r\r\r')
+        save_to_file(results)
+        if re:
+          return results
+#print(proxy(re=True))
+def read_proxy_file(filename='proxy.txt'):
+    try:
+        with open(filename, 'r') as file:
+            proxy_list = file.read().splitlines()
+
+        # Jika file proxy.txt kosong atau tidak ada, panggil fungsi proxy() untuk mengisi file
+        if not proxy_list:
+            new_proxies = proxy(re=True)
+            proxy_list = new_proxies  # Gunakan hasil baru untuk mengembalikan nilai
+
+        return proxy_list
+
+    except FileNotFoundError:
+        new_proxies = proxy(re=True)
+        return new_proxies  # Gunakan hasil baru untuk mengembalikan nilai
+def remove_proxy_from_file(proxy_to_remove, filename='proxy.txt'):
+    try:
+        with open(filename, 'r') as file:
+            proxy_list = file.read().splitlines()
+
+        if proxy_to_remove in proxy_list:
+            proxy_list.remove(proxy_to_remove)
+
+            with open(filename, 'w') as file:
+                for proxy in proxy_list:
+                    file.write(f'{proxy}\n')
+
+
+    except FileNotFoundError:
+        pass
 # -------------------------------------------
 # RecaptchaV2 BYPASS
 def end():
   return ' '*20+'\r'
 def status_code(req):
   print(putih1+"Response "+str(req.status_code)+' '+req.reason,end=end())
-  sleep(0.2)
+  sleep(0.7)
   print(' ',end=end())
 def get_res(api, key, url):
      ua = {
@@ -1664,164 +1705,171 @@ def botfly(url):
     pass
 def rsshort(url):
   try:
-    #while True:
-      curl = requests.Session()
-      retry = Retry(connect=5, backoff_factor=1)
-      adapter = HTTPAdapter(max_retries=retry)
-      curl.mount('http://', adapter)
-      curl.mount('https://', adapter)
-      curl.verify = False
-      requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-      #key=open('sca.txt').read().splitlines()[0]
-      pr=random.choice(proxy())
-      #print(pr)
-      curl.proxies = {
-    'http': pr,#f'http://scraperapi.keep_headers=true.session_number=1:{key}@proxy-server.scraperapi.com:8001',
-    'https': pr,#f'http://scraperapi.keep_headers=true.session_number=1:{key}@proxy-server.scraperapi.com:8001',
-      }
-      ua={'User-Agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'}
-      step1=curl.get(url,headers=ua,timeout=1)
-      status_code(step1)
-      #print(step1.text)
-      ur=bs(step1.text,'html.parser').find_all('meta')[1]['content'].split('url=')[1].split('"')[0]
-      #print(ur)
-      nama_f=urlparse(url).path.replace('/','')
-      urut=1
-      while True:
-        step2=curl.get(ur,headers=ua)
-        status_code(step2)
-        #print(step2.cookies)
-        #sleep(15)
-        #print(bs(step2.text,'html.parser').text.strip().replace('\n',''))
-        data=bs(step2.text,'html.parser').find_all('script')
-        for fd in data:
-          if fd.text.startswith('var _'):
-            res=run_js(nama_f,fd.text.replace('eval','console.log'))
-            #print(res)
-            break
-        for fd in data:
-          if fd.text.startswith('var _'):
-            stepnya=run_js(nama_f,fd.text.replace('eval','console.log'))
-            if 'Step' in stepnya:
-              break
-        data=bs(res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
-        csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
-        inputs = data.find_all("input")
-        key1=inputs[len(inputs)-1].get('name')
-        value1=inputs[len(inputs)-1].get('value')
-        if '_iconcaptcha-token' in res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''):
-          #sleep(15)
-          icon_token=data.find('input',{'name':'_iconcaptcha-token'})['value']
-          timestamp = int(time.time() * 1000)
-          data = {
-            'i': 1,
-            'a': 1,
-            't': 'light',
-            'tk': icon_token,
-            'ts': timestamp}
-          #print(data)
-          json_data = json.dumps(data)
-          py = base64.b64encode(json_data.encode()).decode()
-          data={"payload":py}
-          #print(data)
-          id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
-          ua_cp = {
-            'Host': urlparse(ur).netloc,
-            'X-Requested-With': 'XMLHttpRequest',
-            #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-            'X-Iconcaptcha-Token': icon_token,
-            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
-            'Accept': '*/*',
-            'Origin': 'https://'+urlparse(ur).netloc,
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Dest': 'empty',
-            'Referer': ur}
-          boundary = "----WebKitFormBoundary"+id_
-          payload = ''
-          for key, value in data.items():
-              payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
-          payload += '--{}--'.format(boundary)
-          get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload)
-          status_code(get_data)
-          if get_data.status_code==200:
-            data_g=base64.b64encode(json.dumps({'i': 1, 'tk': icon_token, 'ts': int(time.time() * 1000)}).encode()).decode()
-            ua_g={
-            'Host': urlparse(ur).netloc,
-            #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-            'X-Requested-With': 'mark.via.gq',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-Mode': 'no-cors',
-            'Sec-Fetch-Dest': 'image',
-            'Referer': ur}
-            gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g)
-            status_code(gambar)
-            ans1=random.randint(200, 250)
-            ans2=random.randint(33,35)
-            ic={
-              'i': 1,
-              'x': ans1,
-              'y': ans2,
-              'w': 320,
-              'a': 2,
-              'tk': icon_token,
-              'ts': int(time.time() * 1000)
-            }
-            #print(ic)
-            data_verif=base64.b64encode(json.dumps(ic).encode()).decode()
-            id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
-            uacp = {
+    while True:
+      try:
+        curl = requests.Session()
+        pr=random.choice(read_proxy_file())
+        #print(pr)
+        curl.proxies = {'http': pr, #'socks5://127.0.0.1:9050',
+                       'https': pr}
+        ua={'User-Agent':'XYZ/3.0'}
+        step1=curl.get(url,headers=ua,timeout=1.5)
+        status_code(step1)
+        #print(step1.text)
+        if 'You Already Visited Our link 20 times today please come back tommorrow.' in step1.text:
+          remove_proxy_from_file(pr)
+        elif step1.status_code==200:
+          #print(step1.text)
+          ur=bs(step1.text,'html.parser').find('meta')['content'].split('url=')[1].split('"')[0]
+          #print(ur)
+          nama_f=urlparse(url).path.replace('/','')
+          urut=1
+          while True:
+            step2=curl.get(ur,headers=ua,verify=False)
+            status_code(step2)
+            #sleep(15)
+            #print(bs(step2.text,'html.parser').text.strip().replace('\n',''))
+            data=bs(step2.text,'html.parser').find_all('script')
+            for fd in data:
+              if fd.text.startswith('var _'):
+                res=run_js(nama_f,fd.text.replace('eval','console.log'))
+                #print(res)
+                break
+            for fd in data:
+              if fd.text.startswith('var _'):
+                stepnya=run_js(nama_f,fd.text.replace('eval','console.log'))
+                if 'Step' in stepnya:
+                  #print(bs(stepnya.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser').text.strip())
+                  break
+            data=bs(res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+            csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
+            inputs = data.find_all("input")
+            key1=inputs[len(inputs)-1].get('name')
+            value1=inputs[len(inputs)-1].get('value')
+            if '_iconcaptcha-token' in res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''):
+              #sleep(15)
+              icon_token=data.find('input',{'name':'_iconcaptcha-token'})['value']
+              timestamp = int(time.time() * 1000)
+              data = {
+                'i': 1,
+                'a': 1,
+                't': 'light',
+                'tk': icon_token,
+                'ts': timestamp}
+              #print(data)
+              json_data = json.dumps(data)
+              py = base64.b64encode(json_data.encode()).decode()
+              data={"payload":py}
+              #print(data)
+              id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
+              ua_cp = {
+                'Host': urlparse(ur).netloc,
+                'X-Requested-With': 'XMLHttpRequest',
+                #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+                'X-Iconcaptcha-Token': icon_token,
+                'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
+                'Accept': '*/*',
+                'Origin': 'https://'+urlparse(ur).netloc,
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Dest': 'empty',
+                'Referer': ur}
+              boundary = "----WebKitFormBoundary"+id_
+              payload = ''
+              for key, value in data.items():
+                  payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
+              payload += '--{}--'.format(boundary)
+              get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload)
+              status_code(get_data)
+              if get_data.status_code==200:
+                data_g=base64.b64encode(json.dumps({'i': 1, 'tk': icon_token, 'ts': int(time.time() * 1000)}).encode()).decode()
+                ua_g={
+                'Host': urlparse(ur).netloc,
+                #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                'X-Requested-With': 'mark.via.gq',
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-Fetch-Mode': 'no-cors',
+                'Sec-Fetch-Dest': 'image',
+                'Referer': ur}
+                gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g)
+                status_code(gambar)
+                ans1=random.randint(200, 250)
+                ans2=random.randint(33,35)
+                ic={
+                  'i': 1,
+                  'x': ans1,
+                  'y': ans2,
+                  'w': 320,
+                  'a': 2,
+                  'tk': icon_token,
+                  'ts': int(time.time() * 1000)
+                }
+                #print(ic)
+                data_verif=base64.b64encode(json.dumps(ic).encode()).decode()
+                id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
+                uacp = {
+                  'Host': urlparse(ur).netloc,
+                  'X-Requested-With': 'XMLHttpRequest',
+                  #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+                  'X-Iconcaptcha-Token': icon_token,
+                  'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
+                  'Accept': '*/*',
+                  'Referer': ur}
+                # print(uacp)
+                # print(data_verif)
+                dataq={"payload":data_verif}
+                boundary = "----WebKitFormBoundary"+id_
+                payload = ''
+                for key, value in dataq.items():
+                    payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
+                payload += '--{}--'.format(boundary)
+                #print(payload)
+                cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload)
+                status_code(cek_captcha)
+                #print(cek_captcha.status_code)
+                #if cek_captcha.status_code!=200:
+                  #break
+                #print(cek_captcha.status_code)
+              data=f'csrf_test_name={csrf_name}&_iconcaptcha-token={icon_token}&ic-hf-se={str(ans1)}%2C{str(ans2)}%2C320&ic-hf-id=1&ic-hf-hp=&{key1}={value1}'
+            else:
+              data=f'csrf_test_name={csrf_name}&{key1}={value1}'
+            ua_p = {
               'Host': urlparse(ur).netloc,
-              'X-Requested-With': 'XMLHttpRequest',
-              #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-              'X-Iconcaptcha-Token': icon_token,
-              'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
-              'Accept': '*/*',
-              'Referer': ur}
-            # print(uacp)
-            # print(data_verif)
-            dataq={"payload":data_verif}
-            boundary = "----WebKitFormBoundary"+id_
-            payload = ''
-            for key, value in dataq.items():
-                payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
-            payload += '--{}--'.format(boundary)
-            #print(payload)
-            cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload)
-            status_code(cek_captcha)
-            #print(cek_captcha.status_code)
-            #if cek_captcha.status_code!=200:
-              #break
-            #print(cek_captcha.status_code)
-          data=f'csrf_test_name={csrf_name}&_iconcaptcha-token={icon_token}&ic-hf-se={str(ans1)}%2C{str(ans2)}%2C320&ic-hf-id=1&ic-hf-hp=&{key1}={value1}'
+              'Origin': 'https://'+urlparse(ur).netloc,
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'User-Agent': 'XYZ/3.0',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+              'X-Requested-With': 'mark.via.gq',
+              'Sec-Fetch-Site': 'same-origin',
+              'Sec-Fetch-Mode': 'navigate',
+              'Sec-Fetch-User': '?1',
+              'Sec-Fetch-Dest': 'document',
+              'Referer': ur
+            }
+            get_data=curl.post(ur,headers=ua_p,data=data,allow_redirects=False)
+            status_code(get_data)
+            #print(get_data.headers)
+            ur=get_data.headers['location']
+            #print(ur)
+            urut+=1
+            get_data=curl.get(ur,allow_redirects=False)
+            status_code(get_data)
+            #print(get_data.headers)
+            if get_data.status_code==302:
+              if '//rs' not in get_data.headers['location']:
+                return get_data.headers['location']
         else:
-          data=f'csrf_test_name={csrf_name}&{key1}={value1}'
-        ua_p = {
-          'Host': urlparse(ur).netloc,
-          'Origin': 'https://'+urlparse(ur).netloc,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-          'X-Requested-With': 'mark.via.gq',
-          'Sec-Fetch-Site': 'same-origin',
-          'Sec-Fetch-Mode': 'navigate',
-          'Sec-Fetch-User': '?1',
-          'Sec-Fetch-Dest': 'document',
-          'Referer': ur
-        }
-        get_data=curl.post(ur,headers=ua_p,data=data,allow_redirects=False)
-        status_code(get_data)
-        #print(get_data.headers)
-        ur=get_data.headers['location']
-        #print(ur)
-        urut+=1
-        get_data=curl.get(ur,allow_redirects=False)
-        status_code(get_data)
-        #print(get_data.headers)
-        if get_data.status_code==302:
-          if '//rs' not in get_data.headers['location']:
-            return get_data.headers['location']
+          #print(pr)
+          remove_proxy_from_file(pr)
+      except requests.ConnectionError as ce:
+          #print(pr)
+          remove_proxy_from_file(pr)
+        #print(f'ConnectionError: {ce} for {item}')
+      except requests.Timeout as to:
+          #print(pr)
+          remove_proxy_from_file(pr)
+        #pass
   # inputs = data.find_all("input")
   # data = "&".join([f"{input.get('name')}={input.get('value')}" for input in inputs])
   #print(data)
@@ -1829,12 +1877,10 @@ def rsshort(url):
     return "failed to bypass"
     pass
 # start_time = time.time()
-# print(rsshort('https://rsshort.com/YESf8IbO'))
+# print(proxy(re=True))
 # end_time = time.time()
-#print(rsshort('https://rsshort.com/ZlmV6'))
 # # Hitung selisih waktu untuk mendapatkan durasi eksekusi
 # execution_time = end_time - start_time
-
 # print(f"Waktu eksekusi: {execution_time} detik")
 # def scrape():
 #   curl=Session()
