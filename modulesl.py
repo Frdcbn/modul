@@ -73,7 +73,7 @@ def proxy(re=False):
     for url in ['https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/https.txt', 'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-https.txt', 'https://raw.githubusercontent.com/mmpx12/proxy-list/master/https.txt', 'https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt', 'https://raw.githubusercontent.com/aslisk/proxyhttps/main/https.txt']:
       dat=requests.get(url).text.splitlines()
       data=data+dat
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         futures = [executor.submit(check_proxy, item) for item in data]
         results = [future.result() for future in futures if future.result() is not None]
     if results:
@@ -1705,179 +1705,135 @@ def botfly(url):
     pass
 def rsshort(url):
   try:
-    while True:
-      try:
-        curl = requests.Session()
-        pr=random.choice(read_proxy_file())
-        #print(pr)
-        curl.proxies = {'http': pr, #'socks5://127.0.0.1:9050',
-                       'https': pr}
-        ua={'User-Agent':'XYZ/3.0'}
-        step1=curl.get(url,headers=ua,timeout=1.5)
-        status_code(step1)
-        #print(step1.text)
-        if 'You Already Visited Our link 20 times today please come back tommorrow.' in step1.text:
-          remove_proxy_from_file(pr)
-        elif step1.status_code==200:
-          #print(step1.text)
-          ur=bs(step1.text,'html.parser').find('meta')['content'].split('url=')[1].split('"')[0]
-          #print(ur)
-          nama_f=urlparse(url).path.replace('/','')
-          urut=1
-          while True:
-            step2=curl.get(ur,headers=ua,verify=False)
-            status_code(step2)
-            #sleep(15)
-            #print(bs(step2.text,'html.parser').text.strip().replace('\n',''))
-            data=bs(step2.text,'html.parser').find_all('script')
-            for fd in data:
-              if fd.text.startswith('var _'):
-                res=run_js(nama_f,fd.text.replace('eval','console.log'))
-                #print(res)
-                break
-            for fd in data:
-              if fd.text.startswith('var _'):
-                stepnya=run_js(nama_f,fd.text.replace('eval','console.log'))
-                if 'Step' in stepnya:
-                  #print(bs(stepnya.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser').text.strip())
-                  break
-            data=bs(res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
-            csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
-            inputs = data.find_all("input")
-            key1=inputs[len(inputs)-1].get('name')
-            value1=inputs[len(inputs)-1].get('value')
-            if '_iconcaptcha-token' in res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''):
-              #sleep(15)
-              icon_token=data.find('input',{'name':'_iconcaptcha-token'})['value']
-              timestamp = int(time.time() * 1000)
-              data = {
-                'i': 1,
-                'a': 1,
-                't': 'light',
-                'tk': icon_token,
-                'ts': timestamp}
-              #print(data)
-              json_data = json.dumps(data)
-              py = base64.b64encode(json_data.encode()).decode()
-              data={"payload":py}
-              #print(data)
-              id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
-              ua_cp = {
-                'Host': urlparse(ur).netloc,
-                'X-Requested-With': 'XMLHttpRequest',
-                #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-                'X-Iconcaptcha-Token': icon_token,
-                'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
-                'Accept': '*/*',
-                'Origin': 'https://'+urlparse(ur).netloc,
-                'Sec-Fetch-Site': 'same-origin',
-                'Sec-Fetch-Mode': 'cors',
-                'Sec-Fetch-Dest': 'empty',
-                'Referer': ur}
-              boundary = "----WebKitFormBoundary"+id_
-              payload = ''
-              for key, value in data.items():
-                  payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
-              payload += '--{}--'.format(boundary)
-              get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload)
-              status_code(get_data)
-              if get_data.status_code==200:
-                data_g=base64.b64encode(json.dumps({'i': 1, 'tk': icon_token, 'ts': int(time.time() * 1000)}).encode()).decode()
-                ua_g={
-                'Host': urlparse(ur).netloc,
-                #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-                'X-Requested-With': 'mark.via.gq',
-                'Sec-Fetch-Site': 'same-origin',
-                'Sec-Fetch-Mode': 'no-cors',
-                'Sec-Fetch-Dest': 'image',
-                'Referer': ur}
-                gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g)
-                status_code(gambar)
-                ans1=random.randint(200, 250)
-                ans2=random.randint(33,35)
-                ic={
-                  'i': 1,
-                  'x': ans1,
-                  'y': ans2,
-                  'w': 320,
-                  'a': 2,
-                  'tk': icon_token,
-                  'ts': int(time.time() * 1000)
-                }
-                #print(ic)
-                data_verif=base64.b64encode(json.dumps(ic).encode()).decode()
-                id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
-                uacp = {
-                  'Host': urlparse(ur).netloc,
-                  'X-Requested-With': 'XMLHttpRequest',
-                  #'User-Agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-                  'X-Iconcaptcha-Token': icon_token,
-                  'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
-                  'Accept': '*/*',
-                  'Referer': ur}
-                # print(uacp)
-                # print(data_verif)
-                dataq={"payload":data_verif}
-                boundary = "----WebKitFormBoundary"+id_
-                payload = ''
-                for key, value in dataq.items():
-                    payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
-                payload += '--{}--'.format(boundary)
-                #print(payload)
-                cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload)
-                status_code(cek_captcha)
-                #print(cek_captcha.status_code)
-                #if cek_captcha.status_code!=200:
-                  #break
-                #print(cek_captcha.status_code)
-              data=f'csrf_test_name={csrf_name}&_iconcaptcha-token={icon_token}&ic-hf-se={str(ans1)}%2C{str(ans2)}%2C320&ic-hf-id=1&ic-hf-hp=&{key1}={value1}'
-            else:
-              data=f'csrf_test_name={csrf_name}&{key1}={value1}'
-            ua_p = {
-              'Host': urlparse(ur).netloc,
-              'Origin': 'https://'+urlparse(ur).netloc,
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'User-Agent': 'XYZ/3.0',
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-              'X-Requested-With': 'mark.via.gq',
-              'Sec-Fetch-Site': 'same-origin',
-              'Sec-Fetch-Mode': 'navigate',
-              'Sec-Fetch-User': '?1',
-              'Sec-Fetch-Dest': 'document',
-              'Referer': ur
+    curl = requests.Session()
+    key=open('sca.txt').read().splitlines()[0]
+    ua={'User-Agent':'XYZ/3.0'}
+    step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers=ua)
+    curl = requests.Session()
+    curl.cookies.update(step1.cookies.get_dict())
+    status_code(step1)
+    if step1.status_code==200:
+      ur=bs(step1.text,'html.parser').find_all('meta')[1]['content'].split('url=')[1].split('"')[0]
+      nama_f=urlparse(url).path.replace('/','')
+      urut=1
+      while True:
+        step2=curl.get(ur,headers=ua)
+        status_code(step2)
+        data=bs(step2.text,'html.parser').find_all('script')
+        for fd in data:
+          if fd.text.startswith('var _'):
+            res=run_js(nama_f,fd.text.replace('eval','console.log'))
+            break
+        for fd in data:
+          if fd.text.startswith('var _'):
+            stepnya=run_js(nama_f,fd.text.replace('eval','console.log'))
+            if 'Step' in stepnya:
+              break
+        data=bs(res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
+        inputs = data.find_all("input")
+        key1=inputs[len(inputs)-1].get('name')
+        value1=inputs[len(inputs)-1].get('value')
+        if '_iconcaptcha-token' in res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''):
+          icon_token=data.find('input',{'name':'_iconcaptcha-token'})['value']
+          timestamp = int(time.time() * 1000)
+          data = {
+            'i': 1,
+            'a': 1,
+            't': 'light',
+            'tk': icon_token,
+            'ts': timestamp}
+          json_data = json.dumps(data)
+          py = base64.b64encode(json_data.encode()).decode()
+          data={"payload":py}
+          id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
+          ua_cp = {
+            'Host': urlparse(ur).netloc,
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Iconcaptcha-Token': icon_token,
+            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
+            'Accept': '*/*',
+            'Origin': 'https://'+urlparse(ur).netloc,
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Dest': 'empty',
+            'Referer': ur}
+          boundary = "----WebKitFormBoundary"+id_
+          payload = ''
+          for key, value in data.items():
+              payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
+          payload += '--{}--'.format(boundary)
+          get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload)
+          status_code(get_data)
+          if get_data.status_code==200:
+            dt={'i': 1, 'tk': icon_token, 'ts': int(time.time() * 1000)}
+            data_g=base64.b64encode(json.dumps(dt).encode()).decode()
+            ua_g={
+            'Host': urlparse(ur).netloc,
+            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'X-Requested-With': 'mark.via.gq',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'no-cors',
+            'Sec-Fetch-Dest': 'image',
+            'Referer': ur}
+            gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g)
+            status_code(gambar)
+            ans1=random.randint(200, 250)
+            ans2=random.randint(33,35)
+            ic={
+              'i': 1,
+              'x': ans1,
+              'y': ans2,
+              'w': 320,
+              'a': 2,
+              'tk': icon_token,
+              'ts': int(time.time() * 1000)
             }
-            get_data=curl.post(ur,headers=ua_p,data=data,allow_redirects=False)
-            status_code(get_data)
-            #print(get_data.headers)
-            ur=get_data.headers['location']
-            #print(ur)
-            urut+=1
-            get_data=curl.get(ur,allow_redirects=False)
-            status_code(get_data)
-            #print(get_data.headers)
-            if get_data.status_code==302:
-              if '//rs' not in get_data.headers['location']:
-                return get_data.headers['location']
+            data_verif=base64.b64encode(json.dumps(ic).encode()).decode()
+            id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
+            uacp = {
+              'Host': urlparse(ur).netloc,
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-Iconcaptcha-Token': icon_token,
+              'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
+              'Accept': '*/*',
+              'Referer': ur}
+            dataq={"payload":data_verif}
+            boundary = "----WebKitFormBoundary"+id_
+            payload = ''
+            for key, value in dataq.items():
+                payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
+            payload += '--{}--'.format(boundary)
+            cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload)
+            status_code(cek_captcha)
+          data=f'csrf_test_name={csrf_name}&_iconcaptcha-token={icon_token}&ic-hf-se={str(ans1)}%2C{str(ans2)}%2C320&ic-hf-id=1&ic-hf-hp=&{key1}={value1}'
         else:
-          #print(pr)
-          remove_proxy_from_file(pr)
-      except requests.ConnectionError as ce:
-          #print(pr)
-          remove_proxy_from_file(pr)
-        #print(f'ConnectionError: {ce} for {item}')
-      except requests.Timeout as to:
-          #print(pr)
-          remove_proxy_from_file(pr)
-        #pass
-  # inputs = data.find_all("input")
-  # data = "&".join([f"{input.get('name')}={input.get('value')}" for input in inputs])
-  #print(data)
+          data=f'csrf_test_name={csrf_name}&{key1}={value1}'
+        ua_p = {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'XYZ/3.0',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'X-Requested-With': 'mark.via.gq',
+          'Sec-Fetch-Site': 'same-origin',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-User': '?1',
+          'Sec-Fetch-Dest': 'document',
+          'Referer': ur
+        }
+        get_data=curl.post(ur,headers=ua_p,data=data,allow_redirects=False)
+        status_code(get_data)
+        ur=get_data.headers['location']
+        urut+=1
+        get_data=curl.get(ur,allow_redirects=False)
+        status_code(get_data)
+        if get_data.status_code==302:
+          if '//rs' not in get_data.headers['location']:
+            return get_data.headers['location']
   except Exception as e:
     return "failed to bypass"
     pass
 # start_time = time.time()
-# print(proxy(re=True))
+# print(rsshort('https://rsshort.com/zLDj'))
 # end_time = time.time()
 # # Hitung selisih waktu untuk mendapatkan durasi eksekusi
 # execution_time = end_time - start_time
