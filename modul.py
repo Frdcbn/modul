@@ -87,7 +87,7 @@ def animasi(menit=None,detik=None):
       detik -= 1
 def bypass_link(url,modulesl,jumlah):
   dictnya={
-  "rsshort.com":modulesl.rsshort,
+  #"rsshort.com":modulesl.rsshort,
   "1short.info":modulesl._1short_in,
   "adbitfly.com":modulesl.adbitfly,
   "adbull.me":modulesl.adbull,
