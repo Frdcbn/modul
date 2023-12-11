@@ -1709,6 +1709,9 @@ def rsshort(url):
     key=open('sca.txt').read().splitlines()[0]
     ua={'User-Agent':'XYZ/3.0'}
     step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers=ua)
+    if "You've hit the request limit for your current plan. You can upgrade or renew your subscription early on our dashboard, or contact support@scraperapi.com for help." in step1.text:
+      print("api key scrapeapi limit mohon ganti api key")
+      return "failed to bypass"
     curl = requests.Session()
     curl.cookies.update(step1.cookies.get_dict())
     status_code(step1)
@@ -1736,76 +1739,78 @@ def rsshort(url):
         value1=inputs[len(inputs)-1].get('value')
         if '_iconcaptcha-token' in res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''):
           icon_token=data.find('input',{'name':'_iconcaptcha-token'})['value']
-          timestamp = int(time.time() * 1000)
-          data = {
-            'i': 1,
-            'a': 1,
-            't': 'light',
-            'tk': icon_token,
-            'ts': timestamp}
-          json_data = json.dumps(data)
-          py = base64.b64encode(json_data.encode()).decode()
-          data={"payload":py}
-          id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
-          ua_cp = {
-            'Host': urlparse(ur).netloc,
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-Iconcaptcha-Token': icon_token,
-            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
-            'Accept': '*/*',
-            'Origin': 'https://'+urlparse(ur).netloc,
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Dest': 'empty',
-            'Referer': ur}
-          boundary = "----WebKitFormBoundary"+id_
-          payload = ''
-          for key, value in data.items():
-              payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
-          payload += '--{}--'.format(boundary)
-          get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload)
-          status_code(get_data)
-          if get_data.status_code==200:
-            dt={'i': 1, 'tk': icon_token, 'ts': int(time.time() * 1000)}
-            data_g=base64.b64encode(json.dumps(dt).encode()).decode()
-            ua_g={
-            'Host': urlparse(ur).netloc,
-            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-            'X-Requested-With': 'mark.via.gq',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-Mode': 'no-cors',
-            'Sec-Fetch-Dest': 'image',
-            'Referer': ur}
-            gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g)
-            status_code(gambar)
-            ans1=random.randint(200, 250)
-            ans2=random.randint(33,35)
-            ic={
+          while True:
+            timestamp = int(time.time() * 1000)
+            data = {
               'i': 1,
-              'x': ans1,
-              'y': ans2,
-              'w': 320,
-              'a': 2,
+              'a': 1,
+              't': 'light',
               'tk': icon_token,
-              'ts': int(time.time() * 1000)
-            }
-            data_verif=base64.b64encode(json.dumps(ic).encode()).decode()
+              'ts': timestamp}
+            json_data = json.dumps(data)
+            py = base64.b64encode(json_data.encode()).decode()
+            data={"payload":py}
             id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
-            uacp = {
+            ua_cp = {
               'Host': urlparse(ur).netloc,
               'X-Requested-With': 'XMLHttpRequest',
               'X-Iconcaptcha-Token': icon_token,
               'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
               'Accept': '*/*',
+              'Origin': 'https://'+urlparse(ur).netloc,
+              'Sec-Fetch-Site': 'same-origin',
+              'Sec-Fetch-Mode': 'cors',
+              'Sec-Fetch-Dest': 'empty',
               'Referer': ur}
-            dataq={"payload":data_verif}
             boundary = "----WebKitFormBoundary"+id_
             payload = ''
-            for key, value in dataq.items():
+            for key, value in data.items():
                 payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
             payload += '--{}--'.format(boundary)
-            cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload)
-            status_code(cek_captcha)
+            get_data=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=ua_cp,data=payload)
+            status_code(get_data)
+            if get_data.status_code==200:
+              dt={'i': 1, 'tk': icon_token, 'ts': int(time.time() * 1000)}
+              data_g=base64.b64encode(json.dumps(dt).encode()).decode()
+              ua_g={
+              'Host': urlparse(ur).netloc,
+              'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+              'X-Requested-With': 'mark.via.gq',
+              'Sec-Fetch-Site': 'same-origin',
+              'Sec-Fetch-Mode': 'no-cors',
+              'Sec-Fetch-Dest': 'image',
+              'Referer': ur}
+              gambar=curl.get(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest?payload={data_g}',headers=ua_g)
+              status_code(gambar)
+              ans1=random.randint(200, 250)
+              ans2=random.randint(33,35)
+              ic={
+                'i': 1,
+                'x': ans1,
+                'y': ans2,
+                'w': 320,
+                'a': 2,
+                'tk': icon_token,
+                'ts': int(time.time() * 1000)
+              }
+              data_verif=base64.b64encode(json.dumps(ic).encode()).decode()
+              id_=''.join(random.sample(string.ascii_letters + string.digits, 16))
+              uacp = {
+                'Host': urlparse(ur).netloc,
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-Iconcaptcha-Token': icon_token,
+                'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary'+id_,
+                'Accept': '*/*',
+                'Referer': ur}
+              dataq={"payload":data_verif}
+              boundary = "----WebKitFormBoundary"+id_
+              payload = ''
+              for key, value in dataq.items():
+                  payload += '--{}\r\nContent-Disposition: form-data; name="{}"\r\n\r\n{}\r\n'.format(boundary, key, value)
+              payload += '--{}--'.format(boundary)
+              cek_captcha=curl.post(f'https://{urlparse(ur).netloc}/iconcaptchar/captcharequest',headers=uacp,data=payload)
+              status_code(cek_captcha)
+              if cek_captcha.status_code==200:break
           data=f'csrf_test_name={csrf_name}&_iconcaptcha-token={icon_token}&ic-hf-se={str(ans1)}%2C{str(ans2)}%2C320&ic-hf-id=1&ic-hf-hp=&{key1}={value1}'
         else:
           data=f'csrf_test_name={csrf_name}&{key1}={value1}'
@@ -1833,7 +1838,7 @@ def rsshort(url):
     return "failed to bypass"
     pass
 # start_time = time.time()
-# print(rsshort('https://rsshort.com/zLDj'))
+#print(rsshort('https://rsshort.com/zLDj'))
 # end_time = time.time()
 # # Hitung selisih waktu untuk mendapatkan durasi eksekusi
 # execution_time = end_time - start_time
