@@ -87,7 +87,9 @@ def animasi(menit=None,detik=None):
       detik -= 1
 def bypass_link(url,modulesl,jumlah):
   dictnya={
-  #"rsshort.com":modulesl.rsshort,
+  "urlpay.in":modulesl.urlpay,
+  "teralinks.in":modulesl.teralinks,
+  "rsshort.com":modulesl.rsshort,
   "1short.info":modulesl._1short_in,
   "adbitfly.com":modulesl.adbitfly,
   "adbull.me":modulesl.adbull,
@@ -845,42 +847,48 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
             re=int(jumlah[0])
             for ulang in range(int(jumlah[0])):
               try:
-                if 'pre_verify' in i.find('a')["href"]:
-                  status=True
-                  while(status==True):
-                    url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies)
-                    status_code(url)
-                    ans=modulesl.antibot(url,key='alert alert-warning text-center',name_key=name_key)
-                    if ans!='WRONG_RESULT':
-                      data='antibotlinks=+'+ans+'&'
-                      if 'csrf_token_name' in url.text:
-                        csrf=bs(url.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-                        data=data+'csrf_token_name='+csrf+'&'
-                      elif 'token' in url.text:
-                        token=bs(url.text,'html.parser').find('input',{'name':'token'})['value']
-                        data=data+'token='+token
-                      url = curl.post(i.find('a')["href"].replace('pre_verify','go'), headers={'Host':host,'User-Agent':ugentmu,'content-type':'application/x-www-form-urlencoded','referer':i.find('a')["href"]},data=data, cookies=cookies,allow_redirects=False)
+                for ytta in range(5):
+                 try:
+                  if 'pre_verify' in i.find('a')["href"]:
+                    status=True
+                    while(status==True):
+                      url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies)
                       status_code(url)
-                      status=False
-                else:
-                  url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
-                status_code(url)
-                url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah[1]])
-                if answer==False:
+                      ans=modulesl.antibot(url,key='alert alert-warning text-center',name_key=name_key)
+                      if ans!='WRONG_RESULT':
+                        data='antibotlinks=+'+ans+'&'
+                        if 'csrf_token_name' in url.text:
+                          csrf=bs(url.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+                          data=data+'csrf_token_name='+csrf+'&'
+                        elif 'token' in url.text:
+                          token=bs(url.text,'html.parser').find('input',{'name':'token'})['value']
+                          data=data+'token='+token
+                        url = curl.post(i.find('a')["href"].replace('pre_verify','go'), headers={'Host':host,'User-Agent':ugentmu,'content-type':'application/x-www-form-urlencoded','referer':i.find('a')["href"]},data=data, cookies=cookies,allow_redirects=False)
+                        status_code(url)
+                        status=False
+                  else:
+                    url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
+                  status_code(url)
+                  url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+                  answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah[1]])
+                  if answer==False:break
+                  if 'failed to bypass' in answer:
+                      pass
+                  else:
+                      if urlparse(answer).netloc =='earnsolana.xyz':
+                        answer=answer.replace('back','verify')
+                      reward = curl.get(answer, headers=ua, cookies=cookies)
+                      status_code(reward)
+                      if 'Good job!' in reward.text:
+                          print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                      else:
+                          print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+                  re-=1
                   break
-                if 'failed to bypass' in answer:
-                    pass
-                else:
-                    if urlparse(answer).netloc =='earnsolana.xyz':
-                      answer=answer.replace('back','verify')
-                    reward = curl.get(answer, headers=ua, cookies=cookies)
-                    status_code(reward)
-                    if 'Good job!' in reward.text:
-                        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-                    else:
-                        print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
-                re-=1
+                 except Exception as e:
+                  keluar(str(e))
+                  pass
+                if answer==False:break
               except Exception as e:
                 keluar(str(e))
                 pass
@@ -1026,6 +1034,8 @@ def claimcash(modulesl,banner):
   vie_script(modulesl,banner,url="https://claimcash.cc",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
 def bitupdate(modulesl,banner):
   vie_script(modulesl,banner,url="https://bitupdate.info",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True,name_key='div')
+def litefaucet(modulesl,banner):
+  vie_script(modulesl,banner,url="https://litefaucet.in",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
 def queenofferwall(modulesl,banner):
   vie_script(modulesl,banner,url="https://queenofferwall.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 def hatecoin(modulesl,banner):
@@ -1071,21 +1081,25 @@ def chillfaucet(modulesl,banner):
     re=int(jumlah[0])
     name=sl.find("h5").text
     for juml in range(int(jumlah[0])):
-      gt_links=curl.get(url,headers=hd,cookies=cookies,allow_redirects=False)
-      status_code(gt_links)
-      gt_links=gt_links.text.split('<script> location.href = "')[1].split('"; </script>')[0]
-      answer=bypass_link(gt_links,modulesl,jumlah=[str(re),jumlah[1]])
-      if answer==False:
-        break
-      if 'failed to bypass' in answer:
-        pass
-      else:
-        
-        reward=curl.get(answer,headers=hd,cookies=cookies)
-        status_code(reward)
-        if 'Good job!' in reward.text:
-          print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+      for i in range(5):
+       try:
+        gt_links=curl.get(url,headers=hd,cookies=cookies,allow_redirects=False)
+        status_code(gt_links)
+        gt_links=gt_links.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+        answer=bypass_link(gt_links,modulesl,jumlah=[str(re),jumlah[1]])
+        if answer==False:
+          break
+        if 'failed to bypass' in answer:
+          pass
+        else:
+          reward=curl.get(answer,headers=hd,cookies=cookies)
+          status_code(reward)
+          if 'Good job!' in reward.text:
+            print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
           re-=1
+          break
+       except:pass
+      if answer==False:break
    except Exception as e:
      keluar(str(e))
      pass
@@ -1126,21 +1140,25 @@ def insfaucet(modulesl,banner):
     re=int(jumlah[0])
     name=sl.find("h5").text
     for juml in range(int(jumlah[0])):
-      gt_links=curl.get(url,headers=hd,cookies=cookies,allow_redirects=False)
-      status_code(gt_links)
-      gt_links=gt_links.text.split('<script> location.href = "')[1].split('"; </script>')[0]
-      answer=bypass_link(gt_links,modulesl,jumlah=[str(re),jumlah[1]])
-      if answer==False:
-        break
-      if 'failed to bypass' in answer:
-        pass
-      else:
-        
-        reward=curl.get(answer,headers=hd,cookies=cookies)
-        status_code(reward)
-        if 'Good job!' in reward.text:
-          print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-          re-=1
+      for ytta in range(5):
+        try:
+          gt_links=curl.get(url,headers=hd,cookies=cookies,allow_redirects=False)
+          status_code(gt_links)
+          gt_links=gt_links.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+          answer=bypass_link(gt_links,modulesl,jumlah=[str(re),jumlah[1]])
+          if answer==False:
+            break
+          if 'failed to bypass' in answer:
+            pass
+          else:
+            reward=curl.get(answer,headers=hd,cookies=cookies)
+            status_code(reward)
+            if 'Good job!' in reward.text:
+              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+            re-=1
+            break
+        except:pass
+      if answer==False:break
    except Exception as e:
      keluar(str(e))
      pass
@@ -1188,6 +1206,7 @@ def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=No
       bithub_family(modulesl,banner,url, captcha, key_cp,key_info,ptc,sl,auto,key_jumlah)
     ads=bs(get_ptc.text,'html.parser').find_all(*ptc)
     for ad in ads:
+     try:
       view=curl.get(ad.find('button')['onclick'].split("'")[1].split("'")[0])
       animasi(detik=int(view.text.split('var timer = ')[1].split(';')[0]))
       bs4 = bs(view.text, "html.parser")
@@ -1211,6 +1230,9 @@ def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=No
       #       shutil.copyfileobj(get_img.raw, f)
       #   #answer=modulesl.RecaptchaV2(key_cp,ad.find('button')['onclick'].split("'")[1].split("'")[0])
       #   #data='captcha=rscaptcha&'+data+'&rscaptcha_response='+answer
+     except Exception as e:
+          keluar(str(e))
+          pass
   if sl:
     rprint(Tree("[gree] > [yellow] Start shortlinks"))
     sll=curl.get(url+'/links')
@@ -1236,25 +1258,33 @@ def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=No
           re=int(jumlah)
         for i in range(re):
           try:
-            url = curl.get(link.find('a')["href"],allow_redirects=False)
-            status_code(url)
-            url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
-            answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah])
-            if answer==False:
-              break
-            if 'failed to bypass' in answer:
-                pass
-            else:
-                reward = curl.get(answer)
-                status_code(reward)
-                if 'Good job!' in reward.text:
-                    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+            for ytta in range(5):
+              try:
+                url = curl.get(link.find('a')["href"],allow_redirects=False)
+                status_code(url)
+                url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
+                answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah])
+                if answer==False:
+                  break
+                if 'failed to bypass' in answer:
+                    pass
                 else:
-                    print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
-            re-=1
+                    reward = curl.get(answer)
+                    status_code(reward)
+                    if 'Good job!' in reward.text:
+                        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+                    else:
+                        print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+                re-=1
+                break
+              except Exception as e:
+                  keluar(str(e))
+                  pass
           except Exception as e:
               keluar(str(e))
               pass
+        if answer==False:
+                  break
       except Exception as e:
           keluar(str(e))
           pass
@@ -1283,76 +1313,6 @@ def feyorra(modulesl,banner):
 def _1xbitcoins(modulesl,banner):
   bithub_family(modulesl,banner,'https://1xbitcoins.com', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-lg-4'}),sl=('div',{'class':'viewads_heading'}),key_jumlah=('a',{'class':'view_ads_click'}))
 #--------------- other family ---------------#
-def coinfola(modulesl,banner):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  data_control('coinfola')
-  banner.banner('COINFOLA')
-  cookies, ugentmu = load_data('coinfola')
-  if not os.path.exists("data/coinfola/coinfola.json"):
-    save_data('coinfola')
-    coinfola(modulesl,banner)
-  cookiek = SimpleCookie()
-  cookiek.load(cookies)
-  cookies = {k: v.value for k, v in cookiek.items()}
-  ua={
-    "Host":"coinfola.com",
-    'User-Agent': ugentmu,
-    
-  }
-  curl=Session()
-  try:
-    dahs=curl.get('https://coinfola.com/account',headers=ua,cookies=cookies)
-    status_code(dahs)
-  except Exception as e:
-    save_data('coinfola')
-    coinfola(modulesl,banner)
-  if 'Balance' not in dahs.text:
-      save_data('coinfola')
-      coinfola(modulesl,banner)
-  fd=bs(dahs.text,'html.parser').find_all('table',{'class':'table table-hover table-striped'})
-  akun=Tree("[green]> [yellow]Account information")
-  akun.add('[green]> [yellow]'+fd[0].text.strip().splitlines()[0]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[1])
-  akun.add('[green]> [yellow]'+fd[0].text.strip().splitlines()[4]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[5])
-  akun.add('[green]> [yellow]'+fd[0].text.strip().splitlines()[8]+' [white]: [yellow]'+fd[0].text.strip().splitlines()[9])
-  rprint(akun)
-  link=curl.get('https://coinfola.com/shortlinks',headers=ua,cookies=cookies)
-  status_code(link)
-  gt=bs(link.text,'html.parser').find_all('div',{'class':'col-lg-4 mt-3'})
-  rprint(Tree("[green]> [yellow]Start bypass shortlinks"))
-  ua["content-type"]="application/x-www-form-urlencoded"
-  for i in gt:
-    try:
-      #print(i)
-      y=[i for i in i.text.strip().splitlines() if i][2].replace(' ','')
-      #print(y)
-      if 'clicksremaining' in y:
-        y=y.split('clicksremaining')[0]
-      if 'clickremaining' in y:
-        y=y.split('clickremaining')[0]
-      link=i.find('a',{'class':'card shadow text-decoration-none shortlink'})['data-id']
-      #answer = bypass_link(url)
-      re=int(y)
-      for ulang in range(int(y)):
-          get_links = curl.post('https://coinfola.com/shortlinks#!', headers=ua, cookies=cookies,data='csrfToken=&go='+link, allow_redirects=False)
-          status_code(get_links)
-          #print(putih1+'├──'+hijau1+f' {putih1}[{kuning1} ~ {putih1}] {kuning1}Bypassing : '+get_links,end=end())
-          answer = bypass_link(get_links.headers['location'],modulesl,jumlah=[str(re),y])
-          if answer:
-            if 'failed to bypass' in answer:
-                pass
-            else:
-              
-              reward = curl.get(answer, headers=ua, cookies=cookies)
-              if 'Congratulations.' in reward.text:
-                  _1 = reward.text.split("message: 'You")[1].split("tickets.'")[0]
-                  _2 = reward.text.split("message: 'Congratulations.")[1].split("credited.'")[0]
-                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+'Congratulations. ' + _2 + ' credited. & You ' + _1 + ' tickets.')
-                  re-=1
-    except Exception as e:
-      keluar(str(e))
-      pass
-  print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
-  exit()
 def faucetspeedbtc(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('faucetspeedbtc')
@@ -1573,33 +1533,6 @@ def earnsolana(modulesl,banner):
         url_f.append(url['href'])
       if 'links' in url['href']:
         url_sl.append(url['href'])
-    # while True:
-    #   for faucet in url_f:
-    #     print(faucet)
-    #     fc=curl.get(faucet,headers=headers)
-    #     get_data=bs(fc.text,'html.parser')
-    #     csrf=get_data.find('input',{'name':'csrf_token_name'})['value']
-    #     token=get_data.find('input',{'name':'token'})['value']
-    #     atb=modulesl.antibot(fc,key='alert alert-warning text-center')
-    #     re=modulesl.RecaptchaV2('6Lem2pIjAAAAAESScDYn7ChChD9JS7pqa0d7TUUL',faucet)
-    #     data=f'antibotlinks=+{atb}&csrf_token_name={csrf}&token={token}&captcha=recaptchav2&g-recaptcha-response={re}&wallet={email}'
-    #     print(data)
-    #     get_reward=curl.post(faucet.replace('currency','verify'),headers={
-    #   "Host":"earnsolana.xyz",
-    #   "User-Agent":"XYZ/3.0",
-    #   "content-type":"application/x-www-form-urlencoded",
-    #   "referer":faucet
-    #   },data=data)
-    #     if get_reward.url=='https://earnsolana.xyz/firewall':
-    #       csrf=bs(get_reward.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-    #       data=f'g-recaptcha-response={re}&captchaType=recaptchav2&csrf_token_name={csrf}'
-    #       firewall=curl.post('https://earnsolana.xyz/firewall/verify',headers=headers_p,data=data)
-    #       print(firewall.text)
-    #     else:
-    #       print(get_reward.text)
-    #       if 'Success!' in get_reward.text:
-    #         print(get_reward.text.split("html: '")[1].split("',")[0])
-    #     #exit()
     for i in range(len(url_sl)):
       print(str(i)+'.'+url_sl[i].split('https://earnsolana.xyz/links/currency/')[1].upper())
     currency=input('select > ')
@@ -1609,21 +1542,32 @@ def earnsolana(modulesl,banner):
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
     for sl in data_sl:
+     try:
       jumlah=int(sl.find('span',{'class':'badge badge-light'}).text.split('/')[0])
       re=jumlah
       for u in range(jumlah):
-        get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False).text.split(' <script> location.href = "')[1].split('"; </script>')[0]
-        answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
-        if answer:
-          if 'failed to bypass' in answer:
-            pass
-          else:
-            get_reward=curl.get(answer,headers=headers)
-            if 'Success!' in get_reward.text:
-              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
-            re-=1
-        else:
-          break
+       for ytta in range(5):
+         try:
+          get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False)
+          #print(get_link.text)
+          if 'location.href' in get_link.text:
+            get_link=get_link.text.split(' <script> location.href = "')[1].split('"; </script>')[0]
+            answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer:
+              if 'failed to bypass' in answer:
+                pass
+              else:
+                get_reward=curl.get(answer,headers=headers)
+                if 'Success!' in get_reward.text:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
+                re-=1
+            break
+         except Exception as e:
+          keluar(str(e))
+          pass
+     except Exception as e:
+          keluar(str(e))
+          pass
 def cryptofuture(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://cryptofuture.co.in/").netloc
@@ -1658,33 +1602,6 @@ def cryptofuture(modulesl,banner):
         url_f.append(url['href'])
       if 'links' in url['href']:
         url_sl.append(url['href'])
-    # while True:
-    #   for faucet in url_f:
-    #     print(faucet)
-    #     fc=curl.get(faucet,headers=headers)
-    #     get_data=bs(fc.text,'html.parser')
-    #     csrf=get_data.find('input',{'name':'csrf_token_name'})['value']
-    #     token=get_data.find('input',{'name':'token'})['value']
-    #     atb=modulesl.antibot(fc,key='alert alert-warning text-center')
-    #     re=modulesl.RecaptchaV2('6Lem2pIjAAAAAESScDYn7ChChD9JS7pqa0d7TUUL',faucet)
-    #     data=f'antibotlinks=+{atb}&csrf_token_name={csrf}&token={token}&captcha=recaptchav2&g-recaptcha-response={re}&wallet={email}'
-    #     print(data)
-    #     get_reward=curl.post(faucet.replace('currency','verify'),headers={
-    #   "Host":"earnsolana.xyz",
-    #   "User-Agent":"XYZ/3.0",
-    #   "content-type":"application/x-www-form-urlencoded",
-    #   "referer":faucet
-    #   },data=data)
-    #     if get_reward.url=='https://earnsolana.xyz/firewall':
-    #       csrf=bs(get_reward.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-    #       data=f'g-recaptcha-response={re}&captchaType=recaptchav2&csrf_token_name={csrf}'
-    #       firewall=curl.post('https://earnsolana.xyz/firewall/verify',headers=headers_p,data=data)
-    #       print(firewall.text)
-    #     else:
-    #       print(get_reward.text)
-    #       if 'Success!' in get_reward.text:
-    #         print(get_reward.text.split("html: '")[1].split("',")[0])
-    #     #exit()
     for i in range(len(url_sl)):
       print(str(i)+'.'+url_sl[i].split('https://CryptoFuture.co.in/links/currency/')[1].upper())
     currency=input('select > ')
@@ -1694,21 +1611,32 @@ def cryptofuture(modulesl,banner):
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
     for sl in data_sl:
+     try:
       jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
       re=jumlah
       for u in range(jumlah):
-        get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False).text.split(' <script> location.href = "')[1].split('"; </script>')[0]
-        answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
-        if answer:
-          if 'failed to bypass' in answer:
-            pass
-          else:
-            get_reward=curl.get(answer,headers=headers)
-            if 'Success!' in get_reward.text:
-              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
-            re-=1
-        else:
-          break
+       for ytta in range(5):
+         try:
+          get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False)
+          #print(get_link.text)
+          if 'location.href' in get_link.text:
+            get_link=get_link.text.split(' <script> location.href = "')[1].split('"; </script>')[0]
+            answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer:
+              if 'failed to bypass' in answer:
+                pass
+              else:
+                get_reward=curl.get(answer,headers=headers)
+                if 'Success!' in get_reward.text:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
+                re-=1
+            break
+         except Exception as e:
+          keluar(str(e))
+          pass
+     except Exception as e:
+          keluar(str(e))
+          pass
 def freeltc(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://freeltc.fun/").netloc
@@ -1752,21 +1680,90 @@ def freeltc(modulesl,banner):
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
     for sl in data_sl:
+     try:
       jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
       re=jumlah
       for u in range(jumlah):
-        get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False).text.split(' <script> location.href = "')[1].split('"; </script>')[0]
-        answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
-        if answer:
-          if 'failed to bypass' in answer:
-            pass
-          else:
-            get_reward=curl.get(answer,headers=headers)
-            if 'Success!' in get_reward.text:
-              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
-            re-=1
-        else:
-          break
+       for ytta in range(5):
+         try:
+          get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False)
+          #print(get_link.text)
+          if 'location.href' in get_link.text:
+            get_link=get_link.text.split(' <script> location.href = "')[1].split('"; </script>')[0]
+            answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer:
+              if 'failed to bypass' in answer:
+                pass
+              else:
+                get_reward=curl.get(answer,headers=headers)
+                if 'Success!' in get_reward.text:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
+                re-=1
+            break
+         except Exception as e:
+          keluar(str(e))
+          pass
+     except Exception as e:
+          keluar(str(e))
+          pass
+def claimcoins(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://claimcoins.net/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['email'])
+    claimcoins(modulesl,banner)
+  email = load_data(host,custom=['email'])["email"]
+  #email=input('email > ')
+  curl=Session()
+  headers={
+    "Host":"claimcoins.net",
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "User-Agent":"XYZ/3.0"
+  }
+  headers_p={
+    "Host":"claimcoins.net",
+    "User-Agent":"XYZ/3.0",
+    "content-type":"application/x-www-form-urlencoded"
+  }
+  login=curl.get('https://claimcoins.net/',headers=headers)
+  #print(login.text)
+  #csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  auth=curl.post('https://claimcoins.net/auth/login',data=f'wallet={email}',headers=headers_p)
+  if 'Success!' in auth.text:
+    print(hijau1+'Login Success')
+    get_sl=curl.get('https://claimcoins.net/links/currency/ltc',headers=headers)
+    data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body text-center'})
+    for sl in data_sl:
+     try:
+      jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
+      re=jumlah
+      for u in range(jumlah):
+       for ytta in range(5):
+         try:
+          get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False)
+          #print(get_link.text)
+          if 'location.href' in get_link.text:
+            get_link=get_link.text.split('location.href = "')[1].split('";')[0]
+            answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer:
+              if 'failed to bypass' in answer:
+                pass
+              else:
+                get_reward=curl.get(answer,headers=headers)
+                if 'Success!' in get_reward.text:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
+                re-=1
+            break
+         except Exception as e:
+          keluar(str(e))
+          pass
+     except Exception as e:
+          keluar(str(e))
+          pass
+    get_sl=curl.get('https://claimcoins.net/links/withdraw/LTC',headers=headers)
+    print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_sl.text.split("html: '")[1].split("',")[0])
 def claim88(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://claim88.fun/").netloc
@@ -1810,18 +1807,29 @@ def claim88(modulesl,banner):
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
     for sl in data_sl:
+     try:
       jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
       re=jumlah
       for u in range(jumlah):
-        get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False).text.split(' <script> location.href = "')[1].split('"; </script>')[0]
-        answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
-        if answer:
-          if 'failed to bypass' in answer:
-            pass
-          else:
-            get_reward=curl.get(answer,headers=headers)
-            if 'Success!' in get_reward.text:
-              print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
-            re-=1
-        else:
-          break
+       for ytta in range(5):
+         try:
+          get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False)
+          #print(get_link.text)
+          if 'location.href' in get_link.text:
+            get_link=get_link.text.split(' <script> location.href = "')[1].split('"; </script>')[0]
+            answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer:
+              if 'failed to bypass' in answer:
+                pass
+              else:
+                get_reward=curl.get(answer,headers=headers)
+                if 'Success!' in get_reward.text:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
+                re-=1
+            break
+         except Exception as e:
+          keluar(str(e))
+          pass
+     except Exception as e:
+          keluar(str(e))
+          pass

@@ -621,6 +621,16 @@ def shrinkme(url):
   res= one_method(curl=curl,url='https://en.shrinke.me'+urlparse(url).path,headers={"referer":"https://themezon.net/managed-cloud-hosting-service-providers/"})
   sleep(15)
   return res
+def urlpay(url):
+  curl=Session()
+  res= one_method(curl=curl,url='https://go.urlpay.in'+urlparse(url).path,headers={"referer":"https://daddy.helpowi.com/web-hosting-navigating-the-digital-landscape/"})
+  sleep(15)
+  return res
+def teralinks(url):
+  curl=Session()
+  res= one_method(curl=curl,url='https://go.teralinks.in'+urlparse(url).path,headers={"referer":"https://daddy.webseriesreel.in/"})
+  sleep(15)
+  return res
 def shrinkearn(url):
   try:
     curl=Session()
@@ -1712,7 +1722,7 @@ def rsshort(url):
     if "You've hit the request limit for your current plan. You can upgrade or renew your subscription early on our dashboard, or contact support@scraperapi.com for help." in step1.text:
       print("api key scrapeapi limit mohon ganti api key")
       return "failed to bypass"
-    curl = requests.Session()
+    curl = Session()
     curl.cookies.update(step1.cookies.get_dict())
     status_code(step1)
     if step1.status_code==200:

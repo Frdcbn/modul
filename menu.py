@@ -28,7 +28,7 @@ def menu(banner,modul,modulesl):
     "ptctask":modul.ptctask,
     }
     micin = {
-    "coinfola":modul.coinfola,
+    #"coinfola":modul.coinfola,
     "earnsolana":modul.earnsolana,
     "faucetspeedbtc":modul.faucetspeedbtc,
     "whoopyrewards":modul.whoopyrewards,
@@ -52,6 +52,8 @@ def menu(banner,modul,modulesl):
     #"1xbitcoins":modul._1xbitcoins,
     #"feyorra":modul.feyorra,
     "claim88":modul.claim88,
+    "claimcoins":modul.claimcoins,
+    "litefaucet":modul.litefaucet,
     }
     menu={
       "settings":None,
