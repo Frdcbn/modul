@@ -85,7 +85,7 @@ def animasi(menit=None,detik=None):
       print(output, end=' '*20+'\r')
       time.sleep(1)
       detik -= 1
-def bypass_link(url,modulesl,jumlah):
+def bypass_link(url,modulesl,jumlah=None):
   dictnya={
   "urlpay.in":modulesl.urlpay,
   "teralinks.in":modulesl.teralinks,
@@ -158,7 +158,10 @@ def bypass_link(url,modulesl,jumlah):
   }
   if urlparse(url).netloc in dictnya:
     print(putih1+'├──'+'─'*56)
-    print(f"├── {putih1}[{kuning1}{jumlah[0]}/{jumlah[1]}{putih1}] {kuning1} Bypassing : {hijau1}{url}")
+    if jumlah:
+      print(f"├── {putih1}[{kuning1}{jumlah[0]}/{jumlah[1]}{putih1}] {kuning1} Bypassing : {hijau1}{url}")
+    else:
+      print(f"├── {putih1}{kuning1}Bypassing : {hijau1}{url}")
     res=dictnya[urlparse(url).netloc](url)
     if "failed to bypass" in res:
       print(putih1+'├── '+kuning1+'Status : '+merah1+res)
@@ -486,10 +489,10 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
               else:
                 animasi(menit=1440)
                 bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
-            waktu=get_sl.text.split('<h1 class="text-warning"><i class="fa fa-arrow-down"></i>')[1].split(' minutes')[0].split('every ')[1]
             if 'Just a moment...' in get_sl.text:
               save_data(host)
               bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
+            waktu=get_sl.text.split('<h1 class="text-warning"><i class="fa fa-arrow-down"></i>')[1].split(' minutes')[0].split('every ')[1]
             status_code(get_sl)
             if 'You can claim again in' in get_sl.text:
                 tim = int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0]) * 60
@@ -536,10 +539,10 @@ def bits_family(modulesl,banner,host, recaptcha_key,faucet=None,path_ptc='/ptc.h
               else:
                 animasi(menit=1440)
                 bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run='0',ptc1=ptc1)
-            waktu=get_sl.text.split('<h1 class="text-warning"><i class="fa fa-arrow-down"></i>')[1].split(' minutes')[0].split('every ')[1]
             if 'Just a moment...' in get_sl.text:
               save_data(host)
               bits_family(modulesl,banner,host, recaptcha_key,faucet,path_ptc,key_all_ptc,path_sl,key_all_sl,key_button_id,key_amount_sl,run,ptc1)
+            waktu=get_sl.text.split('<h1 class="text-warning"><i class="fa fa-arrow-down"></i>')[1].split(' minutes')[0].split('every ')[1]
             status_code(get_sl)
             if 'You can claim again in' in get_sl.text:
                 tim = int(get_sl.text.split('You can claim again in <span id="claimTime">')[1].split(' minutes</span>')[0]) * 60
@@ -1280,11 +1283,11 @@ def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=No
               except Exception as e:
                   keluar(str(e))
                   pass
+            if answer==False:
+                      break
           except Exception as e:
               keluar(str(e))
               pass
-        if answer==False:
-                  break
       except Exception as e:
           keluar(str(e))
           pass
@@ -1307,7 +1310,7 @@ def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=No
        break
   exit()
 def tartaria_faucet(modulesl,banner):
-  bithub_family(modulesl,banner,'https://tartaria-faucet.net', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-md-6 col-xl-3'}),ptc=('div',{'class':'col-lg-6 col-xl-4'}),sl=('div',{'class':'col-lg-6 col-xl-4'}),auto=True)
+  bithub_family(modulesl,banner,'https://tartaria-faucet.net', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-md-6 col-xl-3'}),ptc=('div',{'class':'col-lg-6 col-xl-4'}),sl=('div',{'class':'card-lg claim-card'}),auto=True)
 def feyorra(modulesl,banner):
   bithub_family(modulesl,banner,'https://feyorra.top', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-lg-3 col-md-6'}),sl=('div',{'class':'col-md-6 col-lg-4 mb-3 mb-lg-0'}),key_jumlah=('span',{'class':'badge bg-info'}))
 def _1xbitcoins(modulesl,banner):
@@ -1833,3 +1836,101 @@ def claim88(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
+def freeltc_online(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://freeltc.online/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['email'])
+    freeltc_online(modulesl,banner)
+  email = load_data(host,custom=['email'])["email"]
+  while True:
+    try:
+      curl=Session()
+      ua_g = {
+        'Host': 'freeltc.online',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      }
+      ua_p = {
+        'Host': 'freeltc.online',
+        'origin': 'https://freeltc.online',
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+      }
+      url="https://freeltc.online/"
+      get_data=curl.get(url,headers=ua_g)
+      parser=bs(get_data.text,'html.parser')
+      sesi=parser.find('input',{'name':'session-token'})['value']
+      key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+      answer=modulesl.RecaptchaV2(key,url)
+      data=f'session-token={sesi}&address={email}&antibotlinks=&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
+      send_data=curl.post(url,headers=ua_p,data=data)
+      for ulang in range(10):
+        get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
+        an=bypass_link(get_sl.headers['location'],modulesl)
+        if an:
+          if 'failed to bypass' in an:
+            pass
+          else:
+            get_data=curl.get(an,headers=ua_g)
+            print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
+            animasi(detik=60)
+            break
+        else:
+          send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
+      if ulang==9:
+        exit('shortlinks limit')
+    except Exception as e:
+      pass
+def claimfreetrx(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://claimfreetrx.online/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['email'])
+    claimfreetrx(modulesl,banner)
+  email = load_data(host,custom=['email'])["email"]
+  while True:
+    try:
+      curl=Session()
+      ua_g = {
+        'Host': 'claimfreetrx.online',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      }
+      ua_p = {
+        'Host': 'claimfreetrx.online',
+        'origin': 'https://claimfreetrx.online',
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+      }
+      url="https://claimfreetrx.online/"
+      get_data=curl.get(url,headers=ua_g)
+      parser=bs(get_data.text,'html.parser')
+      sesi=parser.find('input',{'name':'session-token'})['value']
+      key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+      answer=modulesl.RecaptchaV2(key,url)
+      data=f'session-token={sesi}&address={email}&antibotlinks=&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
+      send_data=curl.post(url,headers=ua_p,data=data)
+      for ulang in range(10):
+        get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
+        an=bypass_link(get_sl.headers['location'],modulesl)
+        if an:
+          if 'failed to bypass' in an:
+            pass
+          else:
+            get_data=curl.get(an,headers=ua_g)
+            print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
+            animasi(detik=60)
+            break
+        else:
+          send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
+      if ulang==9:
+        exit('shortlinks limit')
+    except Exception as e:
+      pass

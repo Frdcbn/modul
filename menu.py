@@ -54,6 +54,8 @@ def menu(banner,modul,modulesl):
     "claim88":modul.claim88,
     "claimcoins":modul.claimcoins,
     "litefaucet":modul.litefaucet,
+    "freeltc_online":modul.freeltc_online,
+    "claimfreetrx_online(BTC)":modul.claimfreetrx,
     }
     menu={
       "settings":None,

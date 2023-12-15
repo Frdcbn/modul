@@ -260,6 +260,9 @@ def run(data, key, url='http://goodxevilpay.pp.ua', max_wait=300, sleep=5):
         if get_res:
             answer = get_res.text
             if 'CAPCHA_NOT_READY' in answer:
+                print(answer, end='\r')
+                time.sleep(0.3)
+                print('                                    ',end='\r\r\r')
                 continue
             elif "|" in answer:
                 #print(answer)
