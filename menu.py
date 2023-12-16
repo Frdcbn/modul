@@ -56,6 +56,7 @@ def menu(banner,modul,modulesl):
     "litefaucet":modul.litefaucet,
     "freeltc_online":modul.freeltc_online,
     "claimfreetrx_online(BTC)":modul.claimfreetrx,
+    "earncryptowrs":modul.earncryptowrs,
     }
     menu={
       "settings":None,

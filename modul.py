@@ -1047,6 +1047,8 @@ def nobitafc(modulesl,banner):
   vie_script(modulesl,banner,url="https://nobitafc.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
 def coin_4u(modulesl,banner):
   vie_script(modulesl,banner,url="https://coin-4u.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
+def freeltc_online(modulesl,banner):
+  vie_script(modulesl,banner,url="https://freeltc.online",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
 #--------------- vie new family ---------------#
 def chillfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -1640,6 +1642,76 @@ def cryptofuture(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
+def earncryptowrs(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://earncryptowrs.in").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['email'])
+    cryptofuture(modulesl,banner)
+  email = load_data(host,custom=['email'])["email"]
+  #email=input('email > ')
+  curl=Session()
+  headers={
+    "Host":"earncryptowrs.in",
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "User-Agent":"XYZ/3.0"
+  }
+  headers_p={
+    "Host":"earncryptowrs.in",
+    "User-Agent":"XYZ/3.0",
+    "content-type":"application/x-www-form-urlencoded"
+  }
+  login=curl.get('https://earncryptowrs.in/?r=678',headers=headers)
+  csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
+  auth=curl.post('https://earncryptowrs.in/auth/login',data=f'wallet={email}&csrf_token_name={csrf}',headers=headers_p)
+  if 'Success!' in auth.text:
+    print(hijau1+'Login Success')
+    url=bs(auth.text,'html.parser').find_all('a',{'class':'collapse-item'})
+    url_sl=[]
+    url_f=[]
+    for url in url:
+      if 'faucet' in url['href']:
+        url_f.append(url['href'])
+      if 'links' in url['href']:
+        url_sl.append(url['href'])
+    for i in range(len(url_sl)):
+      print(str(i)+'.'+url_sl[i].split('https://earncryptowrs.in/links/currency/')[1].upper())
+    currency=input('select > ')
+    os.system('cls' if os.name == 'nt' else 'clear')
+    host=urlparse("https://earncryptowrs.in/").netloc
+    banner.banner(host.upper())
+    get_sl=curl.get(url_sl[int(currency)],headers=headers)
+    data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
+    for sl in data_sl:
+     try:
+      jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
+      re=jumlah
+      for u in range(jumlah):
+       for ytta in range(5):
+         try:
+          get_link=curl.get(sl.find('a')['href'],headers=headers,allow_redirects=False)
+          #print(get_link.text)
+          if 'location.href' in get_link.text:
+            get_link=get_link.text.split(' <script> location.href = "')[1].split('"; </script>')[0]
+            answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer:
+              if 'failed to bypass' in answer:
+                pass
+              else:
+                get_reward=curl.get(answer.replace('back','verify'),headers=headers)
+                #print(get_reward.text)
+                if 'Success!' in get_reward.text:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
+                re-=1
+            break
+         except Exception as e:
+          keluar(str(e))
+          pass
+     except Exception as e:
+          keluar(str(e))
+          pass
 def freeltc(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://freeltc.fun/").netloc
@@ -1836,55 +1908,6 @@ def claim88(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
-def freeltc_online(modulesl,banner):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  host=urlparse("https://freeltc.online/").netloc
-  data_control(host)
-  banner.banner(host.upper())
-  if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
-    freeltc_online(modulesl,banner)
-  email = load_data(host,custom=['email'])["email"]
-  while True:
-    try:
-      curl=Session()
-      ua_g = {
-        'Host': 'freeltc.online',
-        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-      }
-      ua_p = {
-        'Host': 'freeltc.online',
-        'origin': 'https://freeltc.online',
-        'content-type': 'application/x-www-form-urlencoded',
-        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
-      }
-      url="https://freeltc.online/"
-      get_data=curl.get(url,headers=ua_g)
-      parser=bs(get_data.text,'html.parser')
-      sesi=parser.find('input',{'name':'session-token'})['value']
-      key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
-      answer=modulesl.RecaptchaV2(key,url)
-      data=f'session-token={sesi}&address={email}&antibotlinks=&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
-      send_data=curl.post(url,headers=ua_p,data=data)
-      for ulang in range(10):
-        get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
-        an=bypass_link(get_sl.headers['location'],modulesl)
-        if an:
-          if 'failed to bypass' in an:
-            pass
-          else:
-            get_data=curl.get(an,headers=ua_g)
-            print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
-            animasi(detik=60)
-            break
-        else:
-          send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
-      if ulang==9:
-        exit('shortlinks limit')
-    except Exception as e:
-      pass
 def claimfreetrx(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://claimfreetrx.online/").netloc
