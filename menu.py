@@ -48,14 +48,14 @@ def menu(banner,modul,modulesl):
     "queenofferwall":modul.queenofferwall,
     "hatecoin":modul.hatecoin,
     "nobitafc":modul.nobitafc,
-    "tartaria_faucet":modul.tartaria_faucet,
+    #"tartaria_faucet":modul.tartaria_faucet,
     #"1xbitcoins":modul._1xbitcoins,
     #"feyorra":modul.feyorra,
     "claim88":modul.claim88,
     "claimcoins":modul.claimcoins,
     "litefaucet":modul.litefaucet,
     "freeltc_online":modul.freeltc_online,
-    "claimfreetrx_online(BTC)":modul.claimfreetrx,
+    #"claimfreetrx_online(BTC)":modul.claimfreetrx,
     "earncryptowrs":modul.earncryptowrs,
     }
     menu={

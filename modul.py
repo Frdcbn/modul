@@ -169,7 +169,7 @@ def bypass_link(url,modulesl,jumlah=None):
     else:
       print(putih1+'├── '+kuning1+'Status : '+hijau1+"success")
       print(putih1+'├──'+'─'*56)
-      animasi(detik=45)
+      animasi(detik=200)
       return res
   else:
     return False
@@ -835,7 +835,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
     rprint(Tree("[green]> [yellow]Start bypass shortlinks"))
     get_links=curl.get(f'https://{host}/links',headers=ua,cookies=cookies)
     status_code(get_links)
-    if 'shortlinks' not in get_links.text.lower():
+    if get_links.status_code!=200:
       save_data(name=host)
       vie_script(modulesl,banner,url,key_re,ptc, short,faucet,auto)
     else:
@@ -1048,7 +1048,7 @@ def nobitafc(modulesl,banner):
 def coin_4u(modulesl,banner):
   vie_script(modulesl,banner,url="https://coin-4u.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 def freeltc_online(modulesl,banner):
-  vie_script(modulesl,banner,url="https://freeltc.online",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
+  vie_script(modulesl,banner,url="https://freeltc.online",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True,link='card card-body text-center')
 #--------------- vie new family ---------------#
 def chillfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -1241,7 +1241,8 @@ def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=No
   if sl:
     rprint(Tree("[gree] > [yellow] Start shortlinks"))
     sll=curl.get(url+'/links')
-    if 'available' and 'shortlinks' not in sll.text.lower():
+    #print(sll.text)
+    if 'available' or 'shortlinks' not in sll.text.lower():
       save_data(name=host)
       bithub_family(modulesl,banner,url, captcha, key_cp,key_info,ptc,sl,auto,key_jumlah)
     status_code(sll)
@@ -1312,7 +1313,7 @@ def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=No
        break
   exit()
 def tartaria_faucet(modulesl,banner):
-  bithub_family(modulesl,banner,'https://tartaria-faucet.net', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-md-6 col-xl-3'}),ptc=('div',{'class':'col-lg-6 col-xl-4'}),sl=('div',{'class':'card-lg claim-card'}),auto=True)
+  bithub_family(modulesl,banner,'https://tartaria-faucet.net', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-md-6 col-xl-3'}),sl=('div',{'class':'card-lg claim-card'}),auto=True)
 def feyorra(modulesl,banner):
   bithub_family(modulesl,banner,'https://feyorra.top', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-lg-3 col-md-6'}),sl=('div',{'class':'col-md-6 col-lg-4 mb-3 mb-lg-0'}),key_jumlah=('span',{'class':'badge bg-info'}))
 def _1xbitcoins(modulesl,banner):
