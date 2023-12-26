@@ -6,13 +6,14 @@ from os import system
 from time import sleep
 from bs4 import BeautifulSoup as bs
 from http.cookies import SimpleCookie
-from urllib.parse import urlparse,urlencode
+from urllib.parse import urlparse,urlencode,unquote
 from telethon import TelegramClient, sync, events
 from rich.tree import Tree
 from rich.panel import Panel
 from rich import print as rprint
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
+from concurrent.futures import ThreadPoolExecutor
 #----------- color ---------------#
 hijau1 = "\033[1;92m"
 kuning1 = "\033[1;93m"
@@ -20,6 +21,12 @@ putih1 = "\033[1;97m"
 merah1 = "\033[1;91m"
 biru1 = "\033[1;94m"
 #----------- module ---------------#
+def settings():
+  if os.path.exists('settings.json'):
+    data=json.loads(open('settings.json').read())
+    if data['multi']=='n':data['multi']=None
+    return data
+  else:return {"timer":160,"multi":None}
 def Session():
     session = requests.Session()
     retry = Retry(connect=5, backoff_factor=1)
@@ -169,7 +176,10 @@ def bypass_link(url,modulesl,jumlah=None):
     else:
       print(putih1+'├── '+kuning1+'Status : '+hijau1+"success")
       print(putih1+'├──'+'─'*56)
-      animasi(detik=200)
+      if settings():
+        animasi(detik=settings()['timer'])
+      else:
+        animasi(detik=160)
       return res
   else:
     return False
@@ -844,7 +854,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
         link=fd.find_all('div',{'class':link})
       else:
         link=fd.find_all('div',{'class':'col-lg-3'})
-      for i in link:
+      def run(i):
         try:
             jumlah = i.find('span',{'class':'badge badge-info'}).text.split('/')
             re=int(jumlah[0])
@@ -898,6 +908,13 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
         except Exception as e:
             keluar(str(e))
             pass
+      if settings()['multi']:
+        
+          with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = [executor.submit(run, i) for i in link]
+      else:
+        for i in link:
+          run(i)
       print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
   if auto == True:
     rprint(Tree("[green]> [yellow]Start auto faucet"))
@@ -962,7 +979,7 @@ def keforcash(modulesl,banner):
   cookies, ugentmu = load_data(host)
   if not os.path.exists(f"data/{host}/{host}.json"):
     save_data(name=host)
-    vie_script(modulesl,banner,url,key_re,ptc, short,faucet,auto)
+    keforcash(modulesl,banner)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -976,7 +993,7 @@ def keforcash(modulesl,banner):
   status_code(dash)
   if 'Balance' not in dash.text:
     save_data(name=host)
-    vie_script(modulesl,banner,url,key_re,ptc, short,faucet,auto)
+    keforcash(modulesl,banner)
   info=bs(dash.text,'html.parser').find_all('div',{'class':'card mini-stats-wid'})
   akun=Tree("[green]> [yellow]Account information")
   for info in info:
@@ -987,13 +1004,13 @@ def keforcash(modulesl,banner):
   status_code(get_links)
   if 'links available' not in get_links.text.lower():
     save_data(name=host)
-    vie_script(modulesl,banner,url,key_re,ptc, short,faucet,auto)
+    keforcash(modulesl,banner)
   if 'pre_verify' in get_links.url:
     print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}maaf shortlinks memiliki anti bot saat ini belum ada metode bypass untuk anti bot')
   else:
     fd=bs(get_links.text,'html.parser')
     link=fd.find_all('div',{'class':'col-12 col-md-6 col-xl-4'})
-    for i in link:
+    def run(i):
       try:
           #name = i.find('h4').text
           jumlah = i.find('p',{'class':'mx-auto text-primary'}).text.split('/')
@@ -1024,6 +1041,13 @@ def keforcash(modulesl,banner):
       except Exception as e:
           keluar(str(e))
           pass
+    if settings()['multi']:
+      
+        with ThreadPoolExecutor(max_workers=3) as executor:
+          futures = [executor.submit(run, i) for i in link]
+    else:
+      for i in link:
+        run(i)
     print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 def claimcoin_in(modulesl,banner):
   vie_script(modulesl,banner,url="https://claimcoin.in/",key_re="6LfO65QlAAAAAE4tUQ1uwmXFMW1TvT5QxEDtrK25",ptc=False,short=True,faucet=False,auto=True)
@@ -1079,7 +1103,7 @@ def chillfaucet(modulesl,banner):
   sl=curl.get(f'https://{host}/links',headers=hd,cookies=cookies)
   status_code(sl)
   sl=bs(sl.text,"html.parser").find_all("div",{"class":"col-sm-4 layout-spacing"})
-  for sl in sl:
+  def run(sl):
    try:
     url=sl.find("center").find('a')["href"]
     jumlah=sl.find("span",{"class":"badge span-warning text-warning text-center"}).text.strip().split('/')
@@ -1108,6 +1132,13 @@ def chillfaucet(modulesl,banner):
    except Exception as e:
      keluar(str(e))
      pass
+  if settings()['multi']:
+    
+      with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(run, sl) for sl in sl]
+  else:
+    for sl in sl:
+      run(sl)
   print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 def insfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -1117,7 +1148,7 @@ def insfaucet(modulesl,banner):
   cookies, ugentmu = load_data(host)
   if not os.path.exists(f"data/{host}/{host}.json"):
     save_data(name=host)
-    chillfaucet(modulesl,banner)
+    insfaucet(modulesl,banner)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
@@ -1128,7 +1159,7 @@ def insfaucet(modulesl,banner):
   status_code(dash)
   if 'Balance' not in dash.text:
     save_data(name=host)
-    chillfaucet(modulesl,banner)
+    insfaucet(modulesl,banner)
   get_info=bs(dash.text,"html.parser").find_all('div',{"class":"col-sm-6 layout-spacing"})
   akun=Tree("[green]> [yellow]Account information")
   for info in get_info:
@@ -1138,7 +1169,7 @@ def insfaucet(modulesl,banner):
   sl=curl.get(f'https://{host}/links',headers=hd,cookies=cookies)
   status_code(sl)
   sl=bs(sl.text,"html.parser").find_all("div",{"class":"col-sm-4 layout-spacing"})
-  for sl in sl:
+  def run(sl):
    try:
     url=sl.find("center").find('a')["href"]
     jumlah=sl.find("span",{"class":"badge span-warning text-warning text-center"}).text.strip().split('/')
@@ -1167,14 +1198,15 @@ def insfaucet(modulesl,banner):
    except Exception as e:
      keluar(str(e))
      pass
+  if settings()['multi']:
+    
+      with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(run, sl) for sl in sl]
+  else:
+    for sl in sl:
+      run(sl)
   print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 #--------------- bithub family ---------------#
-# captcha fields
-# hcaptcha => hc
-# rscaptcha => rs
-# recaptchav2 => rev2
-# recaptchav3 => rev3
-# antibotlinks => atb
 def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=None,sl=None,auto=None,key_jumlah=None):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse(url).netloc
@@ -1312,12 +1344,6 @@ def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=No
        print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy!')
        break
   exit()
-def tartaria_faucet(modulesl,banner):
-  bithub_family(modulesl,banner,'https://tartaria-faucet.net', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-md-6 col-xl-3'}),sl=('div',{'class':'card-lg claim-card'}),auto=True)
-def feyorra(modulesl,banner):
-  bithub_family(modulesl,banner,'https://feyorra.top', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-lg-3 col-md-6'}),sl=('div',{'class':'col-md-6 col-lg-4 mb-3 mb-lg-0'}),key_jumlah=('span',{'class':'badge bg-info'}))
-def _1xbitcoins(modulesl,banner):
-  bithub_family(modulesl,banner,'https://1xbitcoins.com', captcha='hc', key_cp='5bba62cc-f41b-47cd-8927-dc2e576e3a5c',key_info=('div',{'class':'col-lg-4'}),sl=('div',{'class':'viewads_heading'}),key_jumlah=('a',{'class':'view_ads_click'}))
 #--------------- other family ---------------#
 def faucetspeedbtc(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -1354,7 +1380,7 @@ def faucetspeedbtc(modulesl,banner):
     save_data('faucetspeedbtc')
     faucetspeedbtc(modulesl,banner)
   link=fd.find_all('div',{'class':'col-md-6 col-xl-4'})
-  for i in link:
+  def run(i):
     try:
         if 'h5' not in str(i):pass
         else:
@@ -1381,6 +1407,13 @@ def faucetspeedbtc(modulesl,banner):
     except Exception as e:
       keluar(str(e))
       pass
+  if settings()['multi']:
+    
+      with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(run, i) for i in link]
+  else:
+    for i in link:
+      run(i)
   print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
   rprint(Tree("[gree] > [yellow]Start auto faucet"))
   while True:
@@ -1427,7 +1460,7 @@ def coinpayz(modulesl,banner):
   sl=curl.get('https://coinpayz.xyz/links')
   status_code(sl)
   sli=bs(sl.text,'html.parser').find_all('div',class_='card card-body text-center bg-metallic')
-  for bp in sli:
+  def run(bp):
    try:
     jumlah=int(bp.find('span',class_='badge badge-soft-info font-size-12').text.strip().split('/')[0])
     link=bp.find('a',class_='btn btn-info waves-effect waves-light')['href']
@@ -1451,6 +1484,13 @@ def coinpayz(modulesl,banner):
        print(td+str(e))
    except Exception as e:
      print(td+str(e))
+  if settings()['multi']:
+    
+      with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(run, i) for i in sli]
+  else:
+    for i in sli:
+      run(i)
 def wildfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   data_control('wildfaucet')
@@ -1482,7 +1522,7 @@ def wildfaucet(modulesl,banner):
   rprint(Tree("[green] > [yellow]Start shortlinks"))
   sl=curl.post('https://wildfaucet.com/em-assets/themes/default/earn/sortlink/',data=data)
   links=bs(sl.text,'html.parser').find_all('div',class_='em_short')
-  for link in links:
+  def run(link):
     jumlah=link.find('a').text.strip().split('Claim (')[1].split('/')
     if jumlah[0] != '0':
       jumlah=int(eval(jumlah[1].split(')')[0]+'-'+jumlah[0]))
@@ -1505,33 +1545,36 @@ def wildfaucet(modulesl,banner):
           re-=1
      except Exception as e:
        pass
+  if settings()['multi']:
+    
+      with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(run, i) for i in links]
+  else:
+    for i in links:
+      run(i)
 def earnsolana(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://earnsolana.xyz/").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
+    save_data(host)
     earnsolana(modulesl,banner)
-  email = load_data(host,custom=['email'])["email"]
-  #email=input('email > ')
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
   curl=Session()
+  curl.cookies.update(cookies)
   headers={
-    "Host":"earnsolana.xyz",
+    "Host":host,
     "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "User-Agent":"XYZ/3.0"
+    "User-Agent":ugentmu
   }
-  headers_p={
-    "Host":"earnsolana.xyz",
-    "User-Agent":"XYZ/3.0",
-    "content-type":"application/x-www-form-urlencoded"
-  }
-  login=curl.get('https://earnsolana.xyz/?r=1548',headers=headers)
-  csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-  auth=curl.post('https://earnsolana.xyz/auth/login',data=f'wallet={email}&csrf_token_name={csrf}',headers=headers_p)
-  if 'Success!' in auth.text:
+  login=curl.get(f'https://{host}/',headers=headers)
+  if 'Invite your friends and earn' in login.text:
     print(hijau1+'Login Success')
-    url=bs(auth.text,'html.parser').find_all('a',{'class':'collapse-item'})
+    url=bs(login.text,'html.parser').find_all('a',{'class':'collapse-item'})
     url_sl=[]
     url_f=[]
     for url in url:
@@ -1547,7 +1590,7 @@ def earnsolana(modulesl,banner):
     banner.banner(host.upper())
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
-    for sl in data_sl:
+    def run(sl):
      try:
       jumlah=int(sl.find('span',{'class':'badge badge-light'}).text.split('/')[0])
       re=jumlah
@@ -1574,33 +1617,39 @@ def earnsolana(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
+    if settings()['multi']:
+      
+        with ThreadPoolExecutor(max_workers=3) as executor:
+          futures = [executor.submit(run, i) for i in data_sl]
+    else:
+      for i in data_sl:
+        run(i)
+  else:
+    save_data(host)
+    earnsolana(modulesl,banner)
 def cryptofuture(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://cryptofuture.co.in/").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
+    save_data(host)
     cryptofuture(modulesl,banner)
-  email = load_data(host,custom=['email'])["email"]
-  #email=input('email > ')
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
   curl=Session()
+  curl.cookies.update(cookies)
   headers={
-    "Host":"cryptofuture.co.in",
+    "Host":host,
     "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "User-Agent":"XYZ/3.0"
+    "User-Agent":ugentmu
   }
-  headers_p={
-    "Host":"cryptofuture.co.in",
-    "User-Agent":"XYZ/3.0",
-    "content-type":"application/x-www-form-urlencoded"
-  }
-  login=curl.get('https://cryptofuture.co.in/?r=5471',headers=headers)
-  csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-  auth=curl.post('https://cryptofuture.co.in/auth/login',data=f'wallet={email}&csrf_token_name={csrf}',headers=headers_p)
-  if 'Success!' in auth.text:
+  login=curl.get(f'https://{host}/',headers=headers)
+  if 'Invite your friends and earn' in login.text:
     print(hijau1+'Login Success')
-    url=bs(auth.text,'html.parser').find_all('a',{'class':'collapse-item'})
+    url=bs(login.text,'html.parser').find_all('a',{'class':'collapse-item'})
     url_sl=[]
     url_f=[]
     for url in url:
@@ -1616,7 +1665,7 @@ def cryptofuture(modulesl,banner):
     banner.banner(host.upper())
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
-    for sl in data_sl:
+    def run(sl):
      try:
       jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
       re=jumlah
@@ -1643,33 +1692,39 @@ def cryptofuture(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
+    if settings()['multi']:
+      
+        with ThreadPoolExecutor(max_workers=3) as executor:
+          futures = [executor.submit(run, i) for i in data_sl]
+    else:
+      for i in data_sl:
+        run(i)
+  else:
+    save_data(host)
+    cryptofuture(modulesl,banner)
 def earncryptowrs(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://earncryptowrs.in").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
-    cryptofuture(modulesl,banner)
-  email = load_data(host,custom=['email'])["email"]
-  #email=input('email > ')
+    save_data(host)
+    earncryptowrs(modulesl,banner)
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
   curl=Session()
+  curl.cookies.update(cookies)
   headers={
-    "Host":"earncryptowrs.in",
+    "Host":host,
     "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "User-Agent":"XYZ/3.0"
+    "User-Agent":ugentmu
   }
-  headers_p={
-    "Host":"earncryptowrs.in",
-    "User-Agent":"XYZ/3.0",
-    "content-type":"application/x-www-form-urlencoded"
-  }
-  login=curl.get('https://earncryptowrs.in/?r=678',headers=headers)
-  csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-  auth=curl.post('https://earncryptowrs.in/auth/login',data=f'wallet={email}&csrf_token_name={csrf}',headers=headers_p)
-  if 'Success!' in auth.text:
+  login=curl.get(f'https://{host}/',headers=headers)
+  if 'Invite your friends and earn' in login.text:
     print(hijau1+'Login Success')
-    url=bs(auth.text,'html.parser').find_all('a',{'class':'collapse-item'})
+    url=bs(login.text,'html.parser').find_all('a',{'class':'collapse-item'})
     url_sl=[]
     url_f=[]
     for url in url:
@@ -1685,7 +1740,7 @@ def earncryptowrs(modulesl,banner):
     banner.banner(host.upper())
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
-    for sl in data_sl:
+    def run(sl):
      try:
       jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
       re=jumlah
@@ -1713,33 +1768,39 @@ def earncryptowrs(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
+    if settings()['multi']:
+      
+        with ThreadPoolExecutor(max_workers=3) as executor:
+          futures = [executor.submit(run, i) for i in data_sl]
+    else:
+      for i in data_sl:
+        run(i)
+  else:
+    save_data(host)
+    earncryptowrs(modulesl,banner)
 def freeltc(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://freeltc.fun/").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
+    save_data(host)
     freeltc(modulesl,banner)
-  email = load_data(host,custom=['email'])["email"]
-  #email=input('email > ')
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
   curl=Session()
+  curl.cookies.update(cookies)
   headers={
-    "Host":"freeltc.fun",
+    "Host":host,
     "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "User-Agent":"XYZ/3.0"
+    "User-Agent":ugentmu
   }
-  headers_p={
-    "Host":"freeltc.fun",
-    "User-Agent":"XYZ/3.0",
-    "content-type":"application/x-www-form-urlencoded"
-  }
-  login=curl.get('https://freeltc.fun/?r=7583',headers=headers)
-  csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-  auth=curl.post('https://freeltc.fun/auth/login',data=f'wallet={email}&csrf_token_name={csrf}',headers=headers_p)
-  if 'Success!' in auth.text:
+  login=curl.get(f'https://{host}/',headers=headers)
+  if 'Invite your friends and earn' in login.text:
     print(hijau1+'Login Success')
-    url=bs(auth.text,'html.parser').find_all('a',{'class':'collapse-item'})
+    url=bs(login.text,'html.parser').find_all('a',{'class':'collapse-item'})
     url_sl=[]
     url_f=[]
     for url in url:
@@ -1755,7 +1816,7 @@ def freeltc(modulesl,banner):
     banner.banner(host.upper())
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
-    for sl in data_sl:
+    def run(sl):
      try:
       jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
       re=jumlah
@@ -1782,36 +1843,41 @@ def freeltc(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
+    if settings()['multi']:
+      
+        with ThreadPoolExecutor(max_workers=3) as executor:
+          futures = [executor.submit(run, i) for i in data_sl]
+    else:
+      for i in data_sl:
+        run(i)
+  else:
+    save_data(host)
+    freeltc(modulesl,banner)
 def claimcoins(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://claimcoins.net/").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
+    save_data(host)
     claimcoins(modulesl,banner)
-  email = load_data(host,custom=['email'])["email"]
-  #email=input('email > ')
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
   curl=Session()
+  curl.cookies.update(cookies)
   headers={
-    "Host":"claimcoins.net",
+    "Host":host,
     "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "User-Agent":"XYZ/3.0"
+    "User-Agent":ugentmu
   }
-  headers_p={
-    "Host":"claimcoins.net",
-    "User-Agent":"XYZ/3.0",
-    "content-type":"application/x-www-form-urlencoded"
-  }
-  login=curl.get('https://claimcoins.net/',headers=headers)
-  #print(login.text)
-  #csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-  auth=curl.post('https://claimcoins.net/auth/login',data=f'wallet={email}',headers=headers_p)
-  if 'Success!' in auth.text:
+  login=curl.get(f'https://{host}/',headers=headers)
+  if 'Go to Faucet' in login.text:
     print(hijau1+'Login Success')
     get_sl=curl.get('https://claimcoins.net/links/currency/ltc',headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body text-center'})
-    for sl in data_sl:
+    def run(sl):
      try:
       jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
       re=jumlah
@@ -1838,35 +1904,41 @@ def claimcoins(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
+    if settings()['multi']:
+      
+        with ThreadPoolExecutor(max_workers=3) as executor:
+          futures = [executor.submit(run, i) for i in data_sl]
+    else:
+      for i in data_sl:
+        run(i)
     get_sl=curl.get('https://claimcoins.net/links/withdraw/LTC',headers=headers)
     print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_sl.text.split("html: '")[1].split("',")[0])
+  else:
+    save_data(host)
+    claimcoins(modulesl,banner)
 def claim88(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://claim88.fun/").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
+    save_data(host)
     claim88(modulesl,banner)
-  email = load_data(host,custom=['email'])["email"]
-  #email=input('email > ')
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
   curl=Session()
+  curl.cookies.update(cookies)
   headers={
-    "Host":"claim88.fun",
+    "Host":host,
     "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "User-Agent":"XYZ/3.0"
+    "User-Agent":ugentmu
   }
-  headers_p={
-    "Host":"claim88.fun",
-    "User-Agent":"XYZ/3.0",
-    "content-type":"application/x-www-form-urlencoded"
-  }
-  login=curl.get('https://claim88.fun/',headers=headers)
-  csrf=bs(login.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
-  auth=curl.post('https://claim88.fun/auth/login',data=f'wallet={email}&csrf_token_name={csrf}',headers=headers_p)
-  if 'Success!' in auth.text:
+  login=curl.get(f'https://{host}/',headers=headers)
+  if 'Invite your friends and earn' in login.text:
     print(hijau1+'Login Success')
-    url=bs(auth.text,'html.parser').find_all('a',{'class':'collapse-item'})
+    url=bs(login.text,'html.parser').find_all('a',{'class':'collapse-item'})
     url_sl=[]
     url_f=[]
     for url in url:
@@ -1882,7 +1954,7 @@ def claim88(modulesl,banner):
     banner.banner(host.upper())
     get_sl=curl.get(url_sl[int(currency)],headers=headers)
     data_sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'card card-body bg-dark text-center text-white'})
-    for sl in data_sl:
+    def run(sl):
      try:
       jumlah=int(sl.find('span',{'class':'badge badge-info'}).text.split('/')[0])
       re=jumlah
@@ -1909,52 +1981,79 @@ def claim88(modulesl,banner):
      except Exception as e:
           keluar(str(e))
           pass
-def claimfreetrx(modulesl,banner):
+    if settings()['multi']:
+      
+        with ThreadPoolExecutor(max_workers=3) as executor:
+          futures = [executor.submit(run, i) for i in data_sl]
+    else:
+      for i in data_sl:
+        run(i)
+  else:
+    save_data(host)
+    claim88(modulesl,banner)
+def tokenmix_pro(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
-  host=urlparse("https://claimfreetrx.online/").netloc
+  host=urlparse("https://tokenmix.pro/").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['email'])
-    claimfreetrx(modulesl,banner)
-  email = load_data(host,custom=['email'])["email"]
-  while True:
-    try:
-      curl=Session()
-      ua_g = {
-        'Host': 'claimfreetrx.online',
-        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-      }
-      ua_p = {
-        'Host': 'claimfreetrx.online',
-        'origin': 'https://claimfreetrx.online',
-        'content-type': 'application/x-www-form-urlencoded',
-        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
-      }
-      url="https://claimfreetrx.online/"
-      get_data=curl.get(url,headers=ua_g)
-      parser=bs(get_data.text,'html.parser')
-      sesi=parser.find('input',{'name':'session-token'})['value']
-      key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
-      answer=modulesl.RecaptchaV2(key,url)
-      data=f'session-token={sesi}&address={email}&antibotlinks=&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
-      send_data=curl.post(url,headers=ua_p,data=data)
-      for ulang in range(10):
-        get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
-        an=bypass_link(get_sl.headers['location'],modulesl)
-        if an:
-          if 'failed to bypass' in an:
-            pass
-          else:
-            get_data=curl.get(an,headers=ua_g)
-            print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
-            animasi(detik=60)
+    save_data(host)
+    tokenmix_pro(modulesl,banner)
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  curl=Session()
+  curl.cookies.update(cookies)
+  headers={
+    "Host":"tokenmix.pro",
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "User-Agent":ugentmu,
+    "content-type":"application/json",
+    "referer":"https://tokenmix.pro/dashboard/sl",
+  }
+  get_info=curl.post('https://tokenmix.pro/infos/dashboard_info',headers=headers).json()
+  if get_info['success']:
+    akun=Tree("[green]> [yellow]Account information")
+    akun.add('[green]> Email [white]: [yellow]'+get_info['user']['email'])
+    akun.add('[green]> Balance [white]: [yellow]'+get_info['user']['coins'])
+    rprint(akun)
+    rprint(Tree("[green]> [yellow]Start shortlinks"))
+    get_sl=curl.post('https://tokenmix.pro/infos/auth_page_info',headers=headers,data=json.dumps({"page":"sl"})).json()
+    def run(sl):
+     try:
+      jumlah=sl['views24Hours']
+      re=jumlah
+      for u in range(jumlah):
+       for ytta in range(5):
+        try:
+          get_link=curl.post('https://tokenmix.pro/user/generateSl',headers=headers,data=json.dumps({"slId":sl['_id'],"vote":None,"type":None}),allow_redirects=False).json()
+          if get_link['success']:
+            get_link=get_link['shortenedUrl']
+            answer=bypass_link(get_link,modulesl,jumlah=[str(re),str(jumlah)])
+            if answer:
+              if 'failed to bypass' in answer:
+                pass
+              else:
+                get_reward=curl.get(answer,headers=headers)
+                if 'succuss' in get_reward.url:
+                  print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+unquote(get_reward.url).split('=')[1])
+                re-=1
             break
-        else:
-          send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
-      if ulang==9:
-        exit('shortlinks limit')
-    except Exception as e:
-      pass
+        except Exception as e:
+          keluar(str(e))
+          pass
+     except Exception as e:
+          keluar(str(e))
+          pass
+    if settings()['multi']:
+      
+        with ThreadPoolExecutor(max_workers=3) as executor:
+          futures = [executor.submit(run, i) for i in get_sl['sls']]
+    else:
+      for i in get_sl['sls']:
+        run(i)
+    exit()
+  else:
+    save_data(host)
+    tokenmix_pro(modulesl,banner)

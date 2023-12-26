@@ -1722,6 +1722,7 @@ def rsshort(url):
     key=open('sca.txt').read().splitlines()[0]
     ua={'User-Agent':'XYZ/3.0'}
     step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers=ua)
+    #print(step1.text)
     if "You've hit the request limit for your current plan. You can upgrade or renew your subscription early on our dashboard, or contact support@scraperapi.com for help." in step1.text:
       print("api key scrapeapi limit mohon ganti api key")
       return "failed to bypass"
@@ -1735,8 +1736,14 @@ def rsshort(url):
       while True:
         step2=curl.get(ur,headers=ua)
         status_code(step2)
-        data=bs(step2.text,'html.parser').find_all('script')
+        #print(step2.text)
+        if 'jJe.forEach(function NlJ(value) { hwn += String.fromCharCode(parseInt(atob(value).replace(/\D/g,'')) - 8160481); } ); document.write(decodeURIComponent(escape(hwn)));' in step2.text:
+          res=run_js(nama_f,bs(step2.text,'html.parser').find('script').text.replace('document.write','console.log'))
+        else:
+          res=step2.text
+        data=bs(res,'html.parser').find_all('script')
         for fd in data:
+          #print(fd)
           if fd.text.startswith('var _'):
             res=run_js(nama_f,fd.text.replace('eval','console.log'))
             break
@@ -1839,19 +1846,23 @@ def rsshort(url):
           'Referer': ur
         }
         get_data=curl.post(ur,headers=ua_p,data=data,allow_redirects=False)
+        #print(get_data.text)
+        #print(get_data.headers)
         status_code(get_data)
         ur=get_data.headers['location']
+        #print(ur)
         urut+=1
         get_data=curl.get(ur,allow_redirects=False)
         status_code(get_data)
         if get_data.status_code==302:
+          #print(get_data.headers)
           if '//rs' not in get_data.headers['location']:
             return get_data.headers['location']
   except Exception as e:
     return "failed to bypass"
     pass
 # start_time = time.time()
-#print(rsshort('https://rsshort.com/zLDj'))
+# print(rsshort('https://rsshort.com/POIo6'))
 # end_time = time.time()
 # # Hitung selisih waktu untuk mendapatkan durasi eksekusi
 # execution_time = end_time - start_time

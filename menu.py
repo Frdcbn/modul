@@ -57,6 +57,7 @@ def menu(banner,modul,modulesl):
     "freeltc_online":modul.freeltc_online,
     #"claimfreetrx_online(BTC)":modul.claimfreetrx,
     "earncryptowrs":modul.earncryptowrs,
+    "tokenmix_pro":modul.tokenmix_pro,
     }
     menu={
       "settings":None,
@@ -79,20 +80,38 @@ def menu(banner,modul,modulesl):
         print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
         print(f"{putih1}[{hijau1}1{putih1}]{biru1}.Solver Captcha Tg(@Xevil_check_bot)")
         print(f"{putih1}[{hijau1}2{putih1}]{biru1}.Scraper api")
+        print(f"{putih1}[{hijau1}3{putih1}]{biru1}.Set jeda setelah berhasil membypass shortlinks")
+        print(f"{putih1}[{hijau1}4{putih1}]{biru1}.Set multi bypass shortlinks dapat mempercepat proses")
         sel = input(putih1 + "select : ")
         if sel == "0":
             api_key = input("Api key captcha ai > ")
             with open("ckey.txt", "w") as e:
                 e.write(api_key)
-        if sel == "1":
+        elif sel == "1":
             api_key = input("Api key Xevil > ")
             with open("xkey.txt", "w") as e:
                 e.write(api_key)
-        if sel == "2":
+        elif sel == "2":
             api_key = input("Api key > ")
             with open("sca.txt", "w") as e:
                 e.write(api_key)
             #menu(banner,modul,modulesl)
+        elif sel == "3":
+          if os.path.exists('settings.json'):
+            data=json.loads(open('settings.json').read())
+          else:
+            data={"timer":None,"multi":None}
+          data["timer"]=int(input('masukan angka, ini di hitung dalam detik : '))
+          with open('settings.json','w') as f:
+            json.dump(data, f)
+        elif sel == "4":
+          if os.path.exists('settings.json'):
+            data=json.loads(open('settings.json').read())
+          else:
+            data={"timer":None,"multi":None}
+          data["multi"]=input('aktifkan mode multi bypass shortlinks? y/n: ').lower()
+          with open('settings.json','w') as f:
+            json.dump(data, f)
         exit()
     if select == "1":
         menu_dict=list(Bits_Family.items())
@@ -108,7 +127,6 @@ def menu(banner,modul,modulesl):
         if 0 <= selected_index < len(menu_dict):
           _, selected_function = menu_dict[selected_index]
           selected_function(modulesl, banner)
-        
     if select == "2":
         menu_dict=list(micin.items())
         os.system("clear")
