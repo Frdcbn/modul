@@ -58,6 +58,7 @@ def menu(banner,modul,modulesl):
     #"claimfreetrx_online(BTC)":modul.claimfreetrx,
     "earncryptowrs":modul.earncryptowrs,
     "tokenmix_pro":modul.tokenmix_pro,
+    "banfaucet":modul.banfaucet,
     }
     menu={
       "settings":None,
@@ -101,7 +102,7 @@ def menu(banner,modul,modulesl):
             data=json.loads(open('settings.json').read())
           else:
             data={"timer":None,"multi":None}
-          data["timer"]=int(input('masukan angka, ini di hitung dalam detik : '))
+          data["timer"]=input('masukan angka, ini di hitung dalam detik dan ini akan di random contoh 45,160 ini akan acak mulai dari 45 sampai 60 pisahkan dengan koma : ')
           with open('settings.json','w') as f:
             json.dump(data, f)
         elif sel == "4":

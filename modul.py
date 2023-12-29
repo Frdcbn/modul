@@ -26,7 +26,7 @@ def settings():
     data=json.loads(open('settings.json').read())
     if data['multi']=='n':data['multi']=None
     return data
-  else:return {"timer":160,"multi":None}
+  else:return {"timer":"45,160","multi":None}
 def Session():
     session = requests.Session()
     retry = Retry(connect=5, backoff_factor=1)
@@ -177,9 +177,10 @@ def bypass_link(url,modulesl,jumlah=None):
       print(putih1+'├── '+kuning1+'Status : '+hijau1+"success")
       print(putih1+'├──'+'─'*56)
       if settings():
-        animasi(detik=settings()['timer'])
+        ju=random.randint(int(settings()['timer'].split(',')[0]),int(settings()['timer'].split(',')[1]))
+        animasi(detik=ju)
       else:
-        animasi(detik=160)
+        animasi(detik=random.randint(45,160))
       return res
   else:
     return False
@@ -868,7 +869,9 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
                       url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies)
                       status_code(url)
                       ans=modulesl.antibot(url,key='alert alert-warning text-center',name_key=name_key)
-                      if ans!='WRONG_RESULT':
+                      if ans=='WRONG_RESULT' or ans=='ERROR_CAPTCHA_UNSOLVABLE':
+                        pass
+                      else:
                         data='antibotlinks=+'+ans+'&'
                         if 'csrf_token_name' in url.text:
                           csrf=bs(url.text,'html.parser').find('input',{'name':'csrf_token_name'})['value']
@@ -878,7 +881,8 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
                           data=data+'token='+token
                         url = curl.post(i.find('a')["href"].replace('pre_verify','go'), headers={'Host':host,'User-Agent':ugentmu,'content-type':'application/x-www-form-urlencoded','referer':i.find('a')["href"]},data=data, cookies=cookies,allow_redirects=False)
                         status_code(url)
-                        status=False
+                        if 'location.href' in url.text:
+                          status=False
                   else:
                     url = curl.get(i.find('a')["href"], headers=ua, cookies=cookies, allow_redirects=False)
                   status_code(url)
@@ -1207,143 +1211,81 @@ def insfaucet(modulesl,banner):
       run(sl)
   print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 #--------------- bithub family ---------------#
-def bithub_family(modulesl,banner,url, captcha, key_cp=None,key_info=None,ptc=None,sl=None,auto=None,key_jumlah=None):
+def banfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
-  host=urlparse(url).netloc
+  host=urlparse("https://banfaucet.com").netloc
   data_control(host)
   banner.banner(host.upper())
-  cookies, ugentmu = load_data(host)
   if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(name=host)
-    bithub_family(modulesl,banner,url, captcha, key_cp,key_info,ptc,sl,auto,key_jumlah)
+    save_data(host)
+    banfaucet(modulesl,banner)
+  cookies, ugentmu = load_data(host)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
   cookies = {k: v.value for k, v in cookiek.items()}
-  ua={
-    "Host":host,
-    'User-Agent': ugentmu,
-    
-  }
   curl=Session()
-  curl.headers.update(ua)
   curl.cookies.update(cookies)
-  dash=curl.get(url+'/dashboard')
-  if 'balance' not in dash.text.lower():
-    save_data(name=host)
-    bithub_family(modulesl,banner,url, captcha, key_cp,key_info,ptc,sl,auto,key_jumlah)
-  akun=Tree("[gree] > [yellow] Account information")
-  for info in bs(dash.text,'html.parser').find_all(*key_info):
-    akun.add('[green]> [yellow]'+info.text.strip().splitlines()[1]+' [white]: [yellow]'+info.text.strip().splitlines()[0])
+  headers={
+    "Host":host,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "User-Agent":ugentmu
+  }
+  dash=curl.get('https://banfaucet.com/dashboard',headers=headers)
+  status_code(dash)
+  info=bs(dash.text,'html.parser').find_all('a',{'class':'custom-dropmenu'})
+  info.pop(0)
+  akun=Tree("[gree] > [yellow]Account information")
+  akun.add("[gree] > [yellow]Username [white]:[green] "+info[1].text.strip())
+  akun.add("[gree] > [yellow]Balance [white]:[green] "+info[0].text.strip())
   rprint(akun)
-  if ptc:
-    rprint(Tree("[gree] > [yellow] Start ptc"))
-    get_ptc=curl.get(url+'/ptc')
-    if 'available' not in get_ptc.text.lower():
-      save_data(name=host)
-      bithub_family(modulesl,banner,url, captcha, key_cp,key_info,ptc,sl,auto,key_jumlah)
-    ads=bs(get_ptc.text,'html.parser').find_all(*ptc)
-    for ad in ads:
-     try:
-      view=curl.get(ad.find('button')['onclick'].split("'")[1].split("'")[0])
-      animasi(detik=int(view.text.split('var timer = ')[1].split(';')[0]))
-      bs4 = bs(view.text, "html.parser")
-      inputs = bs4.find_all("input")
-      data = "&".join([f"{input.get('name')}={input.get('value')}" for input in inputs])
-      if captcha=='hc':
-        answer=modulesl.hcaptcha(key_cp,ad.find('button')['onclick'].split("'")[1].split("'")[0])
-        data='captcha=hcaptcha&'+data+'&h-captcha-response='+answer
-      if captcha=='rev2':
-        answer=modulesl.RecaptchaV2(key_cp,ad.find('button')['onclick'].split("'")[1].split("'")[0])
-        data='captcha=recaptchav2&'+data+'&g-recaptcha-response='+answer
-      verify=curl.post(ad.find('button')['onclick'].split("'")[1].split("'")[0].replace('view','verify'),data=data,headers={"User-Agent":ugentmu,"content-type":"application/x-www-form-urlencoded"})
-      if 'Good job!' in verify.text:
-        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+verify.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
-      # if captcha=='rs':
-      #   cache_control(host)
-      #   print('https://rscaptcha.com/captcha/getimage?token='+bs4.find('input',{'name':'rscaptcha_token'})['value'])
-      #   get_img=requests.get('https://rscaptcha.com/captcha/getimage?token='+bs4.find('input',{'name':'rscaptcha_token'})['value'],headers = {"Host": "rscaptcha.com","user-Agent": ugentmu,"Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8","X-Requested-With": "mark.via.gp","Sec-Fetch-Site": "cross-site","Sec-Fetch-Mode": "no-cors","Sec-Fetch-Dest": "image","referer":host}, stream=True)
-      #   status_code(get_img)
-      #   with open(f'cache/{host}/cache.png', 'wb') as f:
-      #       shutil.copyfileobj(get_img.raw, f)
-      #   #answer=modulesl.RecaptchaV2(key_cp,ad.find('button')['onclick'].split("'")[1].split("'")[0])
-      #   #data='captcha=rscaptcha&'+data+'&rscaptcha_response='+answer
-     except Exception as e:
-          keluar(str(e))
-          pass
-  if sl:
-    rprint(Tree("[gree] > [yellow] Start shortlinks"))
-    sll=curl.get(url+'/links')
-    #print(sll.text)
-    if 'available' or 'shortlinks' not in sll.text.lower():
-      save_data(name=host)
-      bithub_family(modulesl,banner,url, captcha, key_cp,key_info,ptc,sl,auto,key_jumlah)
-    status_code(sll)
-    links=bs(sll.text,'html.parser').find_all(*sl)
-    url1=url
-    for link in links:
-      try:
-        if url1=='https://1xbitcoins.com':
-          jumlah=link.find(*key_jumlah)['data-view']
-          re=int(jumlah)
-        if url1=='https://feyorra.top':
-          jumlah=link.find_all(*key_jumlah)[1].text.strip().split('/')[1]
-          re=int(jumlah)
-        elif key_jumlah:
-          jumlah=link.find(*key_jumlah).text.strip().split('/')[1]
-          re=int(jumlah)
-        else:
-          jumlah=link.find('span',{'class':'badge badge-info'}).text.strip().split('/')[1]
-          re=int(jumlah)
-        for i in range(re):
-          try:
-            for ytta in range(5):
-              try:
-                url = curl.get(link.find('a')["href"],allow_redirects=False)
-                status_code(url)
-                url=url.text.split('<script> location.href = "')[1].split('"; </script>')[0]
-                answer = bypass_link(url,modulesl,jumlah=[str(re),jumlah])
-                if answer==False:
-                  break
-                if 'failed to bypass' in answer:
-                    pass
-                else:
-                    reward = curl.get(answer)
-                    status_code(reward)
-                    if 'Good job!' in reward.text:
-                        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'", "").replace(',', ''))
+  rprint(Tree("[gree] > [yellow]Start Shortlinks"))
+  links=curl.get('https://banfaucet.com/links',headers=headers)
+  status_code(links)
+  if links.status_code==403:
+    save_data(host)
+    banfaucet(modulesl,banner)
+  link=bs(links.text,'html.parser').find_all('div',{'class':'col-lg-6 col-xl-4'})
+  def run(lin):
+      jumlah=lin.find('div',{'class':'pill yellow'}).text.strip().split('/')[0]
+      url=lin.find('a',{'class':'btn-one'})['href']
+      re=int(jumlah)
+      for i in range(re):
+        try:
+          for ytta in range(5):
+            try:
+              get_links=curl.get(url,headers=headers,allow_redirects=False)
+              if get_links.status_code==403:
+                save_data(host)
+                banfaucet(modulesl,banner)
+              status_code(get_links)
+              if 'location.href' in get_links.text:
+                answer=bypass_link(get_links.text.split('location.href = "')[1].split('";')[0],modulesl,jumlah=[str(re),jumlah])
+                if answer:
+                  if 'failed to bypass' in answer:pass
+                  else:
+                    get_next=curl.get(answer,headers=headers,allow_redirects=False)
+                    status_code(get_next)
+                    get_reward=curl.get(get_next.headers['location'],headers=headers)
+                    #print(get_reward.text)
+                    status_code(get_reward)
+                    if 'success' in get_reward.text:
+                      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}success '+get_reward.text.split("title: '")[1].split("'")[0])
+                      re-=1
                     else:
-                        print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
-                re-=1
+                      print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
                 break
-              except Exception as e:
-                  keluar(str(e))
-                  pass
-            if answer==False:
-                      break
-          except Exception as e:
+            except Exception as e:
               keluar(str(e))
               pass
-      except Exception as e:
+        except Exception as e:
           keluar(str(e))
           pass
-  if auto:
-    rprint(Tree("[green]> [yellow]Start auto faucet"))
-    while True:
-     try:
-      get_=curl.get(f'https://{host}/auto')
-      status_code(get_)
-      bs4 = bs(get_.text, "html.parser")
-      inputs = bs4.find_all("input")
-      data = "&".join([f"{input.get('name')}={input.get('value')}" for input in inputs])
-      animasi(detik=int(get_.text.split('let timer = ')[1].split(',')[0]))
-      reward=curl.post(f'https://{host}/auto/verify',headers={"user-agent":ugentmu,"content-type":"application/x-www-form-urlencoded"},data=data)
-      status_code(reward)
-      if 'Good job!' in reward.text:
-        print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+reward.text.split('<script> Swal.fire(')[1].split(')</script>')[0].replace("'","").replace(',',''))
-     except Exception as e:
-       print(putih1+'└──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}not enough energy!')
-       break
-  exit()
+  if settings()['multi']:
+      with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(run, i) for i in link]
+  else:
+    for i in link:
+      run(i)
 #--------------- other family ---------------#
 def faucetspeedbtc(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
