@@ -1999,3 +1999,54 @@ def tokenmix_pro(modulesl,banner):
   else:
     save_data(host)
     tokenmix_pro(modulesl,banner)
+def claimfreetrx(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://claimfreetrx.online/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['email'])
+    claimfreetrx(modulesl,banner)
+  email=load_data(host,custom=['email'])['email']
+  url_host='claimfreetrx.online'
+  while True:
+    try:
+      curl=Session()
+      ua_g = {
+        'Host': url_host,
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      }
+      ua_p = {
+        'Host': url_host,
+        'origin': 'https://'+url_host,
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+      }
+      url=f"https://{url_host}/"
+      get_data=curl.get(url,headers=ua_g)
+      parser=bs(get_data.text,'html.parser')
+      sesi=parser.find('input',{'name':'session-token'})['value']
+      key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+      answer=modulesl.RecaptchaV2(key,url)
+      data=f'session-token={sesi}&address={email}&antibotlinks=&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
+      send_data=curl.post(url,headers=ua_p,data=data)
+      #print(send_data.text)
+      for ulang in range(10):
+        get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
+        an=bypass_link(get_sl.headers['location'],modulesl)
+        if an:
+          if 'failed to bypass' in an:
+            pass
+          else:
+            get_data=curl.get(an,headers=ua_g)
+            print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
+            break
+        else:
+          send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
+      if ulang==9:
+        print('shortlinks limit')
+        break
+    except Exception as e:
+      pass
