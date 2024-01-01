@@ -1717,7 +1717,7 @@ def botfly(url):
     return "failed to bypass"
     pass
 def rsshort(url):
-  try:
+  #try:
     curl = requests.Session()
     key=open('sca.txt').read().splitlines()[0]
     ua={'User-Agent':'XYZ/3.0'}
@@ -1737,27 +1737,31 @@ def rsshort(url):
         step2=curl.get(ur,headers=ua)
         status_code(step2)
         #print(step2.text)
+        #sleep(15)
         if 'jJe.forEach(function NlJ(value) { hwn += String.fromCharCode(parseInt(atob(value).replace(/\D/g,'')) - 8160481); } ); document.write(decodeURIComponent(escape(hwn)));' in step2.text:
           res=run_js(nama_f,bs(step2.text,'html.parser').find('script').text.replace('document.write','console.log'))
         else:
           res=step2.text
         data=bs(res,'html.parser').find_all('script')
+        js=[]
         for fd in data:
           #print(fd)
           if fd.text.startswith('var _'):
-            res=run_js(nama_f,fd.text.replace('eval','console.log'))
-            break
+            js.append(fd.text.replace('eval','console.log'))
         for fd in data:
           if fd.text.startswith('var _'):
             stepnya=run_js(nama_f,fd.text.replace('eval','console.log'))
             if 'Step' in stepnya:
               break
-        data=bs(res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        #print(bs(stepnya.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser').text)
+        data1=bs(run_js(nama_f,js[len(js)-1]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        data=bs(run_js(nama_f,js[len(js)-2]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        #print(data)
         csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
         inputs = data.find_all("input")
         key1=inputs[len(inputs)-1].get('name')
-        value1=inputs[len(inputs)-1].get('value')
-        if '_iconcaptcha-token' in res.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''):
+        value1=run_js(nama_f,data1.find('script').text).split('").value = "')[1].split('";')[0]
+        if '_iconcaptcha-token' in str(data):
           icon_token=data.find('input',{'name':'_iconcaptcha-token'})['value']
           while True:
             timestamp = int(time.time() * 1000)
@@ -1834,6 +1838,7 @@ def rsshort(url):
           data=f'csrf_test_name={csrf_name}&_iconcaptcha-token={icon_token}&ic-hf-se={str(ans1)}%2C{str(ans2)}%2C320&ic-hf-id=1&ic-hf-hp=&{key1}={value1}'
         else:
           data=f'csrf_test_name={csrf_name}&{key1}={value1}'
+        #print(data)
         ua_p = {
           'Content-Type': 'application/x-www-form-urlencoded',
           'User-Agent': 'XYZ/3.0',
@@ -1858,9 +1863,9 @@ def rsshort(url):
           #print(get_data.headers)
           if '//rs' not in get_data.headers['location']:
             return get_data.headers['location']
-  except Exception as e:
-    return "failed to bypass"
-    pass
+  # except Exception as e:
+  #   return "failed to bypass"
+  #   pass
 # start_time = time.time()
 # print(rsshort('https://rsshort.com/POIo6'))
 # end_time = time.time()
