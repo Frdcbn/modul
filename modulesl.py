@@ -214,7 +214,8 @@ def RecaptchaV3(ANCHOR_URL):
     post_data = "v={}&reason=q&c={}&k={}&co={}"
     client = requests.Session()
     client.headers.update({
-        'content-type': 'application/x-www-form-urlencoded'
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent':'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36'
     })
     matches = re.findall('([api2|enterprise]+)\/anchor\?(.*)', ANCHOR_URL)[0]
     url_base += matches[0]+'/'
@@ -311,6 +312,11 @@ def rscaptcha(img):
   return re
 def RecaptchaV2xe(key,url):
   data = {"method": "userrecaptcha", "pageurl": url, "sitekey": key}
+  xe=open('xkey.txt').read().splitlines()[0]
+  re = run(data,xe)
+  return re
+def RecaptchaV3xe(key,url):
+  data = {"method": "userrecaptcha", "pageurl": url, "sitekey": key,"version": "v3"}
   xe=open('xkey.txt').read().splitlines()[0]
   re = run(data,xe)
   return re
@@ -576,49 +582,6 @@ def fl_lc(url):
         return json.loads(final.text)["url"]
   except Exception as e:
     return "failed to bypass"
-def clks_pro(url):
- if 'http://' in url:
-   url=url.replace('http://','https://')
- def _main(url):
-   for i in range(3):
-     try:
-      curl=Session()
-      ua={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"}
-      get_url=curl.get(url,headers=ua)
-      bs4 = BeautifulSoup(get_url.content, "html.parser")
-      inputs = bs4.find_all("input")
-      data = {input.get("name"): input.get("value") for input in inputs}
-      get_link=curl.post('https://mdn.lol/blog/',headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","referer":url,"content-type":"application/x-www-form-urlencoded"},data=data,allow_redirects=False)
-      cek=curl.get('https://mdn.lol/?redirect_to=random',headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","referer":"https://t.co/"})
-      bs4 = BeautifulSoup(cek.content, "html.parser")
-      inputs = bs4.find_all("input")
-      data = {input.get("name"): input.get("value") for input in inputs}
-      sitkey=bs4.find('div',{'class':'g-recaptcha'})['data-sitekey']
-      data["g-recaptcha-response"]=RecaptchaV2(sitkey,cek.url)
-      step1=curl.post('https://mdn.lol/?redirect_to=random',headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","referer":cek.url,"content-type":"application/x-www-form-urlencoded"},data=data,allow_redirects=False).headers['Location']
-      step1=curl.post(step1,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","referer":cek.url,"content-type":"application/x-www-form-urlencoded"},data=data)
-      for i in range(5):
-        bs4 = BeautifulSoup(step1.content, "html.parser")
-        inti=bs4.find('div',{"style":"margin: 10px 0 10px 0;position: relative;"})
-        inputs = inti.find_all("input")
-        data = {input.get("name"): input.get("value") for input in inputs}
-        step1=curl.post(step1.url,data=data,headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","referer":step1.url,"content-type":"application/x-www-form-urlencoded"},allow_redirects=False)
-        res=step1.headers['location']
-        if 'redirect_to=random' in step1.headers['location']:
-          step1=curl.get('https://mdn.lol/?redirect_to=random',headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","referer":step1.url,"content-type":"application/x-www-form-urlencoded"})
-        sleep(15)
-      sleep(15)
-      if '&url=' in res:
-        res=res.split('&url=')
-        res=res[len(res)-1]
-      return res
-     except:pass
- res=_main(url)
- if 'https://clks.pro/' in res:
-   res=_main(url)
-   return res
- else:
-   return res
 def shrinkme(url):
   curl=Session()
   res= one_method(curl=curl,url='https://en.shrinke.me'+urlparse(url).path,headers={"referer":"https://themezon.net/managed-cloud-hosting-service-providers/"})
@@ -1211,7 +1174,7 @@ def link4m_com(url):
 def insfly(url):
  try:
   curl=Session()
-  res=one_method(curl,url,headers={"referer":"https://enit.in/H3ScKu"})
+  res=one_method(curl,url,headers={"referer":"https://clk.wiki/"})
   sleep(15)
   return res
  except Exception as e:
@@ -1717,8 +1680,8 @@ def botfly(url):
     return "failed to bypass"
     pass
 def rsshort(url):
-  #try:
-    curl = requests.Session()
+  try:
+    curl = Session()
     key=open('sca.txt').read().splitlines()[0]
     ua={'User-Agent':'XYZ/3.0'}
     step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers=ua)
@@ -1863,22 +1826,36 @@ def rsshort(url):
           #print(get_data.headers)
           if '//rs' not in get_data.headers['location']:
             return get_data.headers['location']
-  # except Exception as e:
-  #   return "failed to bypass"
-  #   pass
-# start_time = time.time()
-# print(rsshort('https://rsshort.com/POIo6'))
-# end_time = time.time()
-# # Hitung selisih waktu untuk mendapatkan durasi eksekusi
-# execution_time = end_time - start_time
-# print(f"Waktu eksekusi: {execution_time} detik")
-# def scrape():
-#   curl=Session()
-#   y=curl.get('https://api.proxyscrape.com/?request=getproxies&proxytype=http&timeout=10000&country=all&ssl=all&anonymity=all',headers={'User-Agent':'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537'}).text.splitlines()
-#   aktif=[]
-#   for dt in y:
-#       cek=check_proxy(dt)
-#       if cek:
-#         aktif.append(dt)
-#   print(aktif)
-# scrape()
+  except Exception as e:
+    return "failed to bypass"
+    pass
+def clks_pro(url):
+  path=urlparse(url).path
+  key=open('sca.txt').read().splitlines()[0]
+  curl = Session()
+  url='https://clks.pro/clkclk.'+path
+  step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers={'referer':"https://homeculina.com/"},allow_redirects=False)
+  url=step1.headers['sa-final-url']
+  curl.cookies.update(step1.cookies.get_dict())
+  if 'https://awgrow.com/backup/w/?get=' or 'https://t.co/' in url:
+    while True:
+      step1=curl.get(url)
+      if 'input[name=' in step1.text:
+        name=step1.text.split("input[name='")[1].split("']")[0]
+        value=step1.text.split('value = "')[1].split('";')[0]
+      else:
+        name=bs(step1.text,'html.parser').find('input',{'style':'display: none;'})['name']
+        value=bs(step1.text,'html.parser').find('input',{'style':'display: none;'})['value']
+      step2=curl.post(url,data=name+'='+value,headers={'Content-Type':'application/x-www-form-urlencoded'},allow_redirects=False)
+      if 'redirect_to=random' in step2.headers['location']:
+        if 'https://' in step2.headers['location']:
+          url=step2.headers['location']
+        else:
+          url='https://'+urlparse(step1.url).netloc+step2.headers['location']
+      elif 't.co' in step2.headers['location']:
+        url=step2.headers['location']
+      elif 'https://awgrow.com/' in step2.headers['location']:
+        url=step2.headers['location']
+      else:return step2.headers['location']
+  else:
+    return url

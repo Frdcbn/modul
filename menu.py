@@ -54,11 +54,11 @@ def menu(banner,modul,modulesl):
     "claim88":modul.claim88,
     "claimcoins":modul.claimcoins,
     "litefaucet":modul.litefaucet,
-    "freeltc_online":modul.freeltc_online,
     "claimfreetrx_online(BTC)":modul.claimfreetrx,
     "earncryptowrs":modul.earncryptowrs,
     "tokenmix_pro":modul.tokenmix_pro,
-    "banfaucet":modul.banfaucet,
+    "kiddyearner":modul.kiddyearner,
+    "cryptoearns":modul.cryptoearns,
     }
     menu={
       "settings":None,

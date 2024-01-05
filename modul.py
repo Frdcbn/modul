@@ -112,7 +112,7 @@ def bypass_link(url,modulesl,jumlah=None):
   #"":modulesl.coinparty,
   "ctr.sh":modulesl.ctrsh,
   "cuty.io":modulesl.cuty_io,
- # "clks.pro":modulesl.clks_pro,
+  "clks.pro":modulesl.clks_pro,
   "droplink.co":modulesl.droplink,
   "ex-foary.com":modulesl.ex_foary_com,
   "exe.io":modulesl.exe_io,
@@ -1075,8 +1075,6 @@ def nobitafc(modulesl,banner):
   vie_script(modulesl,banner,url="https://nobitafc.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
 def coin_4u(modulesl,banner):
   vie_script(modulesl,banner,url="https://coin-4u.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
-def freeltc_online(modulesl,banner):
-  vie_script(modulesl,banner,url="https://freeltc.online",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True,link='card card-body text-center')
 #--------------- vie new family ---------------#
 def chillfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -1211,14 +1209,14 @@ def insfaucet(modulesl,banner):
       run(sl)
   print(putih1+'└──'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 #--------------- bithub family ---------------#
-def banfaucet(modulesl,banner):
+def kiddyearner(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
-  host=urlparse("https://banfaucet.com").netloc
+  host=urlparse("https://kiddyearner.com").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
     save_data(host)
-    banfaucet(modulesl,banner)
+    kiddyearner(modulesl,banner)
   cookies, ugentmu = load_data(host)
   cookiek = SimpleCookie()
   cookiek.load(cookies)
@@ -1230,24 +1228,24 @@ def banfaucet(modulesl,banner):
     "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "User-Agent":ugentmu
   }
-  dash=curl.get('https://banfaucet.com/dashboard',headers=headers)
+  dash=curl.get('https://kiddyearner.com/dashboard',headers=headers)
   status_code(dash)
-  info=bs(dash.text,'html.parser').find_all('a',{'class':'custom-dropmenu'})
-  info.pop(0)
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'col-lg-6 col-xl-4'})
   akun=Tree("[gree] > [yellow]Account information")
-  akun.add("[gree] > [yellow]Username [white]:[green] "+info[1].text.strip())
-  akun.add("[gree] > [yellow]Balance [white]:[green] "+info[0].text.strip())
+  for info in info:
+    v=info.text.strip().splitlines()
+    akun.add("[green] > [yellow]"+v[len(v)-1]+" [white]:[green] "+v[0]+" "+v[1])
   rprint(akun)
   rprint(Tree("[gree] > [yellow]Start Shortlinks"))
-  links=curl.get('https://banfaucet.com/links',headers=headers)
+  links=curl.get('https://kiddyearner.com/links',headers=headers)
   status_code(links)
   if links.status_code==403:
     save_data(host)
-    banfaucet(modulesl,banner)
-  link=bs(links.text,'html.parser').find_all('div',{'class':'col-lg-6 col-xl-4'})
+    kiddyearner(modulesl,banner)
+  link=bs(links.text,'html.parser').find_all('div',{'class':'col-lg-6'})
   def run(lin):
-      jumlah=lin.find('div',{'class':'pill yellow'}).text.strip().split('/')[0]
-      url=lin.find('a',{'class':'btn-one'})['href']
+      jumlah=lin.find_all('div',{'class':'pil me-2'})[1].text.strip().split('/')[0]
+      url=lin.find('a',{'class':'claim-btn text-white w-100'})['href']
       re=int(jumlah)
       for i in range(re):
         try:
@@ -1256,7 +1254,82 @@ def banfaucet(modulesl,banner):
               get_links=curl.get(url,headers=headers,allow_redirects=False)
               if get_links.status_code==403:
                 save_data(host)
-                banfaucet(modulesl,banner)
+                kiddyearner(modulesl,banner)
+              status_code(get_links)
+              if 'location.href' in get_links.text:
+                answer=bypass_link(get_links.text.split('location.href = "')[1].split('";')[0],modulesl,jumlah=[str(re),jumlah])
+                if answer:
+                  if 'failed to bypass' in answer:pass
+                  else:
+                    get_next=curl.get(answer,headers=headers,allow_redirects=False)
+                    status_code(get_next)
+                    get_reward=curl.get(get_next.headers['location'],headers=headers)
+                    #print(get_reward.text)
+                    status_code(get_reward)
+                    if 'success' in get_reward.text:
+                      print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}success '+get_reward.text.split("title: '")[1].split("'")[0])
+                      re-=1
+                    else:
+                      print(putih1+'├──'+hijau1+f' {putih1}[{merah1} x {putih1}] {hijau1}invalid keys')
+                break
+            except Exception as e:
+              keluar(str(e))
+              pass
+        except Exception as e:
+          keluar(str(e))
+          pass
+  if settings()['multi']:
+      with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(run, i) for i in link]
+  else:
+    for i in link:
+      run(i)
+def cryptoearns(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://cryptoearns.com").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host)
+    cryptoearns(modulesl,banner)
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  curl=Session()
+  curl.cookies.update(cookies)
+  headers={
+    "Host":host,
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "User-Agent":ugentmu
+  }
+  dash=curl.get('https://cryptoearns.com/dashboard',headers=headers)
+  status_code(dash)
+  info=bs(dash.text,'html.parser').find_all('div',{'class':'finance_card'})
+  akun=Tree("[gree] > [yellow]Account information")
+  for info in info:
+    v=info.text.strip().splitlines()
+    akun.add("[green] > [yellow]"+v[len(v)-1]+" [white]:[green] "+v[0])
+  rprint(akun)
+  rprint(Tree("[gree] > [yellow]Start Shortlinks"))
+  links=curl.get('https://cryptoearns.com/links',headers=headers)
+  status_code(links)
+  if links.status_code==403:
+    save_data(host)
+    cryptoearns(modulesl,banner)
+  link=bs(links.text,'html.parser').find_all('div',{'class':'col-lg-6'})
+  def run(lin):
+      jumlah=lin.find_all('div',{'class':'pil me-2'})[1].text.strip().split('/')[0]
+      url=lin.find('a',{'class':'claim-btn text-white w-100'})['href']
+      re=int(jumlah)
+      for i in range(re):
+        try:
+          for ytta in range(5):
+            try:
+              get_links=curl.get(url,headers=headers,allow_redirects=False)
+              if get_links.status_code==403:
+                save_data(host)
+                cryptoearns(modulesl,banner)
               status_code(get_links)
               if 'location.href' in get_links.text:
                 answer=bypass_link(get_links.text.split('location.href = "')[1].split('";')[0],modulesl,jumlah=[str(re),jumlah])
@@ -1698,8 +1771,9 @@ def earncryptowrs(modulesl,banner):
               if 'failed to bypass' in answer:
                 pass
               else:
+                #print(answer)
                 get_reward=curl.get(answer.replace('back','verify'),headers=headers)
-                #print(get_reward.text)
+                print(get_reward.text)
                 if 'Success!' in get_reward.text:
                   print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+get_reward.text.split("html: '")[1].split("',")[0])
                 re-=1
