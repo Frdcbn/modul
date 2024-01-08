@@ -959,6 +959,39 @@ def flyzu(url):
       return json.loads(final.text)["url"]
  except Exception as e:
     return "failed to bypass"
+def kyshort(url):
+ try:
+  curl=Session()
+  url='https://kyshort.xyz'+urlparse(url).path.replace('go/','')
+  #print(url)
+  step1=curl.get(url).text
+  #print(step1)
+  tf=bs(step1,'html.parser')
+  csrf=tf.find('input',{'name':'_csrfToken'})["value"]
+  tkf=tf.find('input',{'name':'_Token[fields]'})["value"]
+  tku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
+  get_key=json.loads(step1.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
+  answer=RecaptchaV2(key=get_key,url=url)
+  #print(answer)
+  data=f'_method=POST&_csrfToken={csrf}&action=captcha&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+  # print(data)
+  # print(url)
+  step2=curl.post(url,data=data,headers={'content-type':'application/x-www-form-urlencoded','referer':url}).text
+  #print(bs(step2,'html.parser').text.strip())
+  sleep(15)
+  fl=bs(step2,'html.parser')
+  csrf=fl.find('input',{'name':'_csrfToken'})["value"]
+  tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
+  form=fl.find('input',{'name':'ad_form_data'})["value"]
+  tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
+  data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
+  final=curl.post(f'https://{urlparse(url).netloc}/links/go',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
+  if json.loads(final.text)["status"] == "success":
+      sleep(15)
+      return json.loads(final.text)["url"]
+ except Exception as e:
+    return "failed to bypass"
+#print(kyshort("http://kyshort.xyz/go/GR89qR06AN4"))
 def web1s_info(url):
   def final(url_):
     gas=curl.get(url_)
@@ -1684,16 +1717,27 @@ def rsshort(url):
     curl = Session()
     key=open('sca.txt').read().splitlines()[0]
     ua={'User-Agent':'XYZ/3.0'}
-    step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers=ua)
+    while True:
+      step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers=ua)
+      if 'VPN/ Proxy is not allowed!' not in step1.text:
+        break
     #print(step1.text)
+    # print(step1.cookies.get_dict())
     if "You've hit the request limit for your current plan. You can upgrade or renew your subscription early on our dashboard, or contact support@scraperapi.com for help." in step1.text:
       print("api key scrapeapi limit mohon ganti api key")
       return "failed to bypass"
     curl = Session()
     curl.cookies.update(step1.cookies.get_dict())
+    # print(step1.text)
+    # print(step1.headers)
     status_code(step1)
     if step1.status_code==200:
-      ur=bs(step1.text,'html.parser').find_all('meta')[1]['content'].split('url=')[1].split('"')[0]
+      ur=bs(step1.text,'html.parser').find_all('meta')
+      #print(ur)
+      if len(ur)==1:ide=0
+      else:
+        ide=len(ur)-1
+      ur=ur[ide]['content'].split('url=')[1].split('"')[0]
       nama_f=urlparse(url).path.replace('/','')
       urut=1
       while True:
@@ -1827,35 +1871,46 @@ def rsshort(url):
           if '//rs' not in get_data.headers['location']:
             return get_data.headers['location']
   except Exception as e:
-    return "failed to bypass"
     pass
 def clks_pro(url):
-  path=urlparse(url).path
-  key=open('sca.txt').read().splitlines()[0]
-  curl = Session()
-  url='https://clks.pro/clkclk.'+path
-  step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers={'referer':"https://homeculina.com/"},allow_redirects=False)
-  url=step1.headers['sa-final-url']
-  curl.cookies.update(step1.cookies.get_dict())
-  if 'https://awgrow.com/backup/w/?get=' or 'https://t.co/' in url:
-    while True:
-      step1=curl.get(url)
-      if 'input[name=' in step1.text:
-        name=step1.text.split("input[name='")[1].split("']")[0]
-        value=step1.text.split('value = "')[1].split('";')[0]
-      else:
-        name=bs(step1.text,'html.parser').find('input',{'style':'display: none;'})['name']
-        value=bs(step1.text,'html.parser').find('input',{'style':'display: none;'})['value']
-      step2=curl.post(url,data=name+'='+value,headers={'Content-Type':'application/x-www-form-urlencoded'},allow_redirects=False)
-      if 'redirect_to=random' in step2.headers['location']:
-        if 'https://' in step2.headers['location']:
+  try:
+    path=urlparse(url).path
+    key=open('sca.txt').read().splitlines()[0]
+    curl = Session()
+    url='https://clks.pro/clkclk.'+path
+    step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers={'referer':"https://homeculina.com/"},allow_redirects=False)
+    url=step1.headers['sa-final-url']
+    curl.cookies.update(step1.cookies.get_dict())
+    if 'https://awgrow.com/backup/w/?get=' or 'https://t.co/' in url:
+      while True:
+        step1=curl.get(url)
+        #print(step1.text)
+        if 'input[name=' in step1.text:
+          name=step1.text.split("input[name='")[1].split("']")[0]
+          value=step1.text.split('value = "')[1].split('";')[0]
+        else:
+          name=bs(step1.text,'html.parser').find('input',{'style':'display: none;'})['name']
+          value=bs(step1.text,'html.parser').find('input',{'style':'display: none;'})['value']
+        step2=curl.post(url,data=name+'='+value,headers={'Content-Type':'application/x-www-form-urlencoded'},allow_redirects=False)
+        #print(step2.headers['location'])
+        if 'redirect_to=random' in step2.headers['location']:
+          #print('True3')
+          if 'https://' in step2.headers['location']:
+            url=step2.headers['location']
+          else:
+            url='https://'+urlparse(step1.url).netloc+step2.headers['location']
+        elif 't.co/' in step2.headers['location']:
+          #print('True2')
+          url=step2.headers['location']
+        elif 'https://awgrow.com/' in step2.headers['location']:
+          #print('True1')
           url=step2.headers['location']
         else:
-          url='https://'+urlparse(step1.url).netloc+step2.headers['location']
-      elif 't.co' in step2.headers['location']:
-        url=step2.headers['location']
-      elif 'https://awgrow.com/' in step2.headers['location']:
-        url=step2.headers['location']
-      else:return step2.headers['location']
-  else:
-    return url
+          #print(True)
+          return step2.headers['location']
+    else:
+      return url
+  except Exception as e:
+    return "failed to bypass"
+    pass
+#print(rsshort('https://rsshort.com/ZT3mLgg'))

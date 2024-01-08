@@ -59,6 +59,7 @@ def menu(banner,modul,modulesl):
     "tokenmix_pro":modul.tokenmix_pro,
     "kiddyearner":modul.kiddyearner,
     "cryptoearns":modul.cryptoearns,
+    "autofaucet_org":modul.autofaucet_org,
     }
     menu={
       "settings":None,

@@ -14,6 +14,7 @@ from rich import print as rprint
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 from concurrent.futures import ThreadPoolExecutor
+from rich import print as cetak
 #----------- color ---------------#
 hijau1 = "\033[1;92m"
 kuning1 = "\033[1;93m"
@@ -2124,3 +2125,71 @@ def claimfreetrx(modulesl,banner):
         break
     except Exception as e:
       pass
+def autofaucet_org(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://autofaucet.org/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host)
+    autofaucet_org(modulesl,banner)
+  cookies, ugentmu = load_data(host)
+  cookiek = SimpleCookie()
+  cookiek.load(cookies)
+  cookies = {k: v.value for k, v in cookiek.items()}
+  curl=Session()
+  curl.cookies.update(cookies)
+  headers={
+    "Host":"autofaucet.org",
+    "User-Agent":ugentmu,
+  }
+  dash=curl.get('https://autofaucet.org/dashboard',headers=headers,cookies=cookies)
+  if 'Welcome back' not in dash.text:
+    save_data(host)
+    autofaucet_org(modulesl,banner)
+  fd=bs(dash.text,'html.parser')
+  koin=fd.find_all('div',{'class':'col item'})
+  name=fd.find('p',{'class':'username'})
+  akun=Tree("[white]> [green]Account information")
+  akun.add('[yellow]Welcome back [white] : [green] '+name.text)
+  rprint(akun)
+  info=[]
+  for i in koin:
+    info.append("[yellow]"+i.text.strip().splitlines()[0].upper()+' [white]: [green]'+i.text.strip().splitlines()[2])
+  menu_items = [f"[yellow][[white]{str(index)}[yellow]] {info[index]}      " for index in range(len(info))]
+  menu_content = "\n".join([f"{menu_items[i]:<60}{menu_items[i + 1]}" for i in range(0, len(menu_items), 2)])
+  cetak(Panel(menu_content, width=80, title="[bold green]Your Balance", padding=(0, 4), style="bold white"))
+  get_sl=curl.get('https://autofaucet.org/dashboard/shortlinks',headers=headers,cookies=cookies)
+  ak=Tree("[white]> [green]Start shortlinks")
+  cg=bs(get_sl.text,'html.parser')
+  fct=cg.find('p',{"class":"amount"})
+  ak.add('[white]> [green]Your FCT Tokens [white]: [yellow]'+fct.text)
+  rprint(ak)
+  sl=bs(get_sl.text,'html.parser').find_all('div',{'class':'item'})
+  del sl[0]
+  del sl[0]
+  del sl[0]
+  for sl in sl:
+    jumlah=int(sl.find('span',{'id':'views'}).text.strip().split('/')[0])
+    re=jumlah
+    url='https://autofaucet.org'+sl.find('form')['action']
+    value=sl.find('input',{'name':'hh'})['value']
+    for jum in range(jumlah):
+      headers_p={
+        "Host":"autofaucet.org",
+        "content-type":"application/x-www-form-urlencoded",
+        "User-Agent":ugentmu,
+      }
+      data="hh="+value
+      get_url=curl.post(url,headers=headers_p,cookies=cookies,data=data,allow_redirects=False).headers['Location']
+      answer=bypass_link(get_url,modulesl,jumlah=[str(re),str(jumlah)])
+      if answer:
+        if 'failed to bypass' in answer:
+          pass
+        else:
+          get_reward=curl.get(answer,headers=headers,cookies=cookies)
+          if 'successfully' in get_reward.text:
+            print(putih1+'├──'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+bs(get_reward.text,'html.parser').find('div',{'class':'alert alert-success'}).text.strip())
+          re-=1
+      else:
+        break
