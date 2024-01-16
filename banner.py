@@ -11,6 +11,7 @@ kuning1 = "\033[1;93m"#Terang
 putih1 = "\033[1;97m"#Terang
 merah1 = "\033[1;91m"#Terang
 biru1 = "\033[1;94m"#Terang
+biru = "\033[1;36m"#Terang
 def get_system_info():
     system_info = {}
     system_info['OS'] = platform.system()
@@ -76,34 +77,33 @@ def banner(name):
     system_info = get_system_info()
     memory_info = get_memory_info()
     uptime = get_uptime()
-    banner=("""              [green]╔╦╗╦ ╦╦ ╔╦╗╦╔═╗╦  ╔═╗  ╔═╗╔═╗╦═╗╦╔═╗╔╦╗
-              [yellow]║║║║ ║║  ║ ║╠═╝║  ║╣   ╚═╗║  ╠╦╝║╠═╝ ║
-              [blue]╩ ╩╚═╝╩═╝╩ ╩╩  ╩═╝╚═╝  ╚═╝╚═╝╩╚═╩╩   ╩
-"""
-"        [green] [white]: [yellow]MR.BADUT     [green] [white]: [yellow]t.me/MRDEMONSCRIPT     [green] [white]: [yellow]Python")
+
+    print(f"""
+{kuning1}═══╗      ╦ {putih1}RUNNING : {kuning1}{name.upper()}
+{kuning1}   ║      ║{hijau1} ╔╗ ╔═╗╔╦╗ {biru}X BOT {putih1}BY MR.BADUT
+{kuning1}╔══╩══╦═══╝{hijau1} ╠╩╗║ ║ ║  {putih1}YOUR IP : {hijau1}{location_info.ip}
+{kuning1}║     ║ {putih1}1.0{hijau1} ╚═╝╚═╝ ╩ {putih1} LAST UPDATED :{kuning1} 2024-01-15
+{kuning1}╩     ╚══════════════════════{hijau1}═════════════════════\n""")
     info_text = (
-        f"[green] IP[white] : [yellow]{location_info.ip}\n"
         f"[green] COUNTRY[white] : [yellow]{location_info.country}\n"
         f"[green] PROVINCE[white] : [yellow]{location_info.state}\n"
-        f"[green] CITY[white] : [yellow]{location_info.city}\n"
         f"[green] COORDINATE[white] : [yellow]{location_info.latlng}\n"
-    )
-    info_text1 = (
         f"[green] DEVICE OS[white] : [yellow]{system_info['OS']} {system_info['OS Version']}\n"
-        f"[green] ARCHITECTURE[white] : [yellow]{system_info['Machine']}\n"
-        f"[green] VERSION[white] : [yellow]{platform.uname().release}\n"
-        f"[green] ACTIVE[white] : [yellow]{uptime}\n"
         f"[green] RAM[white] : [yellow]{memory_info['Used Memory']} / {memory_info['Total Memory']}"
     )
-
     banner_content = (
         f"{info_text}"
-        f"\n{info_text1}"
     )
     # Print the MAIN MENU text in a larger font
     #cetak(Panel(banner, width=90, title=f"[bold green]{name}", padding=(5, 2), style="white on black",))
     
-    cetak(Panel(banner, width=80,title=f"[bold green]{name}", padding=(0, 4), style="bold white"))
-    cetak(Panel(banner_content, width=80,title=f"[bold green]Your Information", padding=(0, 4), style="bold white"))
+    #cetak(Panel(banner, width=80,title=f"[bold green]{name}", padding=(0, 4), style="bold white"))
+    #cetak(Panel(banner_content, width=50,title=f"[bold green]Your Information", padding=(0, 3), style="bold white"))
 
-#banner("System Information")
+# banner("System Information")
+# print(f"""
+# {kuning1}  ═╗      ╦ 
+# {kuning1}   ║      ║{hijau1} ╔╗ ╔═╗╔╦╗ {biru}MULTI BOT {putih1}BY MR.BADUT
+# {kuning1}╔══╩══╦═══╝{hijau1} ╠╩╗║ ║ ║  {putih1}YOUR IP : {hijau1}8.8.8.8
+# {kuning1}║     ║ {putih1}1.0{hijau1} ╚═╝╚═╝ ╩ {putih1} LAST UPDATED :{kuning1} 2024-04-07
+# {kuning1}╩     ╚══════════════════════{hijau1}═════════════════════""")

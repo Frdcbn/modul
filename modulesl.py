@@ -287,16 +287,21 @@ def antibot(html,key=None,name_key=None):
     for antibot_links_script in antibot_links_script:
       if 'var ablinks' in str(antibot_links_script):
         script_text = antibot_links_script.string
-    try:
+    #print(script_text)
+    if 'var ablinks=[' in script_text:
       val=script_text.split('var ablinks=[')[1].split(']')[0].split('","')
-    except:
+    elif 'var ablinks = [' in script_text:
+      val=script_text.split('var ablinks = [')[1].split(']')[0].split('","')
+    elif 'var ablinks= [' in script_text:
       val=script_text.split('var ablinks= [')[1].split(']')[0].split('","')
     for data in val:
+      #print(val)
       dat=bs(data,'html.parser')
       rel=dat.find('a')['rel'][0].split('\\"')[1].split('"\\')[0]
       img=dat.find('img')['src'].split('data:image/png;base64,')[1].split('\\"')[0]
       anu[rel]=img
     anu["main"]=utama
+    #print(anu)
     xe=open('xkey.txt').read().splitlines()[0]
     answer= run(anu,xe).replace(',','+')
     return answer
