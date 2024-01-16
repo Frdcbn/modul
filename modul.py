@@ -96,6 +96,10 @@ def animasi(menit=None,detik=None):
 def bypass_link(url,modulesl,jumlah=None):
   dictnya={
   "urlpay.in":modulesl.urlpay,
+  "v2p.icu":modulesl.v2picu,
+  "adbits.xyz":modulesl.v2picu,
+  "adbx.pro":modulesl.v2picu,
+  "kyshort.xyz":modulesl.kyshort,
   "teralinks.in":modulesl.teralinks,
   "rsshort.com":modulesl.rsshort,
   "1short.info":modulesl._1short_in,
@@ -118,7 +122,7 @@ def bypass_link(url,modulesl,jumlah=None):
   "ex-foary.com":modulesl.ex_foary_com,
   "exe.io":modulesl.exe_io,
   "ez4short.com":modulesl.ez4short,
-  "fc-lc.com":modulesl.fl_lc,
+  "fc-lc.xyz":modulesl.fl_lc,
   "flyzu.icu":modulesl.flyzu,
   "link.freeltc.top":modulesl.freeltc_top,
   "gplinks.co":modulesl.gplinks_bypass,

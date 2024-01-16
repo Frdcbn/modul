@@ -53,7 +53,7 @@ def menu(banner,modul,modulesl):
     #"claim88":modul.claim88,
     "claimcoins":modul.claimcoins,
     "litefaucet":modul.litefaucet,
-    #"claimfreetrx_online(BTC)":modul.claimfreetrx,
+    "claimfreetrx_online(BTC)":modul.claimfreetrx,
     "earncryptowrs":modul.earncryptowrs,
     "tokenmix_pro":modul.tokenmix_pro,
     "kiddyearner":modul.kiddyearner,
@@ -71,7 +71,7 @@ def menu(banner,modul,modulesl):
     tele=None
     fl=sys.argv[0]
     os.system("clear")
-    banner.banner(' MAIN MENU ')
+    banner.banner('MAIN MENU ')
     cetak(Panel('sekarang ada metode baru yaitu scrape api kalian ke settings lalu setting api key dari scrape api untuk link web api keynya https://www.scraperapi.com/ dan ini terdapat limit kalian cek api key secara berkala ketika sudah limit ganti api keynya'.center(80), width=70, title="[bold green] PENGUMUMAN PENTING", padding=(0, 2), style="bold white"))
     menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(menu.keys())]
     if len(menu_items) % 2 != 0:
@@ -119,7 +119,7 @@ def menu(banner,modul,modulesl):
     if select == "1":
         menu_dict=list(Bits_Family.items())
         os.system("clear")
-        banner.banner(' BITS FAMILY MENU ')
+        banner.banner('BITS FAMILY MENU ')
         menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(Bits_Family.keys())]
         if len(menu_items) % 2 != 0:
             menu_items.append("")
@@ -133,7 +133,7 @@ def menu(banner,modul,modulesl):
     if select == "2":
         menu_dict=list(micin.items())
         os.system("clear")
-        banner.banner(' MICIN FAMILY MENU ')
+        banner.banner('MICIN FAMILY MENU ')
         menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(micin.keys())]
         if len(menu_items) % 2 != 0:
             menu_items.append("")

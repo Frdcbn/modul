@@ -108,8 +108,6 @@ def remove_proxy_from_file(proxy_to_remove, filename='proxy.txt'):
             with open(filename, 'w') as file:
                 for proxy in proxy_list:
                     file.write(f'{proxy}\n')
-
-
     except FileNotFoundError:
         pass
 # -------------------------------------------
@@ -1918,4 +1916,36 @@ def clks_pro(url):
   except Exception as e:
     return "failed to bypass"
     pass
-#print(rsshort('https://rsshort.com/ZT3mLgg'))
+def v2picu(url):
+  curl=Session()
+  step1=curl.get(url)
+  status_code(step1)
+  if 'h-captcha' in step1.text:
+    key=bs(step1.text,'html.parser').find('div',{'class':'h-captcha'})['data-sitekey']
+    inpt=bs(step1.text,'html.parser').find_all('input',{'type':'hidden'})
+    answer=hcaptcha(key,step1.url)
+    data=f'g-recaptcha-response={answer}&h-captcha-response={answer}'
+    for dt in inpt:
+      data=data+'&'+dt['name']+'='+dt['value']
+    ua={'Content-Type':'application/x-www-form-urlencoded','referer':step1.url}
+    step2=curl.post(step1.url,headers=ua,data=data,allow_redirects=False)
+    status_code(step2)
+    url='https://'+urlparse(step1.url).netloc+step2.headers['location']
+  while True:
+    step3=curl.get(url)
+    status_code(step3)
+    #print(curl.cookies.get_dict())
+    inpt=bs(step1.text,'html.parser').find_all('input',{'type':'hidden'})
+    data=''
+    for dt in inpt:
+      data=data+'&'+dt['name']+'='+dt['value']
+    data=data[1:]
+    sleep(30)
+    step4=curl.get(step3.url+'?'+data,allow_redirects=False)
+    status_code(step4)
+    #print(step4.headers['location'])
+    if urlparse(step3.url).netloc == urlparse(step4.headers['location']).netloc or step4.headers['location'] =='/?redirect_to=random':
+      url='https://'+urlparse(step3.url).netloc+step4.headers['location']
+    else:
+      return step4.headers['location']
+#print(v2picu('http://adbx.pro/R77CQ5YL'))
