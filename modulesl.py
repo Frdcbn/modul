@@ -590,6 +590,31 @@ def shrinkme(url):
   res= one_method(curl=curl,url='https://en.shrinke.me'+urlparse(url).path,headers={"referer":"https://themezon.net/managed-cloud-hosting-service-providers/"})
   sleep(15)
   return res
+def urlcut(url):
+  curl=Session()
+  res= one_method(curl=curl,url='https://urlcut.pro'+urlparse(url).path)
+  sleep(15)
+  return res
+def faho(url):
+  curl=Session()
+  res= one_method(curl=curl,url='https://faho.us'+urlparse(url).path)
+  sleep(15)
+  return res
+def revcut(url):
+  curl=Session()
+  res= one_method(curl=curl,url='https://revcut.net'+urlparse(url).path)
+  sleep(15)
+  return res
+def cutlink(url):
+  curl=Session()
+  res= one_method(curl=curl,url='https://cutlink.xyz'+urlparse(url).path)
+  sleep(15)
+  return res
+def bitad(url):
+  curl=Session()
+  res= one_method(curl=curl,url='https://bitad.org'+urlparse(url).path)
+  sleep(15)
+  return res
 def urlpay(url):
   curl=Session()
   res= one_method(curl=curl,url='https://go.urlpay.in'+urlparse(url).path,headers={"referer":"https://daddy.helpowi.com/web-hosting-navigating-the-digital-landscape/"})
@@ -1882,9 +1907,11 @@ def clks_pro(url):
     curl = Session()
     url='https://clks.pro/clkclk.'+path
     step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers={'referer':"https://homeculina.com/"},allow_redirects=False)
+    # print(step1.text)
+    # print(step1.headers)
     url=step1.headers['sa-final-url']
-    curl.cookies.update(step1.cookies.get_dict())
     if 'https://awgrow.com/backup/w/?get=' or 'https://t.co/' in url:
+      curl.cookies.update(step1.cookies.get_dict())
       while True:
         step1=curl.get(url)
         #print(step1.text)
@@ -1948,4 +1975,4 @@ def v2picu(url):
       url='https://'+urlparse(step3.url).netloc+step4.headers['location']
     else:
       return step4.headers['location']
-#print(v2picu('http://adbx.pro/R77CQ5YL'))
+#print(clks_pro('http://clks.pro/CBj080vgpnp'))

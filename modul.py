@@ -96,6 +96,11 @@ def animasi(menit=None,detik=None):
 def bypass_link(url,modulesl,jumlah=None):
   dictnya={
   "urlpay.in":modulesl.urlpay,
+  "131989.xyz":modulesl.urlcut,
+  "161989.xyz":modulesl.bitad,
+  "141989.xyz":modulesl.faho,
+  "121989.xyz":modulesl.revcut,
+  "151989.xyz":modulesl.cutlink,
   "v2p.icu":modulesl.v2picu,
   "adbits.xyz":modulesl.v2picu,
   "adbx.pro":modulesl.v2picu,
@@ -469,51 +474,57 @@ def sl(modulesl,banner,host,cookies,ugentmu,path_sl,key_all_sl,key_button_id,key
               jumlah = int(i.find(*key_amount_sl).text.split('/')[0])
             re = jumlah
             for i in range(jumlah):
-              get_sl = curl.get(f'https://{host}{path_sl}', headers=ua, cookies=cookies)
-              status_code(get_sl)
-              token = get_sl.text.split("var token = '")[1].split("';")[0]
-              status = True
-              while(status == True):
-                da = id["onclick"].split("goShortlink('")[1].split("');")[0]
-                if icon:
-                    answer = icon_c(modulesl, host, curl, cookies, ugentmu)
-                    #print(answer)
-                    answer=answer[0]+","+answer[1]+",320"
-                    data=f"a=getShortlink&data={da}&token={token}&ic-hf-id=1&ic-hf-se={answer[0]},{answer[1]},320&ic-hf-hp="
-                    #print(data)
-                else:
-                    answer = get_answer(name=host, cookies=cookies, ugentmu=ugentmu)
-                    data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf="+answer
-                if answer:
-                  get_lk = curl.post(f'https://{host}/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=data, allow_redirects=False, cookies=cookies)
-                  status_code(get_lk)
-                  get_lk = json.loads(get_lk.text)
-                  if get_lk["status"] == 200:
-                    answer = bypass_link(get_lk['shortlink'], modulesl, jumlah=[str(re), str(jumlah)])
-                    if answer:
-                      if 'failed to bypass' in answer:
+              for gej in range(3):
+                get_sl = curl.get(f'https://{host}{path_sl}', headers=ua, cookies=cookies)
+                status_code(get_sl)
+                token = get_sl.text.split("var token = '")[1].split("';")[0]
+                status = True
+                while(status == True):
+                  da = id["onclick"].split("goShortlink('")[1].split("');")[0]
+                  if icon:
+                      answer = icon_c(modulesl, host, curl, cookies, ugentmu)
+                      #print(answer)
+                      answer=answer[0]+","+answer[1]+",320"
+                      data=f"a=getShortlink&data={da}&token={token}&ic-hf-id=1&ic-hf-se={answer[0]},{answer[1]},320&ic-hf-hp="
+                      #print(data)
+                  else:
+                      answer = get_answer(name=host, cookies=cookies, ugentmu=ugentmu)
+                      data=f"a=getShortlink&data={da}&token={token}&captcha-idhf=0&captcha-hf="+answer
+                  if answer:
+                    get_lk = curl.post(f'https://{host}/system/ajax.php', headers={"User-Agent": ugentmu, "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "accept": "application/json, text/javascript, */*; q=0.01"}, data=data, allow_redirects=False, cookies=cookies)
+                    status_code(get_lk)
+                    get_lk = json.loads(get_lk.text)
+                    if get_lk["status"] == 200:
+                      answer = bypass_link(get_lk['shortlink'], modulesl, jumlah=[str(re), str(jumlah)])
+                      if answer:
+                        if 'failed to bypass' in answer:
+                            ulang=True
+                            break
+                        else:
+                          try:
+                              get_sl = curl.get(answer, headers=ua, cookies=cookies)
+                              status_code(get_sl)
+                              sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
+                              print(putih1 + '┃  ┣━━' + hijau1 + ' [ ' + kuning1 + '>' + hijau1 + ' ] ' + sukses)
+                              print(putih1 + '┃  ┗━━' + hijau1 + ' [ ' + kuning1 + '+' + hijau1 + ' ] ' + balance())
+                              re -= 1
+                          except:
+                              print(putih1 + '┃  ┗━━' + hijau1 + ' [ ' + merah1 + 'x' + hijau1 + ' ] ' + "invalid keys")
+                          ulang=False
                           break
                       else:
-                        try:
-                            
-                            get_sl = curl.get(answer, headers=ua, cookies=cookies)
-                            status_code(get_sl)
-                            sukses = bs(get_sl.text, 'html.parser').find("div", {"class": "alert alert-success mt-0"}).text
-                            print(putih1 + '┃  ┣━━' + hijau1 + ' [ ' + kuning1 + '>' + hijau1 + ' ] ' + sukses)
-                            print(putih1 + '┃  ┗━━' + hijau1 + ' [ ' + kuning1 + '+' + hijau1 + ' ] ' + balance())
-                            re -= 1
-                        except:
-                            print(putih1 + '┃  ┗━━' + hijau1 + ' [ ' + merah1 + 'x' + hijau1 + ' ] ' + "invalid keys")
+                        status=False
                         break
+                    if get_lk['status'] == 600:
+                      print(putih1 + '┣━━' + hijau1 + ' [ ' + merah1 + 'x' + hijau1 + ' ] ' + "Captcha wrong", end="\r")
                     else:
-                      status=False
+                      print(putih1 + '┣━━' + hijau1 + ' [ ' + merah1 + 'x' + hijau1 + ' ] ' + "There seems to be something wrong with the link")
+                      ulang=False
                       break
-                  if get_lk['status'] == 600:
-                    print(putih1 + '┣━━' + hijau1 + ' [ ' + merah1 + 'x' + hijau1 + ' ] ' + "Captcha wrong", end="\r")
-                  else:
-                    print(putih1 + '┣━━' + hijau1 + ' [ ' + merah1 + 'x' + hijau1 + ' ] ' + "There seems to be something wrong with the link")
-                    break
-              if status==False:break
+                if status==False:break
+                elif ulang:
+                  pass
+                else:break
         except Exception as e:
           keluar(str(e))
           traceback.print_exc()
@@ -840,7 +851,7 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
             pass
       if settings()['multi']:
         
-          with ThreadPoolExecutor(max_workers=3) as executor:
+          with ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(run, i) for i in link]
       else:
         for i in link:
@@ -970,7 +981,7 @@ def keforcash(modulesl,banner):
         pass
   if settings()['multi']:
     
-      with ThreadPoolExecutor(max_workers=3) as executor:
+      with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run, i) for i in link]
   else:
     for i in link:
@@ -984,18 +995,16 @@ def liteearn(modulesl,banner):
   vie_script(modulesl,banner,url="https://liteearn.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
 def cryptoviefaucet(modulesl,banner):
   vie_script(modulesl,banner,url="https://cryptoviefaucet.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
-def claimcash(modulesl,banner):
-  vie_script(modulesl,banner,url="https://claimcash.cc",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
 def bitupdate(modulesl,banner):
   vie_script(modulesl,banner,url="https://bitupdate.info",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True,name_key='div')
 def litefaucet(modulesl,banner):
   vie_script(modulesl,banner,url="https://litefaucet.in",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
-def queenofferwall(modulesl,banner):
-  vie_script(modulesl,banner,url="https://queenofferwall.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False)
-def hatecoin(modulesl,banner):
-  vie_script(modulesl,banner,url="https://hatecoin.me",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
 def nobitafc(modulesl,banner):
   vie_script(modulesl,banner,url="https://nobitafc.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
+def almasat(modulesl,banner):
+  vie_script(modulesl,banner,url="https://almasat.net",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
+def allfaucets(modulesl,banner):
+  vie_script(modulesl,banner,url="https://allfaucets.site",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=True)
 #--------------- vie new family ---------------#
 def chillfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -1057,7 +1066,7 @@ def chillfaucet(modulesl,banner):
      pass
   if settings()['multi']:
     
-      with ThreadPoolExecutor(max_workers=3) as executor:
+      with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run, sl) for sl in sl]
   else:
     for sl in sl:
@@ -1123,7 +1132,7 @@ def insfaucet(modulesl,banner):
      pass
   if settings()['multi']:
     
-      with ThreadPoolExecutor(max_workers=3) as executor:
+      with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run, sl) for sl in sl]
   else:
     for sl in sl:
@@ -1200,7 +1209,7 @@ def kiddyearner(modulesl,banner):
           keluar(str(e))
           pass
   if settings()['multi']:
-      with ThreadPoolExecutor(max_workers=3) as executor:
+      with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run, i) for i in link]
   else:
     for i in link:
@@ -1275,7 +1284,7 @@ def cryptoearns(modulesl,banner):
           keluar(str(e))
           pass
   if settings()['multi']:
-      with ThreadPoolExecutor(max_workers=3) as executor:
+      with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run, i) for i in link]
   else:
     for i in link:
@@ -1346,7 +1355,7 @@ def faucetspeedbtc(modulesl,banner):
       pass
   if settings()['multi']:
     
-      with ThreadPoolExecutor(max_workers=3) as executor:
+      with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run, i) for i in link]
   else:
     for i in link:
@@ -1423,7 +1432,7 @@ def coinpayz(modulesl,banner):
      print(td+str(e))
   if settings()['multi']:
     
-      with ThreadPoolExecutor(max_workers=3) as executor:
+      with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run, i) for i in sli]
   else:
     for i in sli:
@@ -1484,7 +1493,7 @@ def wildfaucet(modulesl,banner):
        pass
   if settings()['multi']:
     
-      with ThreadPoolExecutor(max_workers=3) as executor:
+      with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(run, i) for i in links]
   else:
     for i in links:
@@ -1558,7 +1567,7 @@ def earncryptowrs(modulesl,banner):
           pass
     if settings()['multi']:
       
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
           futures = [executor.submit(run, i) for i in data_sl]
     else:
       for i in data_sl:
@@ -1619,7 +1628,7 @@ def claimcoins(modulesl,banner):
           pass
     if settings()['multi']:
       
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
           futures = [executor.submit(run, i) for i in data_sl]
     else:
       for i in data_sl:
@@ -1677,7 +1686,7 @@ def tokenmix_pro(modulesl,banner):
                 if 'succuss' in get_reward.url:
                   print(putih1+'┃  ┗━━'+hijau1+f' {putih1}[{hijau1} √ {putih1}] {hijau1}'+unquote(get_reward.url).split('=')[1])
                 re-=1
-            break
+                break
         except Exception as e:
           keluar(str(e))
           pass
@@ -1686,7 +1695,7 @@ def tokenmix_pro(modulesl,banner):
           pass
     if settings()['multi']:
       
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
           futures = [executor.submit(run, i) for i in get_sl['sls']]
     else:
       for i in get_sl['sls']:
@@ -1739,13 +1748,13 @@ def autofaucet_org(modulesl,banner):
   del sl[0]
   del sl[0]
   del sl[0]
-  for sl in sl:
+  def run(sl):
     jumlah=int(sl.find('span',{'id':'views'}).text.strip().split('/')[0])
     re=jumlah
     url='https://autofaucet.org'+sl.find('form')['action']
     value=sl.find('input',{'name':'hh'})['value']
     for jum in range(jumlah):
-      for i in range(2):
+      for i in range(3):
         headers_p={
           "Host":"autofaucet.org",
           "content-type":"application/x-www-form-urlencoded",
@@ -1765,6 +1774,12 @@ def autofaucet_org(modulesl,banner):
             break
         else:
           break
+  if settings()['multi']:
+        with ThreadPoolExecutor(max_workers=5) as executor:
+          futures = [executor.submit(run, i) for i in sl]
+  else:
+      for i in sl:
+        run(i)
 def autoclaim_in(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://autoclaim.in/").netloc
@@ -1809,13 +1824,13 @@ def autoclaim_in(modulesl,banner):
   del sl[0]
   del sl[0]
   del sl[0]
-  for sl in sl:
+  def run(sl):
     jumlah=int(sl.find('span',{'id':'views'}).text.strip().split('/')[0])
     re=jumlah
     url='https://autoclaim.in'+sl.find('form')['action']
     value=sl.find('input',{'name':'hh'})['value']
     for jum in range(jumlah):
-      for i in range(2):
+      for i in range(3):
         headers_p={
           "Host":"autoclaim.in",
           "content-type":"application/x-www-form-urlencoded",
@@ -1835,6 +1850,12 @@ def autoclaim_in(modulesl,banner):
             break
         else:
           break
+  if settings()['multi']:
+        with ThreadPoolExecutor(max_workers=5) as executor:
+          futures = [executor.submit(run, i) for i in sl]
+  else:
+      for i in sl:
+        run(i)
 def autobitco_in(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
   host=urlparse("https://autobitco.in/").netloc
@@ -1879,13 +1900,13 @@ def autobitco_in(modulesl,banner):
   del sl[0]
   del sl[0]
   del sl[0]
-  for sl in sl:
+  def run(sl):
     jumlah=int(sl.find('span',{'id':'views'}).text.strip().split('/')[0])
     re=jumlah
     url='https://autobitco.in'+sl.find('form')['action']
     value=sl.find('input',{'name':'hh'})['value']
     for jum in range(jumlah):
-      for i in range(2):
+      for i in range(3):
         headers_p={
           "Host":"autobitco.in",
           "content-type":"application/x-www-form-urlencoded",
@@ -1905,6 +1926,231 @@ def autobitco_in(modulesl,banner):
             break
         else:
           break
+  if settings()['multi']:
+        with ThreadPoolExecutor(max_workers=5) as executor:
+          futures = [executor.submit(run, i) for i in sl]
+  else:
+      for i in sl:
+        run(i)
+def satoshitap(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://satoshitap.com/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['wallet'])
+    satoshitap(modulesl,banner)
+  wallet=load_data(host,custom=['wallet'])['wallet']
+  while True:
+      url_host='satoshitap.com'
+      try:
+        curl=Session()
+        ua_g = {
+          'Host': url_host,
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        }
+        ua_p = {
+          'Host': url_host,
+          'origin': 'https://'+url_host,
+          'content-type': 'application/x-www-form-urlencoded',
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+        }
+        url=f"https://{url_host}/"
+        get_data=curl.get('https://satoshitap.com/',headers=ua_g)
+        # print(get_data.text)
+        # exit()
+        parser=bs(get_data.text,'html.parser')
+        sesi=parser.find('input',{'name':'session-token'})['value']
+        key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+        atb=modulesl.antibot(get_data,name_key='div',key='modal-title w-100 text-center')
+        answer=modulesl.RecaptchaV2(key,url)
+        data=f'session-token={sesi}&address={wallet}&antibotlinks=+{atb}&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
+        send_data=curl.post(url,headers=ua_p,data=data)
+        #print(send_data.text)
+        for ulang in range(10):
+          get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
+          #print(get_sl.headers)
+          an=bypass_link(get_sl.headers['location'],modulesl)
+          if an:
+            if 'failed to bypass' in an:
+              pass
+            else:
+              #print(an)
+              get_data=curl.get(an.replace('www.',''),headers=ua_g)
+              #print(get_data.text)
+              print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find_all('div',{'class':'alert alert-success fade show'})[1].text.strip().splitlines()[0])
+              break
+          else:
+            send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
+        if ulang==9:
+          print('shortlinks limit')
+          exit()
+      except Exception as e:
+        pass
+def bitcoin_click_fun(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://bitcoin.bitclick.fun/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['wallet'])
+    bitcoin_click_fun(modulesl,banner)
+  wallet=load_data(host,custom=['wallet'])['wallet']
+  url_host='bitcoin.bitclick.fun'
+  while True:
+    try:
+      curl=Session()
+      ua_g = {
+        'Host': url_host,
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      }
+      ua_p = {
+        'Host': url_host,
+        'origin': 'https://'+url_host,
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+      }
+      url=f"https://{url_host}/"
+      get_data=curl.get('https://bitcoin.bitclick.fun/',headers=ua_g)
+      #print(get_data.text)
+      for ulang in range(10):
+        get_sl=curl.get(url+get_data.text.split("""$(location).attr('href','""")[1].split("');return false;")[0],headers=ua_g,allow_redirects=False)
+        #print(get_sl.headers)
+        an=bypass_link(get_sl.headers['location'],modulesl)
+        if an:
+          if 'failed to bypass' in an:
+            pass
+          else:
+            get_data=curl.get(an,headers=ua_g)
+            parser=bs(get_data.text,'html.parser')
+            sesi=parser.find('input',{'type':'text'})['name']
+            key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+            atb=modulesl.antibot(get_data)
+            answer=modulesl.RecaptchaV2(key,url)
+            data=f'{sesi}={wallet}&g-recaptcha-response={answer}&antibotlinks=+{atb}'
+            send_data=curl.post(url,headers=ua_p,data=data)
+            #print(send_data.text)
+            print(kuning1+' > '+hijau1+bs(send_data.text,'html.parser').find('div',{'class':'alert alert-success'}).text.strip().splitlines()[0])
+            animasi(detik=random.randint(5,35))
+            break
+        else:
+          get_data=curl.get(url,headers=ua_g)
+      if ulang==9:
+        print('shortlinks limit')
+        exit()
+    except Exception as e:
+      pass
+def faucet_imatic_gr(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://faucet.imatic.gr/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['wallet'])
+    faucet_imatic_gr(modulesl,banner)
+  wallet=load_data(host,custom=['wallet'])['wallet']
+  url_host='faucet.imatic.gr'
+  while True:
+    try:
+      curl=Session()
+      ua_g = {
+        'Host': url_host,
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      }
+      ua_p = {
+        'Host': url_host,
+        'origin': 'https://'+url_host,
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+      }
+      url=f"https://{url_host}/"
+      get_data=curl.get('https://faucet.imatic.gr/',headers=ua_g)
+      for ulang in range(10):
+        get_sl=curl.get(url+get_data.text.split("""$(location).attr('href','""")[1].split("');return false;")[0],headers=ua_g,allow_redirects=False)
+        #print(get_sl.headers)
+        an=bypass_link(get_sl.headers['location'],modulesl)
+        if an:
+          if 'failed to bypass' in an:
+            pass
+          else:
+            get_data=curl.get(an,headers=ua_g)
+            parser=bs(get_data.text,'html.parser')
+            sesi=parser.find('input',{'type':'text'})['name']
+            key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+            atb=modulesl.antibot(get_data)
+            answer=modulesl.RecaptchaV2(key,url)
+            data=f'{sesi}={wallet}&g-recaptcha-response={answer}&antibotlinks=+{atb}'
+            send_data=curl.post(url,headers=ua_p,data=data)
+            #print(send_data.text)
+            print(kuning1+' > '+hijau1+bs(send_data.text,'html.parser').find('div',{'class':'alert alert-success'}).text.strip().splitlines()[0])
+            break
+        else:
+          get_data=curl.get(url,headers=ua_g)
+      if ulang==9:
+        print('shortlinks limit')
+        exit()
+    except Exception as e:
+      pass
+def tronmaster(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://tronmaster.online/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['wallet'])
+    tronmaster(modulesl,banner)
+  wallet=load_data(host,custom=['wallet'])['wallet']
+  url_host='tronmaster.online'
+  while True:
+    try:
+      curl=Session()
+      ua_g = {
+        'Host': url_host,
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      }
+      ua_p = {
+        'Host': url_host,
+        'origin': 'https://'+url_host,
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+      }
+      url=f"https://{url_host}/"
+      get_data=curl.get('https://tronmaster.online/',headers=ua_g)
+      #print(get_data.text)
+      for ulang in range(10):
+        get_sl=curl.get(url+get_data.text.split("""$(location).attr('href','""")[1].split("');return false;")[0],headers=ua_g,allow_redirects=False)
+        #print(get_sl.headers)
+        an=bypass_link(get_sl.headers['location'],modulesl)
+        if an:
+          if 'failed to bypass' in an:
+            pass
+          else:
+            get_data=curl.get(an,headers=ua_g)
+            parser=bs(get_data.text,'html.parser')
+            sesi=parser.find('input',{'type':'text'})['name']
+            key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+            atb=modulesl.antibot(get_data)
+            answer=modulesl.RecaptchaV2(key,url)
+            data=f'{sesi}={wallet}&g-recaptcha-response={answer}&antibotlinks=+{atb}'
+            send_data=curl.post(url,headers=ua_p,data=data)
+            #print(send_data.text)
+            print(kuning1+' > '+hijau1+bs(send_data.text,'html.parser').find('div',{'class':'alert alert-success'}).text.strip().splitlines()[0])
+            break
+        else:
+          get_data=curl.get(url,headers=ua_g)
+      if ulang==9:
+        print('shortlinks limit')
+        exit()
+    except Exception as e:
+      pass
 #--------------- off ---------------#
 def earnsolana(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -1972,8 +2218,7 @@ def earnsolana(modulesl,banner):
           keluar(str(e))
           pass
     if settings()['multi']:
-      
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
           futures = [executor.submit(run, i) for i in data_sl]
     else:
       for i in data_sl:
@@ -2048,7 +2293,7 @@ def cryptofuture(modulesl,banner):
           pass
     if settings()['multi']:
       
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
           futures = [executor.submit(run, i) for i in data_sl]
     else:
       for i in data_sl:
@@ -2123,7 +2368,7 @@ def claim88(modulesl,banner):
           pass
     if settings()['multi']:
       
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
           futures = [executor.submit(run, i) for i in data_sl]
     else:
       for i in data_sl:
@@ -2249,7 +2494,7 @@ def freeltc(modulesl,banner):
           pass
     if settings()['multi']:
       
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
           futures = [executor.submit(run, i) for i in data_sl]
     else:
       for i in data_sl:
