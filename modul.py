@@ -106,7 +106,7 @@ def bypass_link(url,modulesl,jumlah=None):
   "adbx.pro":modulesl.v2picu,
   "kyshort.xyz":modulesl.kyshort,
   "teralinks.in":modulesl.teralinks,
-  #"rsshort.com":modulesl.rsshort,
+  "rsshort.com":modulesl.rsshort,
   "1short.info":modulesl._1short_in,
   "adbitfly.com":modulesl.adbitfly,
   "adbull.me":modulesl.adbull,
