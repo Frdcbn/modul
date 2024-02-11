@@ -46,7 +46,6 @@ def menu(banner,modul,modulesl):
     "nobitafc":modul.nobitafc,
     "claimcoins":modul.claimcoins,
     "litefaucet":modul.litefaucet,
-    "claimfreetrx_online(BTC)":modul.claimfreetrx,
     "earncryptowrs":modul.earncryptowrs,
     "tokenmix_pro":modul.tokenmix_pro,
     "kiddyearner":modul.kiddyearner,
@@ -60,6 +59,11 @@ def menu(banner,modul,modulesl):
     "tronmaster":modul.tronmaster,
     "almasat":modul.almasat,
     "allfaucets":modul.allfaucets,
+    "chillfaucet":modul.chillfaucet,
+    "freeltc":modul.freeltc_o,
+    "proinfinity":modul.proinfinity,
+    "bitfaucet":modul.bitfaucet,
+    "larvelfaucet":modul.larvelfaucet,
     }
     menu={
       "settings":None,

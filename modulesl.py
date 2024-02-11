@@ -1,7 +1,7 @@
 import re,json,time,uuid,os,string,random,shutil
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse,urlencode
+from urllib.parse import urlparse,urlencode,quote_plus
 import cloudscraper
 import re
 import base64,random
@@ -313,8 +313,10 @@ def rscaptcha(img):
   xe=open('xkey.txt').read().splitlines()[0]
   re = run(data,xe)
   return re
-def RecaptchaV2xe(key,url):
+def RecaptchaV2xe(key,url,invisible=False):
   data = {"method": "userrecaptcha", "pageurl": url, "sitekey": key}
+  if invisible:
+    data['invisible']=1
   xe=open('xkey.txt').read().splitlines()[0]
   re = run(data,xe)
   return re
@@ -351,53 +353,40 @@ def one_method(curl,url,headers=None,go=None):
    return 'failed to bypass'
 def ctrsh(url):
   try:
-    url_g=url
     curl=Session()
-    step1=curl.get('https://sinonimos.de/?url8j='+url).text
-    url=step1.split('<script>window.location.href = "')[1].split('";</script>')[0]
-    status=False
-    while(status==False):
-      step2=curl.get(url).text
-      url_p=json.loads(step2.split('var Wtpsw = ')[1].split(';')[0])
-      #sleep(20)
-      data=f"action=wtpsw_post_view_count&is_ajax=1&post_id={url_p['post_view_count']}&nonce={url_p['data_nonce']}"
-      step3=curl.post(url_p['ajaxurl'],data=data,headers={"content-type":"application/x-www-form-urlencoded; charset=UTF-8"})
-      answer=RecaptchaV3('https://www.google.com/recaptcha/api2/anchor?ar=1&k=6Lc1s5skAAAAAGriR94-62GGlgzdn-plGUpFQ_pf&co=aHR0cHM6Ly9zaW5vbmltb3MuZGU6NDQz&hl=id&v=6MY32oPwFCn9SUKWt8czDsDw&size=invisible&cb=pyan7vozvr5o')
-      step4=curl.post(url,data=f"g-recaptcha-response={answer}&validator=true",headers={"content-type":"application/x-www-form-urlencoded; charset=UTF-8"},allow_redirects=False)
-      if "location" not in step4.headers:
-        t=step4.text
-        url=t.split('<script>window.location.href = "')[1].split('"</script>')[0].split('&tk=')[1]
-        tk=urlparse(url_g)
-        step5=curl.get(f'https://{tk.hostname}{tk.path}/?token='+url).text
-        fl=bs(step5,'html.parser')
-        lin=fl.find('form',{'id':'go-link'})['action']
-        csrf=fl.find('input',{'name':'_csrfToken'})["value"]
-        tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
-        form=fl.find('input',{'name':'ad_form_data'})["value"]
-        tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
-        data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-        sleep(5)
-        final=curl.post('https://'+tk.hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
-        if json.loads(final.text)["status"] == "success":
-          sleep(15)
-          return json.loads(final.text)["url"]
+    step1=curl.get(url)
+    answer=hcaptcha(bs(step1.text,'html.parser').find('div',{'class':'h-captcha'})['data-sitekey'],url)
+    step2=curl.get(url+f'?g-recaptcha-response={answer}&h-captcha-response={answer}')
+    for l in bs(step2.text,'html.parser').find_all('a'):
+      if 'your destination link' in str(l):
+        url=urlparse(l['href']).query.split('&url=')[1]
+    redirecturl=curl.get(url).text.split('window.location.href = "')[1].split('";')[0]
+    while True:
+      get=curl.get(redirecturl)
+      key_n=get.text.split('el.name = "')[1].split('";')[0]
+      if '<button class="g-recaptcha btn btn-warning" data-sitekey="' in get.text:
+        key=bs(get.text,'html.parser').find('button',{'class':'g-recaptcha btn btn-warning'})['data-sitekey']
+        answer=RecaptchaV2xe(key,redirecturl,invisible=True)
+        data=f'g-recaptcha-response={answer}&{key_n}=true'
+      else:
+        data=f'no-recaptcha-noresponse=true&{key_n}=true'
+      post=curl.post(redirecturl,data=data,headers={'content-type':'application/x-www-form-urlencoded'},allow_redirects=False)
+      if 'ctr.sh' in post.text:
+        url_f=urlparse(post.text.split('window.location.href = "')[1].split('"')[0]).query.split('url=')[1].replace('&tk','?token')
+        return one_method(curl=curl,url=url_f)
+      elif 'easycut.io' in post.text:
+        url_f=urlparse(post.text.split('window.location.href = "')[1].split('"')[0]).query.split('url=')[1].replace('&tk','?token')
+        return one_method(curl=curl,url=url_f)
+      else:
+        redirecturl=post.headers['location']
+      #exit()
   except Exception as e:
     return "failed to bypass"
+#print(ctrsh('https://ctr.sh/FyZOO'))
 def try2(url):
   try:
     curl=Session()
-    step1=curl.get(url)
-    url1=url
-    ht=bs(step1.text,'html.parser')
-    url=ht.find('a',{'class':'btn btn-primary'})['href']
-    sleep(int(ht.find('input',{'id':'co-time'})['value']))
-    jumlah=int(ht.find('span',{'class':'go-step'}).text.split('/')[1])-1
-    for i in range(jumlah):
-      step2=curl.get(url)
-      ht=bs(step2.text,'html.parser')
-      url=ht.find('a',{'class':'btn btn-primary'})['href']
-      sleep(int(ht.find('input',{'id':'co-time'})['value']))
-    return one_method(curl=curl,url=url,headers={"referer":step2.url})
+    return one_method(curl=curl,url=url,headers={"referer":'https://trip.businessnews-nigeria.com/'})
   except Exception as e:
     return "failed to bypass"
 def gplinks_bypass(url: str):
@@ -540,49 +529,45 @@ def exe_io(url):
     return "failed to bypass"
 def fl_lc(url):
   try:
-    curl=Session()
-    step1=curl.get(url)
-    fd=bs(step1.text,'html.parser')
-    id=fd.find('form')['id']
-    url_p=fd.find('form')['action']
-    form=fd.find('input',{'name':'ad_form_data'})['value']
-    token=fd.find('input',{'name':'random_token'})['value']
-    visitor=fd.find('input',{'name':'visitor'})['value']
-    alias=fd.find('input',{'name':'alias'})["value"]
-    sitkey=fd.find('button',{'class':'g-recaptcha btn btn-primary'})['data-sitekey']
-    answer=RecaptchaV2(key=sitkey,url=step1.url)
-    data=f'ad_form_data={urllib.parse.quote_plus(form)}&random_token={token}&visitor={visitor}&alias={alias}&g-recaptcha-response={answer}'
-    step2=curl.post(url_p,data=data,headers={"content-type":"application/x-www-form-urlencoded"})
-    fd=bs(step2.text,'html.parser')
-    url_p=fd.find('form')['action']
-    form=fd.find('input',{'name':'ad_form_data'})['value']
-    token=fd.find('input',{'name':'random_token'})['value']
-    visitor=fd.find('input',{'name':'visitor'})['value']
-    data=f'ad_form_data={urllib.parse.quote_plus(form)}&random_token={token}&visitor={visitor}'
-    step3=curl.post(url_p,data=data,headers={"content-type":"application/x-www-form-urlencoded"})
-    fd=bs(step3.text,'html.parser')
-    url_p=fd.find('form')['action']
-    form=fd.find('input',{'name':'ad_form_data'})['value']
-    token=fd.find('input',{'name':'random_token'})['value']
-    visitor=fd.find('input',{'name':'visitor'})['value']
-    tkf=fd.find('input',{'name':'_Token[fields]'})["value"]
-    tku=fd.find('input',{'name':'_Token[unlocked]'})["value"]
-    sitkey=fd.find('div',{'class':'g-recaptcha m-2'})['data-sitekey']
-    answer=RecaptchaV2(key=sitkey,url=step3.url)
-    data=f'_method=POST&ad_form_data={urllib.parse.quote_plus(form)}&random_token={token}&visitor={visitor}&g-recaptcha-response={answer}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-    step4=curl.post(url_p,data=data,headers={"content-type":"application/x-www-form-urlencoded"})
-    sleep(15)
-    fd=bs(step4.text,'html.parser')
-    form=fd.find('input',{'name':'ad_form_data'})['value']
-    token=fd.find('input',{'name':'random_token'})['value']
-    visitor=fd.find('input',{'name':'visitor'})['value']
-    tkf=fd.find('input',{'name':'_Token[fields]'})["value"]
-    tku=fd.find('input',{'name':'_Token[unlocked]'})["value"]
-    data=f'_method=POST&ad_form_data={urllib.parse.quote_plus(form)}&random_token={token}&visitor={visitor}&ab=2&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-    final=curl.post('https://fc.lc/links/go',data=data,headers={"content-type":"application/x-www-form-urlencoded; charset=UTF-8"})
-    if json.loads(final.text)["status"] == "success":
-        sleep(15)
-        return json.loads(final.text)["url"]
+     client=Session()
+     step1=client.get(url,headers={'referer':'https://digitalmarktrend.com/building-a-strong-social-media-presence-nurturing-connections-and-fostering-success/'})
+     site=json.loads(step1.text.split('var app_vars = ')[1].split(';')[0])['invisible_reCAPTCHA_site_key']
+     answer=RecaptchaV2(key=site,url=step1.url)
+     reff=bs(step1.text,'html.parser').find('input',{'name':'ref'})['value']
+     toke=bs(step1.text,'html.parser').find('input',{'name':'_Token[fields]'})['value']
+     lock=bs(step1.text,'html.parser').find('input',{'name':'_Token[unlocked]'})['value']
+     data=f'_method=POST&ref={reff}&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={toke}&_Token%5Bunlocked%5D={lock}'
+     step2=client.post(step1.url,data=data,headers={'content-type':'application/x-www-form-urlencoded','referer':'https://fc-lc.xyz/'})
+     urlp=bs(step2.text,'html.parser').find('form')['action']
+     adfo=bs(step2.text,'html.parser').find('input',{'name':'ad_form_data'})['value']
+     rand=bs(step2.text,'html.parser').find('input',{'name':'random_token'})['value']
+     visi=bs(step2.text,'html.parser').find('input',{'name':'visitor'})['value']
+     alis=bs(step2.text,'html.parser').find('input',{'name':'alias'})['value']
+     data=f'ad_form_data={quote_plus(adfo)}&random_token={rand}&visitor={visi}&alias={alis}&u_pln=1'
+     step3=client.post(urlp,data=data,headers={'content-type':'application/x-www-form-urlencoded','referer':'https://fc-lc.xyz/'})
+     sleep(int(step3.text.split('<span id="timer" class="circle">')[1].split('</span>')[0]))
+     urlp=bs(step3.text,'html.parser').find('form',{'method':'POST'})['action']
+     adfo=bs(step3.text,'html.parser').find('input',{'name':'ad_form_data'})['value']
+     rand=bs(step3.text,'html.parser').find('input',{'name':'random_token'})['value']
+     visi=bs(step3.text,'html.parser').find('input',{'name':'visitor'})['value']
+     alis=bs(step3.text,'html.parser').find('input',{'name':'alias'})['value']
+     gcap=bs(step3.text,'html.parser').find('input',{'name':'g-recaptcha-response'})['value']
+     toke=bs(step3.text,'html.parser').find('input',{'name':'_Token[fields]'})['value']
+     lock=bs(step3.text,'html.parser').find('input',{'name':'_Token[unlocked]'})['value']
+     data=f'_method=POST&ad_form_data={quote_plus(adfo)}&random_token={rand}&visitor={visi}&alias={alis}&u_pln=1&g-recaptcha-response={gcap}&_Token%5Bfields%5D={toke}&_Token%5Bunlocked%5D={lock}'
+     step4=client.post(urlp,data=data,headers={'content-type':'application/x-www-form-urlencoded','referer':'https://fc-lc.xyz/'})
+     sleep(int(step4.text.split('<span id="timer" class="timer">')[1].split('</span>')[0]))
+     adfo=bs(step4.text,'html.parser').find('input',{'name':'ad_form_data'})['value']
+     rand=bs(step4.text,'html.parser').find('input',{'name':'random_token'})['value']
+     visi=bs(step4.text,'html.parser').find('input',{'name':'visitor'})['value']
+     aabb=bs(step4.text,'html.parser').find('input',{'name':'ab'})['value']
+     toke=bs(step4.text,'html.parser').find('input',{'name':'_Token[fields]'})['value']
+     lock=bs(step4.text,'html.parser').find('input',{'name':'_Token[unlocked]'})['value']
+     data=f'_method=POST&ad_form_data={quote_plus(adfo)}&random_token={rand}&visitor={visi}&ab={aabb}&_Token%5Bfields%5D={toke}&_Token%5Bunlocked%5D={lock}'
+     target=client.post('https://fc.lc/links/go',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','content-type':'application/x-www-form-urlencoded; charset=UTF-8'})
+     #print(target.json())
+     if target.json()['status'] == 'success':
+        return target.json()['url']
   except Exception as e:
     return "failed to bypass"
 def shrinkme(url):
@@ -602,7 +587,7 @@ def faho(url):
   return res
 def revcut(url):
   curl=Session()
-  res= one_method(curl=curl,url='https://revcut.net'+urlparse(url).path)
+  res= one_method(curl=curl,url='https://revcut.net'+urlparse(url).path,headers={'referer':'https://coingraph.us/bitcoins-road-to-130-000-price-prediction/'})
   sleep(15)
   return res
 def cutlink(url):
@@ -929,7 +914,7 @@ def adshorti_xyz(url):
 def birdurl(url):
  try:
   curl=Session()
-  step1=curl.get(url.replace('go.',''),headers={"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
+  step1=curl.get(url.replace('link.',''),headers={"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
   sleep(10)
   fl=bs(step1.text,'html.parser')
   lin=fl.find('form',{'id':'go-link'})['action']
@@ -938,7 +923,7 @@ def birdurl(url):
   form=fl.find('input',{'name':'ad_form_data'})["value"]
   tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
   data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-  final=curl.post(urlparse(url).scheme+'://'+urlparse(url.replace('go.','')).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;','referer':step1.url,"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
+  final=curl.post(urlparse(url).scheme+'://'+urlparse(url.replace('link.','')).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;','referer':step1.url,"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
   if json.loads(final.text)["status"] == "success":
       sleep(15)
       return json.loads(final.text)["url"]
@@ -947,7 +932,7 @@ def birdurl(url):
 def owlink(url):
  try:
   curl=Session()
-  step1=curl.get(url.replace('go.',''),headers={"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
+  step1=curl.get(url.replace('//link.','//'),headers={"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
   sleep(10)
   fl=bs(step1.text,'html.parser')
   lin=fl.find('form',{'id':'go-link'})['action']
@@ -956,7 +941,7 @@ def owlink(url):
   form=fl.find('input',{'name':'ad_form_data'})["value"]
   tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
   data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-  final=curl.post(urlparse(url).scheme+'://'+urlparse(url.replace('go.','')).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;','referer':step1.url,"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
+  final=curl.post(urlparse(url).scheme+'://'+urlparse(url.replace('//link.','//')).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;','referer':step1.url,"user-agent":"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html"})
   if json.loads(final.text)["status"] == "success":
       sleep(15)
       return json.loads(final.text)["url"]
@@ -1325,41 +1310,29 @@ def megaurl(url):
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36",
-            "referer": "https://app.trangchu.news/strengths-and-weaknesses-of-android-based-applications.html"
         }
-
         session = requests.Session()
-
         url_base = url.replace('go', 'get')
         response1 = session.get(url_base, headers=headers).text
-      #  print(response1)
         bs4 = BeautifulSoup(response1, "html.parser")
         inputs = bs4.find_all("input")
         data = {input.get("name"): input.get("value") for input in inputs}
         get_key = json.loads(response1.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
         data["g-recaptcha-response"] = RecaptchaV2(get_key, url_base)
-
         response2 = session.post(url_base, data=urlencode(data), headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","content-type":"application/x-www-form-urlencoded","referer":url_base}).text
-
         sleep(15)
         fl = bs(response2, 'html.parser')
         csrf = fl.find('input', {'name': '_csrfToken'})["value"]
         tkf = fl.find('input', {'name': '_Token[fields]'})["value"]
         form = fl.find('input', {'name': 'ad_form_data'})["value"]
         tku = fl.find('input', {'name': '_Token[unlocked]'})["value"]
-        data = f'_method=POST&_csrfToken={csrf}&ad_form_data={quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-
+        data = f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
         final_url = f'https://{urlparse(url_base).hostname}/links/go'
-        headers["accept"] = 'application/json, text/javascript, */*; q=0.01'
-        headers["x-requested-with"] = 'XMLHttpRequest'
-        headers["content-type"] = 'application/x-www-form-urlencoded;'
-
+        headers={"accept":'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}
         final_response = session.post(final_url, data=data, headers=headers)
-
         if json.loads(final_response.text)["status"] == "success":
             sleep(15)
             return json.loads(final_response.text)["url"]
-
     except Exception as e:
         return "failed to bypass"
 def link1s_net(url):
@@ -1420,26 +1393,6 @@ def url_namaidani(url):
   tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
   data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
   final=curl.post(f'https://{urlparse(url).hostname}/links/go',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8','referer':url,"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36"})
-  if json.loads(final.text)["status"] == "success":
-      sleep(15)
-      return json.loads(final.text)["url"]
- except Exception as e:
-    return "failed to bypass"
-def megafly(url):
- try:
-  curl=Session()
-  url=url.replace('go.','get.')
-  step1=curl.get(url)
-  bs4 = BeautifulSoup(step1.content, "html.parser")
-  inputs = bs4.find_all("input")
-  data = {input.get("name"): input.get("value") for input in inputs}
-  data["g-recaptcha-response"] = RecaptchaV2(json.loads(step1.text.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"],step1.url)
-  step2=curl.post(url,data=data,headers={'content-type':'application/x-www-form-urlencoded;','referer':url})
-  sleep(30)
-  bs4 = BeautifulSoup(step2.content, "html.parser")
-  inputs = bs4.find_all("input")
-  data = {input.get("name"): input.get("value") for input in inputs}
-  final=curl.post(f'https://{urlparse(url).hostname}/links/go',data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8','referer':url})
   if json.loads(final.text)["status"] == "success":
       sleep(15)
       return json.loads(final.text)["url"]
@@ -1914,10 +1867,10 @@ def clks_pro(url):
       curl.cookies.update(step1.cookies.get_dict())
       while True:
         step1=curl.get(url)
-        #print(step1.text)
         if 'input[name=' in step1.text:
           name=step1.text.split("input[name='")[1].split("']")[0]
           value=step1.text.split('value = "')[1].split('";')[0]
+        elif 'test' in step1.text:pass
         else:
           name=bs(step1.text,'html.parser').find('input',{'style':'display: none;'})['name']
           value=bs(step1.text,'html.parser').find('input',{'style':'display: none;'})['value']
@@ -1944,6 +1897,7 @@ def clks_pro(url):
     return "failed to bypass"
     pass
 def v2picu(url):
+ try:
   curl=Session()
   step1=curl.get(url)
   status_code(step1)
@@ -1975,4 +1929,33 @@ def v2picu(url):
       url='https://'+urlparse(step3.url).netloc+step4.headers['location']
     else:
       return step4.headers['location']
-#print(clks_pro('http://clks.pro/CBj080vgpnp'))
+ except Exception as e:
+    return "failed to bypass"
+    pass
+def clickfly(url):
+  try:
+    curl=requests.Session()
+    get_token=bs(curl.get(url).text,'html.parser').find('input',{'name':'url'})['value']
+    start=curl.get(get_token)
+    answer=hcaptcha(bs(start.text,'html.parser').find('div',{'class':'h-captcha'})['data-sitekey'],start.url)
+    inpt=bs(start.text,'html.parser').find_all('input',{'type':'hidden'})
+    data=''
+    for dt in inpt:
+      data=data+'&'+dt['name']+'='+dt['value']
+    data=data.replace("&", "", 1)+'&h-captcha-response='+answer+'&submit='
+    post=curl.post(bs(start.text,'html.parser').find('form')['action'],headers={'Content-Type':'application/x-www-form-urlencoded'},data=data)
+    post=curl.post(bs(post.text,'html.parser').find('form')['action'],headers={'Content-Type':'application/x-www-form-urlencoded'},data=data)
+    #print(post.text)
+    sleep(25)
+    data=f'_method=POST&ad_form_data='+urllib.parse.quote_plus(bs(post.text,'html.parser').find('input',{'name':'ad_form_data'})['value'])
+    post=curl.post('https://clk.wiki/links/go',headers={'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Accept':'application/json, text/javascript, */*; q=0.01','X-Requested-With':'XMLHttpRequest'},data=data)
+    #print(post.json())
+    if post.json()['status']=='success':
+      return post.json()['url']
+  except Exception as e:
+    return "failed to bypass"
+    pass
+#print(clickfly('https://clk.asia/FEbMUDu'))
+#print(v2picu('http://v2p.icu/51j4VMT4'))
+#print(clks_pro('http://clks.pro/LIYTIZ'))
+#print(v2picu('http://adbits.pro/8CKig7P'))
