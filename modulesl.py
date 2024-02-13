@@ -495,13 +495,13 @@ def urlsfly(url):
   except Exception as e:
     return "failed to bypass
 def clicksfly_me(url):
-   try:
+    try:
       client=requests.Session()
       host=client.get('https://clicksfly.me/flyinc.'+urlparse(url).path,allow_redirects=False,headers={'referer':'https://advertisingexcel.com/outgoing/','user-agent':'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html'}).headers
       sleep(15)
       return host['Location']
-   except Exception as e:
-      return 'failed to bypass'
+    except Exception as e:
+        return 'failed to bypass'
 def exe_io(url):
  try:
   curl=Session()
