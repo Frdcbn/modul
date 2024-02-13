@@ -493,7 +493,7 @@ def urlsfly(url):
     sleep(15)
     return y["Location"]
   except Exception as e:
-    return "failed to bypass
+    return "failed to bypass"
 def clicksfly_me(url):
     try:
       client=requests.Session()
