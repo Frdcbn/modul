@@ -96,8 +96,8 @@ def animasi(menit=None,detik=None):
 def bypass_link(url,modulesl,jumlah=None):
   dictnya={
   "urlpay.in":modulesl.urlpay,
-  "clk.asia":modulesl.clickfly,
   "clicksfly.me":modulesl.clicksfly_me,
+  "clk.asia":modulesl.clickfly,
   # "131989.xyz":modulesl.urlcut,
   # "161989.xyz":modulesl.bitad,
   # "141989.xyz":modulesl.faho,
@@ -109,7 +109,7 @@ def bypass_link(url,modulesl,jumlah=None):
   "adbx.pro":modulesl.v2picu,
   "kyshort.xyz":modulesl.kyshort,
   "teralinks.in":modulesl.teralinks,
-  #"rsshort.com":modulesl.rsshort,
+  "rsshort.com":modulesl.rsshort,
   "1short.info":modulesl._1short_in,
   "adbitfly.com":modulesl.adbitfly,
   "adbull.me":modulesl.adbull,
@@ -126,7 +126,7 @@ def bypass_link(url,modulesl,jumlah=None):
   "ctr.sh":modulesl.ctrsh,
   "easycut.io":modulesl.ctrsh,
   "cuty.io":modulesl.cuty_io,
-  #"clks.pro":modulesl.clks_pro,
+  "clks.pro":modulesl.clks_pro,
   "droplink.co":modulesl.droplink,
   "ex-foary.com":modulesl.ex_foary_com,
   "exe.io":modulesl.exe_io,
@@ -993,6 +993,8 @@ def keforcash(modulesl,banner):
     print(putih1+'┗━━'+hijau1+f' {putih1}[{merah1} ! {putih1}] {hijau1}'+'No more shortlinks!')
 def claimcoin_in(modulesl,banner):
   vie_script(modulesl,banner,url="https://claimcoin.in/",key_re="6LfO65QlAAAAAE4tUQ1uwmXFMW1TvT5QxEDtrK25",ptc=False,short=True,faucet=False,auto=True)
+def claimbitco_in(modulesl,banner):
+  vie_script(modulesl,banner,url="https://claimbitco.in/",key_re="6LfO65QlAAAAAE4tUQ1uwmXFMW1TvT5QxEDtrK25",ptc=False,short=True,faucet=False,auto=True)
 def whoopyrewards(modulesl,banner):
   vie_script(modulesl,banner,url="https://whoopyrewards.com",key_re="6Led1EonAAAAACHrCJ0RlPfwK8rDXJk1Wr2ItTNn",ptc=False,short=True,faucet=False,auto=False,link='col-lg-4')
 def liteearn(modulesl,banner):
@@ -1936,17 +1938,17 @@ def autobitco_in(modulesl,banner):
   else:
       for i in sl:
         run(i)
-def satoshitap(modulesl,banner):
+def shortfaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
-  host=urlparse("https://satoshitap.com/").netloc
+  host=urlparse("https://shortfaucet.com/").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
     save_data(host,custom=['wallet'])
-    satoshitap(modulesl,banner)
+    shortfaucet(modulesl,banner)
   wallet=load_data(host,custom=['wallet'])['wallet']
   while True:
-      url_host='satoshitap.com'
+      url_host='shortfaucet.com'
       try:
         curl=Session()
         ua_g = {
@@ -1962,7 +1964,7 @@ def satoshitap(modulesl,banner):
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
         }
         url=f"https://{url_host}/"
-        get_data=curl.get('https://satoshitap.com/',headers=ua_g)
+        get_data=curl.get('https://shortfaucet.com/',headers=ua_g)
         # print(get_data.text)
         # exit()
         parser=bs(get_data.text,'html.parser')
@@ -1983,8 +1985,11 @@ def satoshitap(modulesl,banner):
             else:
               #print(an)
               get_data=curl.get(an.replace('www.',''),headers=ua_g)
-              #print(get_data.text)
-              print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find_all('div',{'class':'alert alert-success fade show'})[1].text.strip().splitlines()[0])
+              # print(get_data.text)
+              # <div class="alert alert-success fade show" role="alert">                              <i class="fas fa-money-bill-wave"></i> 2 satoshi was sent to your <a href="https://faucetpay.io/page/user-admin" target="_blank">FaucetPay Account</a>
+              #           <button type="button" class="close d-none" data-dismiss="alert" aria-label="Close">                                                                                 <span aria-hidden="true">&times;</span>
+              #           </button>                                                             </div>
+              print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
               break
           else:
             send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)

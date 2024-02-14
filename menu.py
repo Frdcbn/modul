@@ -53,7 +53,7 @@ def menu(banner,modul,modulesl):
     "autofaucet_org":modul.autofaucet_org,
     "autoclaim_in":modul.autoclaim_in,
     "autobitco_in":modul.autobitco_in,
-    "satoshitap":modul.satoshitap,
+    "shortfaucet":modul.shortfaucet,
     #"bitcoin_click_fun":modul.bitcoin_click_fun,
     "faucet_imatic_gr":modul.faucet_imatic_gr,
     "tronmaster":modul.tronmaster,
@@ -64,6 +64,7 @@ def menu(banner,modul,modulesl):
     "proinfinity":modul.proinfinity,
     "bitfaucet":modul.bitfaucet,
     "larvelfaucet":modul.larvelfaucet,
+    "claimbitco_in":modul.claimbitco_in,
     }
     menu={
       "settings":None,
@@ -75,7 +76,7 @@ def menu(banner,modul,modulesl):
     fl=sys.argv[0]
     os.system("clear")
     banner.banner('MAIN MENU ')
-    cetak(Panel('sekarang ada metode baru yaitu scrape api kalian ke settings lalu setting api key dari scrape api untuk link web api keynya https://www.scraperapi.com/ dan ini terdapat limit kalian cek api key secara berkala ketika sudah limit ganti api keynya'.center(80), width=70, title="[bold green] PENGUMUMAN PENTING", padding=(0, 2), style="bold white"))
+    cetak(Panel('sekarang api key scrape api ganti ke https://scrapingant.com sekarang lebih hemat tapi perlu buat 2 atau 3 akun agar mempercepat request karena setiap api key di limit 2 request'.center(80), width=70, title="[bold green] PENGUMUMAN PENTING BARU", padding=(0, 2), style="bold white"))
     menu_items = [f"[{index:02}] {item.upper()} [[bold green] ON [bold white]]" for index, item in enumerate(menu.keys())]
     if len(menu_items) % 2 != 0:
         menu_items.append("")

@@ -82,7 +82,7 @@ def banner(name):
 {kuning1}═══╗      ╦ {putih1}RUNNING : {kuning1}{name.upper()}
 {kuning1}   ║      ║{hijau1} ╔╗ ╔═╗╔╦╗ {biru}X BOT {putih1}BY MR.BADUT
 {kuning1}╔══╩══╦═══╝{hijau1} ╠╩╗║ ║ ║  {putih1}YOUR IP : {hijau1}{location_info.ip}
-{kuning1}║     ║ {putih1}1.0{hijau1} ╚═╝╚═╝ ╩ {putih1} LAST UPDATED :{kuning1} 2024-02-11
+{kuning1}║     ║ {putih1}1.0{hijau1} ╚═╝╚═╝ ╩ {putih1} LAST UPDATED :{kuning1} 2024-02-14
 {kuning1}╩     ╚══════════════════════{hijau1}═════════════════════\n""")
     info_text = (
         f"[green] COUNTRY[white] : [yellow]{location_info.country}\n"

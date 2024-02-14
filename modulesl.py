@@ -476,6 +476,14 @@ def linksfly(url):
     return y["Location"]
   except Exception as e:
     return "failed to bypass"
+def clicksfly_me(url):
+   try:
+      client=requests.Session()
+      host=client.get('https://clicksfly.me/flyinc.'+urlparse(url).path,allow_redirects=False,headers={'referer':'https://advertisingexcel.com/outgoing/','user-agent':'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html'}).headers
+      sleep(15)
+      return host['Location']
+   except Exception as e:
+      return 'failed to bypass'
 def wefly(url):
   try:
     url=urlparse(url)
@@ -494,14 +502,6 @@ def urlsfly(url):
     return y["Location"]
   except Exception as e:
     return "failed to bypass"
-def clicksfly_me(url):
-    try:
-      client=requests.Session()
-      host=client.get('https://clicksfly.me/flyinc.'+urlparse(url).path,allow_redirects=False,headers={'referer':'https://advertisingexcel.com/outgoing/','user-agent':'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1;+http://google.com/bot.html'}).headers
-      sleep(15)
-      return host['Location']
-    except Exception as e:
-        return 'failed to bypass'
 def exe_io(url):
  try:
   curl=Session()
@@ -1704,12 +1704,19 @@ def botfly(url):
 def rsshort(url):
   try:
     curl = Session()
-    key=open('sca.txt').read().splitlines()[0]
+    key=random.choice(open('sca.txt').read().splitlines())
     ua={'User-Agent':'XYZ/3.0'}
     while True:
-      step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers=ua)
-      if 'VPN/ Proxy is not allowed!' not in step1.text:
+      key=random.choice(open('sca.txt').read().splitlines())
+      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&browser=False',headers=ua)
+      if 'Free user concurrency limit reached' in step1.text:
+        time.sleep(random.randint(1,10))
+        pass
+      elif 'VPN/ Proxy is not allowed!' not in step1.text:
         break
+      elif step1.status_code ==403:
+        print('The API token is wrong or you have exceeded the API credits limit.')
+        return 'failed to bypass'
     #print(step1.text)
     # print(step1.cookies.get_dict())
     if "You've hit the request limit for your current plan. You can upgrade or renew your subscription early on our dashboard, or contact support@scraperapi.com for help." in step1.text:
@@ -1730,9 +1737,8 @@ def rsshort(url):
       nama_f=urlparse(url).path.replace('/','')
       urut=1
       while True:
-        step2=curl.get(ur,headers=ua)
+        step2=curl.get(ur)
         status_code(step2)
-        #print(step2.text)
         #sleep(15)
         if 'jJe.forEach(function NlJ(value) { hwn += String.fromCharCode(parseInt(atob(value).replace(/\D/g,'')) - 8160481); } ); document.write(decodeURIComponent(escape(hwn)));' in step2.text:
           res=run_js(nama_f,bs(step2.text,'html.parser').find('script').text.replace('document.write','console.log'))
@@ -1864,13 +1870,19 @@ def rsshort(url):
 def clks_pro(url):
   try:
     path=urlparse(url).path
-    key=open('sca.txt').read().splitlines()[0]
     curl = Session()
     url='https://clks.pro/clkclk.'+path
-    step1=curl.get(f'http://api.scraperapi.com?api_key={key}&keep_headers=true&url='+url,headers={'referer':"https://homeculina.com/"},allow_redirects=False)
-    # print(step1.text)
-    # print(step1.headers)
-    url=step1.headers['sa-final-url']
+    while True:
+      key=random.choice(open('sca.txt').read().splitlines())
+      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}',headers={'ant-referer':"https://homeculina.com/"},allow_redirects=False)
+      if 'Free user concurrency limit reached' in step1.text:
+        time.sleep(random.randint(1,10))
+        pass
+      elif '<html><head></head><body>test</body></html>' not in step1.text:break
+      elif step1.status_code ==403:
+        print('The API token is wrong or you have exceeded the API credits limit.')
+        return 'failed to bypass'
+    url=step1.headers['Ant-Original-Header-Location']
     if 'https://awgrow.com/backup/w/?get=' or 'https://t.co/' in url:
       curl.cookies.update(step1.cookies.get_dict())
       while True:
@@ -1967,3 +1979,4 @@ def clickfly(url):
 #print(v2picu('http://v2p.icu/51j4VMT4'))
 #print(clks_pro('http://clks.pro/LIYTIZ'))
 #print(v2picu('http://adbits.pro/8CKig7P'))
+#print(rsshort('https://rsshort.com/iwLFDL7'))
