@@ -65,6 +65,7 @@ def menu(banner,modul,modulesl):
     "bitfaucet":modul.bitfaucet,
     "larvelfaucet":modul.larvelfaucet,
     "claimbitco_in":modul.claimbitco_in,
+    "esledz":modul.esledz,
     }
     menu={
       "settings":None,
@@ -86,7 +87,7 @@ def menu(banner,modul,modulesl):
     if select == "0":
         print(f"{putih1}[{hijau1}0{putih1}]{biru1}.CAPTCHAAI")
         print(f"{putih1}[{hijau1}1{putih1}]{biru1}.Solver Captcha Tg(@Xevil_check_bot)")
-        print(f"{putih1}[{hijau1}2{putih1}]{biru1}.Scraper ant")
+        print(f"{putih1}[{hijau1}2{putih1}]{biru1}.Scraper api")
         print(f"{putih1}[{hijau1}3{putih1}]{biru1}.Set jeda setelah berhasil membypass shortlinks")
         print(f"{putih1}[{hijau1}4{putih1}]{biru1}.Set multi bypass shortlinks dapat mempercepat proses")
         sel = input(putih1 + "select : ")

@@ -1708,7 +1708,7 @@ def rsshort(url):
     ua={'User-Agent':'XYZ/3.0'}
     while True:
       key=random.choice(open('sca.txt').read().splitlines())
-      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&browser=False',headers=ua)
+      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&browser=false',headers=ua)
       if 'Free user concurrency limit reached' in step1.text:
         time.sleep(random.randint(1,10))
         pass
@@ -1717,7 +1717,6 @@ def rsshort(url):
       elif step1.status_code ==403:
         print('The API token is wrong or you have exceeded the API credits limit.')
         return 'failed to bypass'
-    #print(step1.text)
     # print(step1.cookies.get_dict())
     if "You've hit the request limit for your current plan. You can upgrade or renew your subscription early on our dashboard, or contact support@scraperapi.com for help." in step1.text:
       print("api key scrapeapi limit mohon ganti api key")
@@ -1726,8 +1725,10 @@ def rsshort(url):
     curl.cookies.update(step1.cookies.get_dict())
     # print(step1.text)
     # print(step1.headers)
+    #exit()
     status_code(step1)
     if step1.status_code==200:
+      # step1=curl.get(step1.headers['Ant-Original-Header-Location'],headers=ua)
       ur=bs(step1.text,'html.parser').find_all('meta')
       #print(ur)
       if len(ur)==1:ide=0
@@ -1758,7 +1759,6 @@ def rsshort(url):
         #print(bs(stepnya.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser').text)
         data1=bs(run_js(nama_f,js[len(js)-1]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
         data=bs(run_js(nama_f,js[len(js)-2]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
-        #print(data)
         csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
         inputs = data.find_all("input")
         key1=inputs[len(inputs)-1].get('name')
@@ -1866,6 +1866,7 @@ def rsshort(url):
           if '//rs' not in get_data.headers['location']:
             return get_data.headers['location']
   except Exception as e:
+    return "failed to bypass"
     pass
 def clks_pro(url):
   try:
