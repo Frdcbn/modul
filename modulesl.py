@@ -1708,19 +1708,13 @@ def rsshort(url):
     ua={'User-Agent':'XYZ/3.0'}
     while True:
       key=random.choice(open('sca.txt').read().splitlines())
-      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&browser=false',headers=ua)
-      if 'Free user concurrency limit reached' in step1.text:
-        time.sleep(random.randint(1,10))
-        pass
-      elif 'VPN/ Proxy is not allowed!' not in step1.text:
-        break
-      elif step1.status_code ==403:
-        print('The API token is wrong or you have exceeded the API credits limit.')
+      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&browser=false&proxy_type=residential',headers=ua)
+      #print(step1.text)
+      if step1.status_code==200:break
+      elif 'Requests quota limit reached' in step1.text:
+        print('api key limit : '+key)
         return 'failed to bypass'
-    # print(step1.cookies.get_dict())
-    if "You've hit the request limit for your current plan. You can upgrade or renew your subscription early on our dashboard, or contact support@scraperapi.com for help." in step1.text:
-      print("api key scrapeapi limit mohon ganti api key")
-      return "failed to bypass"
+      else:pass
     curl = Session()
     curl.cookies.update(step1.cookies.get_dict())
     # print(step1.text)
@@ -1732,7 +1726,7 @@ def rsshort(url):
       ur=bs(step1.text,'html.parser').find_all('meta')
       #print(ur)
       if len(ur)==1:ide=0
-      else:
+      else: 
         ide=len(ur)-1
       ur=ur[ide]['content'].split('url=')[1].split('"')[0]
       nama_f=urlparse(url).path.replace('/','')
@@ -1875,14 +1869,13 @@ def clks_pro(url):
     url='https://clks.pro/clkclk.'+path
     while True:
       key=random.choice(open('sca.txt').read().splitlines())
-      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}',headers={'ant-referer':"https://homeculina.com/"},allow_redirects=False)
-      if 'Free user concurrency limit reached' in step1.text:
-        time.sleep(random.randint(1,10))
-        pass
-      elif '<html><head></head><body>test</body></html>' not in step1.text:break
-      elif step1.status_code ==403:
-        print('The API token is wrong or you have exceeded the API credits limit.')
+      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&proxy_type=residential',headers={'ant-referer':"https://homeculina.com/"},allow_redirects=False)
+      #print(step1.text)
+      if step1.status_code==200 and '<html><head></head><body>test</body></html>' not in step1.text:break
+      elif 'Requests quota limit reached' in step1.text:
+        print('api key limit : '+key)
         return 'failed to bypass'
+      else:pass
     url=step1.headers['Ant-Original-Header-Location']
     if 'https://awgrow.com/backup/w/?get=' or 'https://t.co/' in url:
       curl.cookies.update(step1.cookies.get_dict())
@@ -1978,6 +1971,6 @@ def clickfly(url):
     pass
 #print(clickfly('https://clk.asia/FEbMUDu'))
 #print(v2picu('http://v2p.icu/51j4VMT4'))
-#print(clks_pro('http://clks.pro/LIYTIZ'))
+#print(clks_pro('http://clks.pro/tizlrC'))
 #print(v2picu('http://adbits.pro/8CKig7P'))
-#print(rsshort('https://rsshort.com/iwLFDL7'))
+#print(rsshort('https://rsshort.com/b4Qh8Hh3'))

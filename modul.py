@@ -853,7 +853,6 @@ def vie_script(modulesl,banner,url,key_re,ptc=False,short=False,faucet=False,aut
                  except Exception as e:
                   keluar(str(e))
                   pass
-                print(yt_)
                 if answer==False:break
                 if yt_==3:break
               except Exception as e:
@@ -2060,6 +2059,126 @@ def esledz(modulesl,banner):
               #           </button>                                                             </div>
               print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
               animasi(detik=60)
+              break
+          else:
+            send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
+        if ulang==9:
+          print('shortlinks limit')
+          exit()
+      except Exception as e:
+        pass
+def faucet1_btc(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://2.faucet1.link/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['wallet'])
+    faucet1_btc(modulesl,banner)
+  wallet=load_data(host,custom=['wallet'])['wallet']
+  while True:
+      url_host=host
+      try:
+        curl=Session()
+        ua_g = {
+          'Host': url_host,
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        }
+        ua_p = {
+          'Host': url_host,
+          'origin': 'https://'+url_host,
+          'content-type': 'application/x-www-form-urlencoded',
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+        }
+        url=f"https://{url_host}/"
+        get_data=curl.get('https://2.faucet1.link/',headers=ua_g)
+        # print(get_data.text)
+        # exit()
+        parser=bs(get_data.text,'html.parser')
+        sesi=parser.find('input',{'name':'session-token'})['value']
+        key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+        #atb=modulesl.antibot(get_data,name_key='div',key='modal-title w-100 text-center')
+        answer=modulesl.RecaptchaV2(key,url)
+        data=f'session-token={sesi}&address={wallet}&antibotlinks=&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
+        send_data=curl.post(url,headers=ua_p,data=data)
+        #print(send_data.text)
+        for ulang in range(10):
+          get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
+          #print(get_sl.headers)
+          an=bypass_link(get_sl.headers['location'],modulesl)
+          if an:
+            if 'failed to bypass' in an:
+              pass
+            else:
+              #print(an)
+              animasi(detik=120)
+              get_data=curl.get(an,headers=ua_g)
+              # <div class="alert alert-success fade show" role="alert">                              <i class="fas fa-money-bill-wave"></i> 2 satoshi was sent to your <a href="https://faucetpay.io/page/user-admin" target="_blank">FaucetPay Account</a>
+              #           <button type="button" class="close d-none" data-dismiss="alert" aria-label="Close">                                                                                 <span aria-hidden="true">&times;</span>
+              #           </button>                                                             </div>
+              print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
+              break
+          else:
+            send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
+        if ulang==9:
+          print('shortlinks limit')
+          exit()
+      except Exception as e:
+        pass
+def faucet1_usdt(modulesl,banner):
+  os.system('cls' if os.name == 'nt' else 'clear')
+  host=urlparse("https://faucet1.link/").netloc
+  data_control(host)
+  banner.banner(host.upper())
+  if not os.path.exists(f"data/{host}/{host}.json"):
+    save_data(host,custom=['wallet'])
+    faucet1_usdt(modulesl,banner)
+  wallet=load_data(host,custom=['wallet'])['wallet']
+  while True:
+      url_host=host
+      try:
+        curl=Session()
+        ua_g = {
+          'Host': url_host,
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        }
+        ua_p = {
+          'Host': url_host,
+          'origin': 'https://'+url_host,
+          'content-type': 'application/x-www-form-urlencoded',
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+        }
+        url=f"https://{url_host}/"
+        get_data=curl.get('https://faucet1.link/',headers=ua_g)
+        # print(get_data.text)
+        # exit()
+        parser=bs(get_data.text,'html.parser')
+        sesi=parser.find('input',{'name':'session-token'})['value']
+        key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
+        atb=modulesl.antibot(get_data,name_key='div',key='modal-title w-100 text-center')
+        answer=modulesl.RecaptchaV2(key,url)
+        data=f'session-token={sesi}&address={wallet}&antibotlinks=+{atb}&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
+        send_data=curl.post(url,headers=ua_p,data=data)
+        #print(send_data.text)
+        for ulang in range(10):
+          get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
+          #print(get_sl.headers)
+          an=bypass_link(get_sl.headers['location'],modulesl)
+          if an:
+            if 'failed to bypass' in an:
+              pass
+            else:
+              #print(an)
+              #animasi(detik=120)
+              get_data=curl.get(an,headers=ua_g)
+              # <div class="alert alert-success fade show" role="alert">                              <i class="fas fa-money-bill-wave"></i> 2 satoshi was sent to your <a href="https://faucetpay.io/page/user-admin" target="_blank">FaucetPay Account</a>
+              #           <button type="button" class="close d-none" data-dismiss="alert" aria-label="Close">                                                                                 <span aria-hidden="true">&times;</span>
+              #           </button>                                                             </div>
+              print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
               break
           else:
             send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)

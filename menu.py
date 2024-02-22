@@ -66,6 +66,8 @@ def menu(banner,modul,modulesl):
     "larvelfaucet":modul.larvelfaucet,
     "claimbitco_in":modul.claimbitco_in,
     "esledz":modul.esledz,
+    "faucet1_btc":modul.faucet1_btc,
+    "faucet1_usdt":modul.faucet1_usdt,
     }
     menu={
       "settings":None,
@@ -100,9 +102,11 @@ def menu(banner,modul,modulesl):
             with open("xkey.txt", "w") as e:
                 e.write(api_key)
         elif sel == "2":
-            api_key = input("Api key > ")
+            print('pisahkan dengan , ')
+            api_key = input("Api key > ").split(',')
             with open("sca.txt", "w") as e:
-                e.write(api_key)
+              for api in api_key:
+                e.write(api)
             #menu(banner,modul,modulesl)
         elif sel == "3":
           if os.path.exists('settings.json'):
