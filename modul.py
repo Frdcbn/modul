@@ -126,7 +126,7 @@ def bypass_link(url,modulesl,jumlah=None):
   "ctr.sh":modulesl.ctrsh,
   "easycut.io":modulesl.ctrsh,
   "cuty.io":modulesl.cuty_io,
-  "clks.pro":modulesl.clks_pro,
+  #"clks.pro":modulesl.clks_pro,
   "droplink.co":modulesl.droplink,
   "ex-foary.com":modulesl.ex_foary_com,
   "exe.io":modulesl.exe_io,
