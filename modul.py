@@ -109,7 +109,7 @@ def bypass_link(url,modulesl,jumlah=None):
   "adbx.pro":modulesl.v2picu,
   "kyshort.xyz":modulesl.kyshort,
   "teralinks.in":modulesl.teralinks,
-  #"rsshort.com":modulesl.rsshort,
+  # "rsshort.com":modulesl.rsshort,
   "1short.info":modulesl._1short_in,
   "adbitfly.com":modulesl.adbitfly,
   "adbull.me":modulesl.adbull,
@@ -150,7 +150,7 @@ def bypass_link(url,modulesl,jumlah=None):
   #"go.megafly.in":modulesl.megafly,
   "go.megaurl.in":modulesl.megaurl,
   "mitly.us":modulesl.mitly,
-  #"oii.io":modulesl.oii,
+  "oii.io":modulesl.oii,
   "link.owllink.net":modulesl.owlink,
   "go.sigmalinks.in":modulesl.shareus,
   "shortsfly.me":modulesl.shortfly,
@@ -1748,9 +1748,11 @@ def autofaucet_org(modulesl,banner):
   rprint(akun)
   info=[]
   for i in koin:
+   try:
     info.append("[yellow]"+i.text.strip().splitlines()[0].upper()+' [white]: [green]'+i.text.strip().splitlines()[2])
+   except:pass
   menu_items = [f"[yellow][[white]{str(index)}[yellow]] {info[index]}      " for index in range(len(info))]
-  menu_content = "\n".join([f"{menu_items[i]:<60}{menu_items[i + 1]}" for i in range(0, len(menu_items), 2)])
+  menu_content = "\n".join(menu_items[i] + (menu_items[i + 1] if i + 1 < len(menu_items) else "") for i in range(0, len(menu_items), 2))
   cetak(Panel(menu_content, width=70, title="[bold green]Your Balance", padding=(0, 4), style="bold white"))
   get_sl=curl.get('https://autofaucet.org/dashboard/shortlinks',headers=headers,cookies=cookies)
   ak=Tree("[white]> [green]Start shortlinks",guide_style="bold bright_white")
@@ -2067,14 +2069,14 @@ def esledz(modulesl,banner):
           exit()
       except Exception as e:
         pass
-def faucet1_btc(modulesl,banner):
+def bitonefaucet(modulesl,banner):
   os.system('cls' if os.name == 'nt' else 'clear')
-  host=urlparse("https://2.faucet1.link/").netloc
+  host=urlparse("https://bitonefaucet.com.tr/").netloc
   data_control(host)
   banner.banner(host.upper())
   if not os.path.exists(f"data/{host}/{host}.json"):
     save_data(host,custom=['wallet'])
-    faucet1_btc(modulesl,banner)
+    bitonefaucet(modulesl,banner)
   wallet=load_data(host,custom=['wallet'])['wallet']
   while True:
       url_host=host
@@ -2093,67 +2095,7 @@ def faucet1_btc(modulesl,banner):
           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
         }
         url=f"https://{url_host}/"
-        get_data=curl.get('https://2.faucet1.link/',headers=ua_g)
-        # print(get_data.text)
-        # exit()
-        parser=bs(get_data.text,'html.parser')
-        sesi=parser.find('input',{'name':'session-token'})['value']
-        key=parser.find('div',{'class':'g-recaptcha'})['data-sitekey']
-        #atb=modulesl.antibot(get_data,name_key='div',key='modal-title w-100 text-center')
-        answer=modulesl.RecaptchaV2(key,url)
-        data=f'session-token={sesi}&address={wallet}&antibotlinks=&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
-        send_data=curl.post(url,headers=ua_p,data=data)
-        #print(send_data.text)
-        for ulang in range(10):
-          get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
-          #print(get_sl.headers)
-          an=bypass_link(get_sl.headers['location'],modulesl)
-          if an:
-            if 'failed to bypass' in an:
-              pass
-            else:
-              #print(an)
-              animasi(detik=120)
-              get_data=curl.get(an,headers=ua_g)
-              # <div class="alert alert-success fade show" role="alert">                              <i class="fas fa-money-bill-wave"></i> 2 satoshi was sent to your <a href="https://faucetpay.io/page/user-admin" target="_blank">FaucetPay Account</a>
-              #           <button type="button" class="close d-none" data-dismiss="alert" aria-label="Close">                                                                                 <span aria-hidden="true">&times;</span>
-              #           </button>                                                             </div>
-              print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
-              break
-          else:
-            send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
-        if ulang==9:
-          print('shortlinks limit')
-          exit()
-      except Exception as e:
-        pass
-def faucet1_usdt(modulesl,banner):
-  os.system('cls' if os.name == 'nt' else 'clear')
-  host=urlparse("https://faucet1.link/").netloc
-  data_control(host)
-  banner.banner(host.upper())
-  if not os.path.exists(f"data/{host}/{host}.json"):
-    save_data(host,custom=['wallet'])
-    faucet1_usdt(modulesl,banner)
-  wallet=load_data(host,custom=['wallet'])['wallet']
-  while True:
-      url_host=host
-      try:
-        curl=Session()
-        ua_g = {
-          'Host': url_host,
-          'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        }
-        ua_p = {
-          'Host': url_host,
-          'origin': 'https://'+url_host,
-          'content-type': 'application/x-www-form-urlencoded',
-          'user-agent': 'Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
-        }
-        url=f"https://{url_host}/"
-        get_data=curl.get('https://faucet1.link/',headers=ua_g)
+        get_data=curl.get('https://bitonefaucet.com.tr/',headers=ua_g)
         # print(get_data.text)
         # exit()
         parser=bs(get_data.text,'html.parser')
@@ -2163,7 +2105,7 @@ def faucet1_usdt(modulesl,banner):
         answer=modulesl.RecaptchaV2(key,url)
         data=f'session-token={sesi}&address={wallet}&antibotlinks=+{atb}&captcha=recaptcha&g-recaptcha-response={answer}&login=Verify+Captcha'
         send_data=curl.post(url,headers=ua_p,data=data)
-        #print(send_data.text)
+        print(send_data.text)
         for ulang in range(10):
           get_sl=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g,allow_redirects=False)
           #print(get_sl.headers)
@@ -2172,14 +2114,16 @@ def faucet1_usdt(modulesl,banner):
             if 'failed to bypass' in an:
               pass
             else:
-              #print(an)
-              #animasi(detik=120)
+              print(an)
+              animasi(detik=120)
               get_data=curl.get(an,headers=ua_g)
+              print(get_data.text)
               # <div class="alert alert-success fade show" role="alert">                              <i class="fas fa-money-bill-wave"></i> 2 satoshi was sent to your <a href="https://faucetpay.io/page/user-admin" target="_blank">FaucetPay Account</a>
               #           <button type="button" class="close d-none" data-dismiss="alert" aria-label="Close">                                                                                 <span aria-hidden="true">&times;</span>
               #           </button>                                                             </div>
+              print(bs(get_data.text,'html.parser').text)
               print(kuning1+' > '+hijau1+bs(get_data.text,'html.parser').find('div',{'class':'alert alert-success fade show'}).text.strip().splitlines()[0])
-              break
+              exit()
           else:
             send_data=curl.get(url+send_data.text.split("""onclick="$(location).attr('href','""")[1].split("')")[0],headers=ua_g)
         if ulang==9:
@@ -2437,7 +2381,7 @@ def freeltc_o(modulesl,banner):
   login=curl.get(f'https://{host}/',headers=headers)
   if 'https://freeltc.online/auth/logout' in login.text:
     print('Login Success')
-    selet=bs(login.text,'html.parser').find_all('a',{'class':'d-flex align-items-center btn btn-outline border text-dark'})
+    selet=bs(login.text,'html.parser').find_all('a',{'class':'dropdown-item'})
     urt=0
     links=[]
     for i in selet:
@@ -2452,7 +2396,7 @@ def freeltc_o(modulesl,banner):
     banner.banner(host.upper())
     get_links=curl.get(select,headers=headers)
     #print(get_links.text)
-    link=bs(get_links.text,'html.parser').find_all('div',{'class':'col-sm-6 layout-spacing'})
+    link=bs(get_links.text,'html.parser').find_all('div',{'class':'col-sm-6'})
     for lin in link:
       #<a href="https://onlyfaucet.com/links/go/5/LTC" class="btn btn-primary waves-effect waves-light" >Claim <span class="badge badge-info">10/10</span></a>print(i)
       jumlah=lin.find('a').find('span').text.strip().split('/')[0]
