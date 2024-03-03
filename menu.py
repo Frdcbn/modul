@@ -66,8 +66,7 @@ def menu(banner,modul,modulesl):
     "larvelfaucet":modul.larvelfaucet,
     "claimbitco_in":modul.claimbitco_in,
     "esledz":modul.esledz,
-    "faucet1_btc":modul.faucet1_btc,
-    "faucet1_usdt":modul.faucet1_usdt,
+    "bitonefaucet":modul.bitonefaucet,
     }
     menu={
       "settings":None,
