@@ -352,17 +352,20 @@ def one_method(curl,url,headers=None,go=None):
  except Exception as e:
    return 'failed to bypass'
 def ctrsh(url):
-  try:
+  #try:
     curl=Session()
     step1=curl.get(url)
-    answer=hcaptcha(bs(step1.text,'html.parser').find('div',{'class':'h-captcha'})['data-sitekey'],url)
-    step2=curl.get(url+f'?g-recaptcha-response={answer}&h-captcha-response={answer}')
-    for l in bs(step2.text,'html.parser').find_all('a'):
-      if 'your destination link' in str(l):
-        url=urlparse(l['href']).query.split('&url=')[1]
-    redirecturl=curl.get(url).text.split('window.location.href = "')[1].split('";')[0]
+    print(step1.text)
+    #answer=hcaptcha(bs(step1.text,'html.parser').find('div',{'class':'h-captcha'})['data-sitekey'],url)
+    url_=step1.text.split('var redirect = "')[1].split(";")[0]
+    # step2=curl.get(url_)
+    # for l in bs(step2.text,'html.parser').find_all('a'):
+    #   if 'your destination link' in str(l):
+    #     url=urlparse(l['href']).query.split('&url=')[1]
+    redirecturl=curl.get(url_).text.split("redirectUrl='")[1].split("';")[0]
     while True:
       get=curl.get(redirecturl)
+      print(get.text)
       key_n=get.text.split('el.name = "')[1].split('";')[0]
       if '<button class="g-recaptcha btn btn-warning" data-sitekey="' in get.text:
         key=bs(get.text,'html.parser').find('button',{'class':'g-recaptcha btn btn-warning'})['data-sitekey']
@@ -380,13 +383,13 @@ def ctrsh(url):
       else:
         redirecturl=post.headers['location']
       #exit()
-  except Exception as e:
-    return "failed to bypass"
+  # except Exception as e:
+  #   return "failed to bypass"
 #print(ctrsh('https://ctr.sh/FyZOO'))
 def try2(url):
   try:
     curl=Session()
-    return one_method(curl=curl,url=url,headers={"referer":'https://trip.businessnews-nigeria.com/'})
+    return one_method(curl=curl,url=url,headers={"referer":'https://world2our.com/the-cost-of-tourism-in-comoros/'})
   except Exception as e:
     return "failed to bypass"
 def gplinks_bypass(url: str):
@@ -583,31 +586,6 @@ def shrinkme(url):
   res= one_method(curl=curl,url='https://en.shrinke.me'+urlparse(url).path,headers={"referer":"https://themezon.net/managed-cloud-hosting-service-providers/"})
   sleep(15)
   return res
-def urlcut(url):
-  curl=Session()
-  res= one_method(curl=curl,url='https://urlcut.pro'+urlparse(url).path)
-  sleep(15)
-  return res
-def faho(url):
-  curl=Session()
-  res= one_method(curl=curl,url='https://faho.us'+urlparse(url).path)
-  sleep(15)
-  return res
-def revcut(url):
-  curl=Session()
-  res= one_method(curl=curl,url='https://revcut.net'+urlparse(url).path,headers={'referer':'https://coingraph.us/bitcoins-road-to-130-000-price-prediction/'})
-  sleep(15)
-  return res
-def cutlink(url):
-  curl=Session()
-  res= one_method(curl=curl,url='https://cutlink.xyz'+urlparse(url).path)
-  sleep(15)
-  return res
-def bitad(url):
-  curl=Session()
-  res= one_method(curl=curl,url='https://bitad.org'+urlparse(url).path)
-  sleep(15)
-  return res
 def urlpay(url):
   curl=Session()
   res= one_method(curl=curl,url='https://go.urlpay.in'+urlparse(url).path,headers={"referer":"https://daddy.helpowi.com/web-hosting-navigating-the-digital-landscape/"})
@@ -787,42 +765,6 @@ def ex_foary_com(url):
   if json.loads(final.text)["status"] == "success":
       sleep(15)
       return json.loads(final.text)["url"]
- except Exception as e:
-    return "failed to bypass"
-def oii(url):
- try:
-  curl=Session()
-  step1=curl.get(url)
-  tf=bs(step1.text,'html.parser')
-  csrf=tf.find('input',{'name':'_csrfToken'})["value"]
-  tkf=tf.find('input',{'name':'_Token[fields]'})["value"]
-  tku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
-  ref=tf.find('input',{'name':'ref'})["value"]
-  get_key=json.loads(step1.text.split('var app_vars = ')[1].split(';')[0])["invisible_reCAPTCHA_site_key"]
-  answer=RecaptchaV2(key=get_key,url=step1.url)
-  data=f'_method=POST&_csrfToken={csrf}&g-recaptcha-response={answer}&ref=&g-recaptcha-response={answer}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-  step2=curl.post(url,data=data,headers={"content-type":"application/x-www-form-urlencoded"})
-  tf=bs(step2.text,'html.parser')
-  csrf=tf.find('input',{'name':'_csrfToken'})["value"]
-  tokf=tf.find('input',{'name':'_Token[fields]'})["value"]
-  toku=tf.find('input',{'name':'_Token[unlocked]'})["value"]
-  ref=tf.find('input',{'name':'ref'})["value"]
-  get_key=json.loads(step2.text.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
-  answer=RecaptchaV2(key=get_key,url=step1.url)
-  data=f'_method=POST&_csrfToken={csrf}&ref=&f_n=slc&g-recaptcha-response={answer}&_Token%5Bfields%5D={tokf}&_Token%5Bunlocked%5D={toku}'
-  step2=curl.post(step1.url,data=data,headers={'content-type':'application/x-www-form-urlencoded;'}).text
-  sleep(15)
-  fl=bs(step2,"html.parser")
-  lin=fl.find('form',{'id':'go-link'})['action']
-  csrf=fl.find('input',{'name':'_csrfToken'})["value"]
-  tkf=fl.find('input',{'name':'_Token[fields]'})["value"]
-  form=fl.find('input',{'name':'ad_form_data'})["value"]
-  tku=fl.find('input',{'name':'_Token[unlocked]'})["value"]
-  data=f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-  final=curl.post('https://'+urlparse(step1.url).hostname+lin,data=data,headers={'accept':'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded;'})
-  if json.loads(final.text)["status"] == "success":
-    sleep(15)
-    return json.loads(final.text)["url"]
  except Exception as e:
     return "failed to bypass"
 def linkjust(url):
@@ -1314,35 +1256,6 @@ def shareus(url):
   return res
  except Exception as e:
    return 'failed to bypass'
-def megaurl(url):
-    try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36",
-        }
-        session = requests.Session()
-        url_base = url.replace('go', 'get')
-        response1 = session.get(url_base, headers=headers).text
-        bs4 = BeautifulSoup(response1, "html.parser")
-        inputs = bs4.find_all("input")
-        data = {input.get("name"): input.get("value") for input in inputs}
-        get_key = json.loads(response1.split('var app_vars = ')[1].split(';')[0])["reCAPTCHA_site_key"]
-        data["g-recaptcha-response"] = RecaptchaV2(get_key, url_base)
-        response2 = session.post(url_base, data=urlencode(data), headers={"User-Agent":"Mozilla/5.0 (Linux; Android 10; RMX3171 Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Mobile Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","content-type":"application/x-www-form-urlencoded","referer":url_base}).text
-        sleep(15)
-        fl = bs(response2, 'html.parser')
-        csrf = fl.find('input', {'name': '_csrfToken'})["value"]
-        tkf = fl.find('input', {'name': '_Token[fields]'})["value"]
-        form = fl.find('input', {'name': 'ad_form_data'})["value"]
-        tku = fl.find('input', {'name': '_Token[unlocked]'})["value"]
-        data = f'_method=POST&_csrfToken={csrf}&ad_form_data={urllib.parse.quote_plus(form)}&_Token%5Bfields%5D={tkf}&_Token%5Bunlocked%5D={tku}'
-        final_url = f'https://{urlparse(url_base).hostname}/links/go'
-        headers={"accept":'application/json, text/javascript, */*; q=0.01','x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}
-        final_response = session.post(final_url, data=data, headers=headers)
-        if json.loads(final_response.text)["status"] == "success":
-            sleep(15)
-            return json.loads(final_response.text)["url"]
-    except Exception as e:
-        return "failed to bypass"
 def link1s_net(url):
   curl=Session()
   res=one_method(curl,url,headers={"referer":"https://nguyenvanbao.com/danh-cho-nguoi-moi-vao-nghe-make-money-online/"})
@@ -1702,15 +1615,27 @@ def botfly(url):
     return "failed to bypass"
     pass
 def rsshort(url):
-  try:
+  #try:
     curl = Session()
     key=random.choice(open('sca.txt').read().splitlines())
     ua={'User-Agent':'XYZ/3.0'}
     while True:
       key=random.choice(open('sca.txt').read().splitlines())
-      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&browser=false&proxy_type=residential',headers=ua)
-      #print(step1.text)
-      if step1.status_code==200:break
+      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&browser=false',headers=ua)
+      print(step1.text)
+      print(step1.headers)
+      if step1.status_code==200 and 'VPN/ Proxy is not allowed!' not in step1.text:break
+      elif 'Requests quota limit reached' in step1.text:
+        print('api key limit : '+key)
+        return 'failed to bypass'
+      else:pass
+    ur=step1.text.split('location.href = "')[1].split('";')[0]
+    while True:
+      key=random.choice(open('sca.txt').read().splitlines())
+      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={ur}&x-api-key={key}&browser=false',headers=ua)
+      print(step1.text)
+      print(step1.headers)
+      if step1.status_code==200 and 'VPN/ Proxy is not allowed!' not in step1.text:break
       elif 'Requests quota limit reached' in step1.text:
         print('api key limit : '+key)
         return 'failed to bypass'
@@ -1733,6 +1658,9 @@ def rsshort(url):
       urut=1
       while True:
         step2=curl.get(ur)
+        sleep(15)
+        print(step2)
+        print(step2.url)
         status_code(step2)
         #sleep(15)
         if 'jJe.forEach(function NlJ(value) { hwn += String.fromCharCode(parseInt(atob(value).replace(/\D/g,'')) - 8160481); } ); document.write(decodeURIComponent(escape(hwn)));' in step2.text:
@@ -1750,13 +1678,20 @@ def rsshort(url):
             stepnya=run_js(nama_f,fd.text.replace('eval','console.log'))
             if 'Step' in stepnya:
               break
-        #print(bs(stepnya.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser').text)
-        data1=bs(run_js(nama_f,js[len(js)-1]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        print(bs(stepnya.replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser').text)
+        data1=bs(run_js(nama_f,js[len(js)-2]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        print(data1)
+        data12=bs(run_js(nama_f,js[len(js)-3]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        print(data12)
+        data123=bs(run_js(nama_f,js[len(js)-4]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
+        print(data123)
         data=bs(run_js(nama_f,js[len(js)-2]).replace("document.write('",'').replace("');",'').replace('\n','').replace("\\",''),'html.parser')
         csrf_name=data.find('input',{'name':'csrf_test_name'})['value']
         inputs = data.find_all("input")
         key1=inputs[len(inputs)-1].get('name')
-        value1=run_js(nama_f,data1.find('script').text).split('").value = "')[1].split('";')[0]
+        value1=inputs[len(inputs)-1].get('id')
+        print(value1)
+        print(key1)
         if '_iconcaptcha-token' in str(data):
           icon_token=data.find('input',{'name':'_iconcaptcha-token'})['value']
           while True:
@@ -1859,17 +1794,17 @@ def rsshort(url):
           #print(get_data.headers)
           if '//rs' not in get_data.headers['location']:
             return get_data.headers['location']
-  except Exception as e:
-    return "failed to bypass"
-    pass
+  # except Exception as e:
+  #   return "failed to bypass"
+  #   pass
 def clks_pro(url):
-  try:
+  #try:
     path=urlparse(url).path
     curl = Session()
     url='https://clks.pro/clkclk.'+path
     while True:
       key=random.choice(open('sca.txt').read().splitlines())
-      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}&proxy_type=residential',headers={'ant-referer':"https://homeculina.com/"},allow_redirects=False)
+      step1=curl.get(f'https://api.scrapingant.com/v2/general?url={url}&x-api-key={key}',headers={'ant-referer':"https://homeculina.com/"},allow_redirects=False)
       #print(step1.text)
       if step1.status_code==200 and '<html><head></head><body>test</body></html>' not in step1.text:break
       elif 'Requests quota limit reached' in step1.text:
@@ -1907,9 +1842,9 @@ def clks_pro(url):
           return step2.headers['location']
     else:
       return url
-  except Exception as e:
-    return "failed to bypass"
-    pass
+  # except Exception as e:
+  #   return "failed to bypass"
+  #   pass
 def v2picu(url):
  try:
   curl=Session()
@@ -1919,6 +1854,7 @@ def v2picu(url):
     key=bs(step1.text,'html.parser').find('div',{'class':'h-captcha'})['data-sitekey']
     inpt=bs(step1.text,'html.parser').find_all('input',{'type':'hidden'})
     answer=hcaptcha(key,step1.url)
+    print(answer)
     data=f'g-recaptcha-response={answer}&h-captcha-response={answer}'
     for dt in inpt:
       data=data+'&'+dt['name']+'='+dt['value']
@@ -1935,8 +1871,10 @@ def v2picu(url):
     for dt in inpt:
       data=data+'&'+dt['name']+'='+dt['value']
     data=data[1:]
-    sleep(30)
+    sleep(35)
     step4=curl.get(step3.url+'?'+data,allow_redirects=False)
+    print(step4.text)
+    print(step4.headers)
     status_code(step4)
     #print(step4.headers['location'])
     if urlparse(step3.url).netloc == urlparse(step4.headers['location']).netloc or step4.headers['location'] =='/?redirect_to=random':
@@ -1969,8 +1907,88 @@ def clickfly(url):
   except Exception as e:
     return "failed to bypass"
     pass
+def revcut(url):
+ try:
+  curl=Session()
+  get_g=curl.get(url)
+  status_code(get_g)
+  url_g=curl.get(get_g.text.split('var redirect = "')[1].split('";')[0])
+  status_code(url_g)
+  ur=bs(url_g.text,'html.parser').find_all('meta')
+  if len(ur)==1:ide=0
+  else: 
+    ide=len(ur)-1
+  ur=ur[ide]['content'].split('url=')[1].split('"')[0]
+  step1=curl.get(ur+'?url8j='+url)
+  status_code(step1)
+  uri=step1.text.split('window.location.href = "')[1].split('";')[0]
+  step2=curl.get(uri)
+  status_code(step2)
+  while True:
+    sleep(15)
+    validasi=step2.text.split('el.name = "')[1].split('";')[0]
+    if '<div class="h-captcha is-hidden"' in step2.text:
+      answer=hcaptcha(key=bs(step2.text,'html.parser').find('div',{'class':'h-captcha is-hidden'})['data-sitekey'],url=step2.url)
+      #print(answer)
+      data=f'g-recaptcha-response={answer}&h-captcha-response={answer}&{validasi}=true'
+      #print(data)
+    else:
+      data=f'no-recaptcha-noresponse=true&{validasi}=true'
+    # print(step2.text)
+    # exit()
+    step2=curl.post(uri,data=data,headers={'Content-Type':'application/x-www-form-urlencoded'})
+    if '<script>window.location.replace("' in step2.text:
+      uri=step2.text.split('<script>window.location.replace("')[1].split('");</script>')[0]
+      step2=curl.get(uri)
+    # print(step2.text)
+    # print(step2.url)
+    status_code(step2)
+    if 'https://insurancexblog.blogspot.com/?url=https://revcut.net' in step2.text:
+      last_url=step2.text.split('window.location.href = "')[1].split('"</script>')[0].split('url=')[1].replace('&tk','?token')
+      break
+  host=urlparse(url).netloc
+  while True:
+    key=random.choice(open('sca.txt').read().splitlines())
+    final = curl.get(f'https://api.scrapingant.com/v2/general?url={last_url}&x-api-key={key}')
+    if 'Get Link' in final.text:
+      break
+  #print(final.cookies.get_dict())
+  curl = Session()
+  curl.cookies.update(final.cookies.get_dict())
+  final = curl.get(last_url)
+  #print(final.text)
+  status_code(final)
+  sleep(15)
+  bs4 = BeautifulSoup(final.text, "html.parser")
+  inputs = bs4.find_all("input")
+  data = urlencode({input.get("name"): input.get("value") for input in inputs})
+  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
+  #print(get_url)
+  if get_url['status']=='success':
+    return get_url['url']
+ except Exception as e:
+     return "failed to bypass"
+     pass
+def inlinks(url):
+  try:
+    curl=Session()
+    return one_method(curl,'https://inlinks.online'+urlparse(url).path)
+  except Exception as e:
+     return "failed to bypass"
+     pass
+def bitss(url):
+  try:
+    curl=Session()
+    return one_method(curl,'https://bitss.sbs'+urlparse(url).path)
+  except Exception as e:
+     return "failed to bypass"
+     pass
 #print(clickfly('https://clk.asia/FEbMUDu'))
 #print(v2picu('http://v2p.icu/51j4VMT4'))
-#print(clks_pro('http://clks.pro/tizlrC'))
-#print(v2picu('http://adbits.pro/8CKig7P'))
+#print(clks_pro('http://clks.pro/09hm'))
+#print(v2picu('http://v2p.icu/a3FWXz'))
 #print(rsshort('https://rsshort.com/b4Qh8Hh3'))
+#print(ctrsh('https://ctr.sh/zNHR'))
+#print(revcut('https://revcut.net/LrpVA'))
+#print(inlinks('https://845265.xyz/Ei03o'))
+#print(bitss('https://546512.xyz/Pvxf'))
