@@ -64,8 +64,10 @@ def menu(banner,modul,modulesl):
     "larvelfaucet":modul.larvelfaucet,
     "claimbitco_in":modul.claimbitco_in,
     "esledz":modul.esledz,
-    "bitonefaucet":modul.bitonefaucet,
     "cryptobigpay":modul.cryptobigpay,
+    "onlyfaucet":modul.onlyfaucet,
+    "satoshifaucet":modul.satoshifaucet,
+    "satoshitap":modul.satoshitap,
     }
     menu={
       "settings":None,
