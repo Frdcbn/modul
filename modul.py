@@ -101,7 +101,7 @@ def bypass_link(url,modulesl,jumlah=None):
   "revcut.net":modulesl.revcut,
   "slfly.net":modulesl.revcut,
   "845265.xyz":modulesl.inlinks,
-  "546512.xyz":modulesl.bitss,
+  "bitss.sbs":modulesl.bitss,
   "v2p.icu":modulesl.v2picu,
   "adbits.pro":modulesl.v2picu,
   "adbits.xyz":modulesl.v2picu,

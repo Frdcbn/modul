@@ -1931,7 +1931,7 @@ def revcut(url):
     if '<script>window.location.replace("' in step2.text:
       uri=step2.text.split('<script>window.location.replace("')[1].split('");</script>')[0]
       step2=curl.get(uri)
-    # print(step2.text)
+    #print(step2.text)
     # print(step2.url)
     status_code(step2)
     if 'https://insurancexblog.blogspot.com/?url=' in step2.text:
@@ -1941,13 +1941,14 @@ def revcut(url):
   while True:
     key=random.choice(open('sca.txt').read().splitlines())
     final = curl.get(f'https://api.scrapingant.com/v2/general?url={last_url}&x-api-key={key}')
-    # print(final.text)
+    #print(final.text)
     # print(key)
     if 'Get Link' in final.text:
       break
-    elif 'Requests quota limit reached' in step1.text:
+    elif 'Requests quota limit reached' in final.text:
         print('api key limit : '+key)
         return 'failed to bypass'
+    else:pass
   #print(final.cookies.get_dict())
   curl = Session()
   curl.cookies.update(final.cookies.get_dict())
@@ -1974,6 +1975,11 @@ def inlinks(url):
       gt=curl.get(f'https://api.scrapingant.com/v2/general?url={ur}&x-api-key={key}')
       if 'Your link is almost ready.' in gt.text:
         break
+      elif 'Requests quota limit reached' in gt.text:
+        print('api key limit : '+key)
+        return 'failed to bypass'
+      else:pass
+    #print(gt.cookies.get_dict())
     curl=Session()
     curl.cookies.update(gt.cookies.get_dict())
     final = curl.get(ur)
@@ -1983,35 +1989,88 @@ def inlinks(url):
     inputs = bs4.find_all("input")
     data = urlencode({input.get("name"): input.get("value") for input in inputs})
     get_url = curl.post(f'https://inlinks.online/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
+    #print(get_url)
     if get_url['status']=='success':
       return get_url['url']
   except Exception as e:
      return "failed to bypass"
      pass
 def bitss(url):
-  try:
-    curl=Session()
-    while True:
-      key=random.choice(open('sca.txt').read().splitlines())
-      ur='https://bitss.sbs'+urlparse(url).path
-      gt=curl.get(f'https://api.scrapingant.com/v2/general?url={ur}&x-api-key={key}')
-      if 'Please wait...' in gt.text:
-        break
-    curl=Session()
-    curl.cookies.update(gt.cookies.get_dict())
-    final = curl.get(ur)
-    status_code(final)
+ try:
+  curl=Session()
+  get_g=curl.get(url)
+  status_code(get_g)
+  url_g=curl.get(get_g.text.split('var redirect = "')[1].split('";')[0])
+  status_code(url_g)
+  ur=bs(url_g.text,'html.parser').find_all('meta')
+  if len(ur)==1:ide=0
+  else: 
+    ide=len(ur)-1
+  ur=ur[ide]['content'].split('url=')[1].split('"')[0]
+  step1=curl.get(ur+'?url8j='+url)
+  status_code(step1)
+  uri=step1.text.split('window.location.href = "')[1].split('";')[0]
+  step2=curl.get(uri)
+  #print(step2.text)
+  status_code(step2)
+  while True:
     sleep(15)
-    bs4 = BeautifulSoup(final.text, "html.parser")
-    inputs = bs4.find_all("input")
-    data = urlencode({input.get("name"): input.get("value") for input in inputs})
-    get_url = curl.post(f'https://bitss.sbs/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
-    print(get_url)
-    if get_url['status']=='success':
-      return get_url['url']
-  except Exception as e:
-     return "failed to bypass"
-     pass
+    validasi=step2.text.split('el.name = "')[1].split('";')[0]
+    if '<input type="hidden" name="no-recaptcha-noresponse" value="true">' not in step2.text:
+      if '<div class="h-captcha is-hidden"' or '<div class="h-captcha" data-sitekey="' in step2.text:
+        if '<div class="h-captcha"' in step2.text:
+          answer=hcaptcha(key=bs(step2.text,'html.parser').find('div',{'class':'h-captcha'})['data-sitekey'],url=step2.url)
+        else:
+          answer=hcaptcha(key=bs(step2.text,'html.parser').find('div',{'class':'h-captcha is-hidden'})['data-sitekey'],url=step2.url)
+        #print(answer)
+        data=f'g-recaptcha-response={answer}&h-captcha-response={answer}&{validasi}=true'
+        #print(data)
+    else:
+      data=f'no-recaptcha-noresponse=true&{validasi}=true'
+    # print(step2.text)
+    # exit()
+    #exit()
+    step2=curl.post(uri,data=data,headers={'Content-Type':'application/x-www-form-urlencoded'})
+    if '<script>window.location.replace("' in step2.text:
+      uri=step2.text.split('<script>window.location.replace("')[1].split('");</script>')[0]
+      step2=curl.get(uri)
+    # print(step2.text)
+    # print(data)
+    # print(step2.url)
+    status_code(step2)
+    if 'https://insurancexblog.blogspot.com/?url=' in step2.text:
+      last_url=step2.text.split('window.location.href = "')[1].split('"</script>')[0].split('url=')[1].replace('&tk','?token')
+      break
+  #print(last_url)
+  host=urlparse(url).netloc
+  while True:
+    key=random.choice(open('sca.txt').read().splitlines())
+    final = curl.get(f'https://api.scrapingant.com/v2/general?url={last_url}&x-api-key={key}')
+    #print(final.text)
+    # print(key)
+    if 'Get Link' in final.text:
+      break
+    elif 'Requests quota limit reached' in final.text:
+        print('api key limit : '+key)
+        return 'failed to bypass'
+    else:pass
+  #print(final.cookies.get_dict())
+  curl = Session()
+  curl.cookies.update(final.cookies.get_dict())
+  final = curl.get(last_url)
+  #print(final.text)
+  status_code(final)
+  sleep(15)
+  bs4 = BeautifulSoup(final.text, "html.parser")
+  inputs = bs4.find_all("input")
+  data = urlencode({input.get("name"): input.get("value") for input in inputs})
+  get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
+  #print(get_url)
+  if get_url['status']=='success':
+    return get_url['url']
+ except Exception as e:
+    return "failed to bypass"
+    pass
 #print(clickfly('https://clk.asia/FEbMUDu'))
 #print(v2picu('http://v2p.icu/iquf'))
 #print(clks_pro('http://clks.pro/09hm'))
@@ -2019,4 +2078,4 @@ def bitss(url):
 #print(ctrsh('https://ctr.sh/zNHR'))
 #print(revcut('https://slfly.net/gf3FBH'))
 #print(inlinks('https://845265.xyz/VuYra'))
-#print(bitss('https://489651.xyz/9urF'))
+#print(bitss('https://slfly.net/gf3FBH'))
