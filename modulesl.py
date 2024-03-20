@@ -1628,6 +1628,12 @@ def rsshort(url):
       elif 'Requests quota limit reached' in step1.text:
         print('api key limit : '+key)
         return 'failed to bypass'
+      elif 'The API token is wrong' in step1.text:
+        print('api key salah mungkin akunmu di blokir : '+key)
+        return 'failed to bypass'
+      elif 'Something went wrong with the server side code' in step1.text:
+        print('sepertinya ada yang salah dengan servernya')
+        return 'failed to bypass'
       else:pass
     ur=step1.text.split('location.href = "')[1].split('";')[0]
     while True:
@@ -1638,6 +1644,12 @@ def rsshort(url):
       if step1.status_code==200 and 'VPN/ Proxy is not allowed!' not in step1.text:break
       elif 'Requests quota limit reached' in step1.text:
         print('api key limit : '+key)
+        return 'failed to bypass'
+      elif 'The API token is wrong' in step1.text:
+        print('api key salah mungkin akunmu di blokir : '+key)
+        return 'failed to bypass'
+      elif 'Something went wrong with the server side code' in step1.text:
+        print('sepertinya ada yang salah dengan servernya')
         return 'failed to bypass'
       else:pass
     curl = Session()
@@ -1810,6 +1822,12 @@ def clks_pro(url):
       elif 'Requests quota limit reached' in step1.text:
         print('api key limit : '+key)
         return 'failed to bypass'
+      elif 'The API token is wrong' in step1.text:
+        print('api key salah mungkin akunmu di blokir : '+key)
+        return 'failed to bypass'
+      elif 'Something went wrong with the server side code' in step1.text:
+        print('sepertinya ada yang salah dengan servernya')
+        return 'failed to bypass'
       else:pass
     url=step1.headers['Ant-Original-Header-Location']
     if 'https://awgrow.com/backup/w/?get=' or 'https://t.co/' in url:
@@ -1948,6 +1966,12 @@ def revcut(url):
     elif 'Requests quota limit reached' in final.text:
         print('api key limit : '+key)
         return 'failed to bypass'
+    elif 'The API token is wrong' in final.text:
+        print('api key salah mungkin akunmu di blokir : '+key)
+        return 'failed to bypass'
+    elif 'Something went wrong with the server side code' in final.text:
+      print('sepertinya ada yang salah dengan servernya')
+      return 'failed to bypass'
     else:pass
   #print(final.cookies.get_dict())
   curl = Session()
@@ -1977,6 +2001,12 @@ def inlinks(url):
         break
       elif 'Requests quota limit reached' in gt.text:
         print('api key limit : '+key)
+        return 'failed to bypass'
+      elif 'The API token is wrong' in gt.text:
+        print('api key salah mungkin akunmu di blokir : '+key)
+        return 'failed to bypass'
+      elif 'Something went wrong with the server side code' in gt.text:
+        print('sepertinya ada yang salah dengan servernya')
         return 'failed to bypass'
       else:pass
     #print(gt.cookies.get_dict())
@@ -2034,7 +2064,7 @@ def bitss(url):
     if '<script>window.location.replace("' in step2.text:
       uri=step2.text.split('<script>window.location.replace("')[1].split('");</script>')[0]
       step2=curl.get(uri)
-    # print(step2.text)
+    #print(step2.text)
     # print(data)
     # print(step2.url)
     status_code(step2)
@@ -2047,12 +2077,18 @@ def bitss(url):
     key=random.choice(open('sca.txt').read().splitlines())
     final = curl.get(f'https://api.scrapingant.com/v2/general?url={last_url}&x-api-key={key}')
     #print(final.text)
-    # print(key)
+    #print(key)
     if 'Get Link' in final.text:
       break
     elif 'Requests quota limit reached' in final.text:
         print('api key limit : '+key)
         return 'failed to bypass'
+    elif 'The API token is wrong' in final.text:
+        print('api key salah mungkin akunmu di blokir : '+key)
+        return 'failed to bypass'
+    elif 'Something went wrong with the server side code' in final.text:
+      print('sepertinya ada yang salah dengan servernya')
+      return 'failed to bypass'
     else:pass
   #print(final.cookies.get_dict())
   curl = Session()
@@ -2078,4 +2114,4 @@ def bitss(url):
 #print(ctrsh('https://ctr.sh/zNHR'))
 #print(revcut('https://slfly.net/gf3FBH'))
 #print(inlinks('https://845265.xyz/VuYra'))
-#print(bitss('https://slfly.net/gf3FBH'))
+#print(bitss('https://bitss.sbs/CB2gt90lmjd'))
