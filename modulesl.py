@@ -2068,7 +2068,7 @@ def bitss(url):
   inputs = bs4.find_all("input")
   data = urlencode({input.get("name"): input.get("value") for input in inputs})
   get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
-  print(get_url)
+  #print(get_url)
   if get_url['status']=='success':
     return get_url['url']
  except Exception as e:
@@ -2081,6 +2081,6 @@ def bitss(url):
 #print(ctrsh('https://ctr.sh/zNHR'))
 #print(revcut('https://slfly.net/gf3FBH'))
 #print(inlinks('https://845265.xyz/VuYra'))
-os.system('clear')
-for i in range(1000):
-  print(str(i)+' '+bitss('https://bitss.sbs/6nvQwi'))
+#os.system('clear')
+#for i in range(1000):
+#  print(str(i)+' '+bitss('https://bitss.sbs/6nvQwi'))
