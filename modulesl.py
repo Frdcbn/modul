@@ -1961,15 +1961,16 @@ def revcut(url):
     final = curl.get(f'https://api.scrapingant.com/v2/general?url={last_url}&x-api-key={key}')
     #print(final.text)
     # print(key)
-    if 'Get Link' in final.text:
+    if 'Get Link' in final.text or 'Your link is almost ready.' in final.text:
+      print(True)
       break
-    elif 'Requests quota limit reached' in final.text:
+    elif 'Requests quota limit reached'.lower() in final.text.lower():
         print('api key limit : '+key)
         return 'failed to bypass'
-    elif 'The API token is wrong' in final.text:
+    elif 'API token is wrong'.lower() in final.text.lower():
         print('api key salah mungkin akunmu di blokir : '+key)
         return 'failed to bypass'
-    elif 'Something went wrong with the server side code' in final.text:
+    elif 'Something went wrong with the server side code'.lower() in final.text.lower():
       print('sepertinya ada yang salah dengan servernya')
       return 'failed to bypass'
     else:pass
@@ -1988,41 +1989,6 @@ def revcut(url):
   if get_url['status']=='success':
     return get_url['url']
  except Exception as e:
-     return "failed to bypass"
-     pass
-def inlinks(url):
-  try:
-    curl=Session()
-    while True:
-      key=random.choice(open('sca.txt').read().splitlines())
-      ur='https://inlinks.online'+urlparse(url).path
-      gt=curl.get(f'https://api.scrapingant.com/v2/general?url={ur}&x-api-key={key}')
-      if 'Your link is almost ready.' in gt.text:
-        break
-      elif 'Requests quota limit reached' in gt.text:
-        print('api key limit : '+key)
-        return 'failed to bypass'
-      elif 'The API token is wrong' in gt.text:
-        print('api key salah mungkin akunmu di blokir : '+key)
-        return 'failed to bypass'
-      elif 'Something went wrong with the server side code' in gt.text:
-        print('sepertinya ada yang salah dengan servernya')
-        return 'failed to bypass'
-      else:pass
-    #print(gt.cookies.get_dict())
-    curl=Session()
-    curl.cookies.update(gt.cookies.get_dict())
-    final = curl.get(ur)
-    status_code(final)
-    sleep(15)
-    bs4 = BeautifulSoup(final.text, "html.parser")
-    inputs = bs4.find_all("input")
-    data = urlencode({input.get("name"): input.get("value") for input in inputs})
-    get_url = curl.post(f'https://inlinks.online/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
-    #print(get_url)
-    if get_url['status']=='success':
-      return get_url['url']
-  except Exception as e:
      return "failed to bypass"
      pass
 def bitss(url):
@@ -2078,15 +2044,16 @@ def bitss(url):
     final = curl.get(f'https://api.scrapingant.com/v2/general?url={last_url}&x-api-key={key}')
     #print(final.text)
     #print(key)
-    if 'Get Link' in final.text:
+    if 'Get Link' in final.text or 'Your link is almost ready.' in final.text:
+      print(True)
       break
-    elif 'Requests quota limit reached' in final.text:
+    elif 'Requests quota limit reached'.lower() in final.text.lower():
         print('api key limit : '+key)
         return 'failed to bypass'
-    elif 'The API token is wrong' in final.text:
+    elif 'API token is wrong'.lower() in final.text.lower():
         print('api key salah mungkin akunmu di blokir : '+key)
         return 'failed to bypass'
-    elif 'Something went wrong with the server side code' in final.text:
+    elif 'Something went wrong with the server side code'.lower() in final.text.lower():
       print('sepertinya ada yang salah dengan servernya')
       return 'failed to bypass'
     else:pass
@@ -2101,7 +2068,7 @@ def bitss(url):
   inputs = bs4.find_all("input")
   data = urlencode({input.get("name"): input.get("value") for input in inputs})
   get_url = curl.post(f'https://{host}/links/go', headers={'x-requested-with':'XMLHttpRequest','content-type':'application/x-www-form-urlencoded; charset=UTF-8'}, data=data).json()
-  #print(get_url)
+  print(get_url)
   if get_url['status']=='success':
     return get_url['url']
  except Exception as e:
@@ -2114,4 +2081,6 @@ def bitss(url):
 #print(ctrsh('https://ctr.sh/zNHR'))
 #print(revcut('https://slfly.net/gf3FBH'))
 #print(inlinks('https://845265.xyz/VuYra'))
-#print(bitss('https://bitss.sbs/CB2gt90lmjd'))
+os.system('clear')
+for i in range(1000):
+  print(str(i)+' '+bitss('https://bitss.sbs/6nvQwi'))
